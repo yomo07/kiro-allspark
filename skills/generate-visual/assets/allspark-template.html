@@ -21,6 +21,7 @@
     --client: #3b82f6;
     --internal: #22c55e;
     --external: #f97316;
+    --monolith: #2ea3aa;
     --direct: #f43f5e;
     --title: "Chakra Petch", "Rajdhani", "Segoe UI", system-ui, sans-serif;
     --ui: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -133,10 +134,10 @@
 <aside class="panel legend" aria-label="Legend">
   <h2>Legend</h2>
   <ul>
-    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--client)"/></svg>Client</li>
-    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--internal)"/></svg>Internal (Acme)</li>
-    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--external)"/></svg>External</li>
-    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="var(--text-soft)" stroke-width="1.6" stroke-dasharray="2.4 1.6"/></svg>System without repo</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--client)"/></svg>Frontend</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--monolith)"/></svg>MVC monolith</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--internal)"/></svg>Backend / Worker</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="var(--text-soft)" stroke-width="1.6" stroke-dasharray="2.4 1.6"/></svg>System without repo (color of its axis)</li>
     <li class="sep" aria-hidden="true"></li>
     <li><svg viewBox="0 0 16 16"><path d="M2 13 14 3" stroke="var(--direct)" stroke-width="2.4" stroke-linecap="round"/></svg>Direct client → external</li>
   </ul>
@@ -195,7 +196,7 @@
   data.points = data.points || []; data.vectors = data.vectors || [];
   if (!data.points.length) { notice('Empty cube', 'allspark.md has no points yet. Run Phase 2 of find-connections first.'); return; }
 
-  var COLOR = { blue: 0x3b82f6, green: 0x22c55e, orange: 0xf97316 };
+  var COLOR = { blue: 0x3b82f6, teal: 0x2ea3aa, green: 0x22c55e, orange: 0xf97316 };
   var COLOR_DIRECT = 0xf43f5e;   // client -> external without going through an internal point
   var COLOR_SEMANTIC = { client: COLOR.blue, internal: COLOR.green, external: COLOR.orange };
   var COLOR_VECTOR_AXIS = { X: COLOR.blue, Y: COLOR.green, Z: COLOR.orange };
@@ -451,27 +452,108 @@
   var NEAR_FRACTION = 0.3, FAR_FRACTION = 0.78;
 
   t = 1.9;
-  var base = nodes.filter(function (n) { return n.type === 'repo' || n.type === 'virtual'; }).sort(function (a, b) {
-    return rank(a) - rank(b) || (a.p.id < b.p.id ? -1 : 1);
-  });
-  var index = new Map(); base.forEach(function (n, i) { index.set(n, i); });
-  var STEP = Math.max(0.35, Math.min(1.1, 16 / Math.max(1, base.length)));
-  base.forEach(function (n, i) {
-    var ti = t + i * STEP;
-    var progress = base.length > 1 ? i / (base.length - 1) : 1;
-    cameraKeys.push({ t: ti - 0.2, target: n.home.clone(),
-      fraction: NEAR_FRACTION + (FAR_FRACTION - NEAR_FRACTION) * smooth(progress) });
-    phases.push({ start: ti, text: 'Adding ' + shortName(n.p.id) });
+  // Process zones: client (frontends + client systems), internal (other repos + Acme without repo), external
+  function zone(n) {
+    if (n.type === 'repo') return n.p.role === 'frontend' ? 'client' : 'internal';
+    return n.p.axis === 'X' ? 'client' : n.p.axis === 'Z' ? 'external' : 'internal';
+  }
+  function compareIds(a, b) { return a.p.id < b.p.id ? -1 : 1; }
+  var base = nodes.filter(function (n) { return n.type === 'repo' || n.type === 'virtual'; });
+  var appearsAt = new Map();
+  function appear(n, ti) {
+    if (appearsAt.has(n)) return;
+    appearsAt.set(n, ti);
     task(ti, 0.75, function (k) {
       n.group.scale.setScalar(Math.max(0.0001, bounce(k)));
       n.glow.material.opacity = n.glow.userData.baseOpacity * (1 + 1.2 * Math.sin(Math.PI * k));
       n.label.material.opacity = Math.max(0, (k - 0.4) / 0.6);
     });
-    // connections appear when their second end enters the scene
-    vectors.filter(function (o) { return Math.max(index.get(o.a), index.get(o.b)) === i; })
-      .forEach(function (o, j) { task(ti + 0.35 + j * 0.12, 0.9, trace(o)); });
+  }
+  function centerOf(list) {
+    if (!list.length) return CENTER.clone();
+    var c = new THREE.Vector3(); list.forEach(function (n) { c.add(n.home); }); return c.multiplyScalar(1 / list.length);
+  }
+  var V_DUR = 1.0;
+  var STEP = Math.max(0.3, Math.min(1.0, 12 / Math.max(1, base.length)));
+  var V_STEP = Math.max(0.12, Math.min(0.45, 8 / Math.max(1, vectors.length)));
+  var zClient = base.filter(function (n) { return zone(n) === 'client'; }).sort(function (a, b) {
+    return (a.type === 'repo' ? 0 : 1) - (b.type === 'repo' ? 0 : 1) || compareIds(a, b); });
+  var zInternal = base.filter(function (n) { return zone(n) === 'internal'; });
+  var zExternal = base.filter(function (n) { return zone(n) === 'external'; });
+  var cClient = centerOf(zClient), cInternal = centerOf(zInternal), cExternal = centerOf(zExternal);
+
+  // Stage of each vector, from its source and target
+  function stage(o) {
+    var za = zone(o.a), zb = zone(o.b);
+    if (za === 'client' && zb === 'internal') return 1;
+    if (za === 'internal' && zb === 'internal') return 2;
+    if (za === 'internal' && zb === 'external') return 3;
+    if (za === 'internal' && zb === 'client') return 4;   // response / notification to the client
+    if (za === 'client' && zb === 'external') return 5;   // direct client -> external (red)
+    return 4;                                             // other rare cases: together with the response
+  }
+  var stages = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+  vectors.forEach(function (o) { stages[stage(o)].push(o); });
+  Object.keys(stages).forEach(function (k) { stages[k].sort(function (x, y) { return compareIds(x.a, y.a) || compareIds(x.b, y.b); }); });
+
+  // traces a list of vectors, staggered; the source appears if missing, the target when the line arrives
+  function traceList(list, from) {
+    var end = from;
+    list.forEach(function (o, i) {
+      var ti = from + i * V_STEP;
+      if (appearsAt.has(o.a)) ti = Math.max(ti, appearsAt.get(o.a) + 0.35); else appear(o.a, ti - 0.4);
+      task(ti, V_DUR, trace(o));
+      appear(o.b, ti + V_DUR * 0.85);
+      end = Math.max(end, ti + V_DUR);
+    });
+    return end;
+  }
+
+  // 1. the client front: frontends and client systems, camera focusing on each
+  phases.push({ start: t, text: 'Adding the client front' });
+  zClient.forEach(function (n, i) {
+    var ti = t + i * STEP;
+    cameraKeys.push({ t: ti - 0.2, target: n.home.clone(), fraction: 0.32 });
+    appear(n, ti);
   });
-  t += base.length * STEP + 0.4;
+  t += zClient.length * STEP + 0.3;
+
+  // 2. from the client to the internals: each internal appears when its line arrives
+  if (stages[1].length) {
+    phases.push({ start: t, text: 'Connecting to the internals' });
+    cameraKeys.push({ t: t, target: cClient.clone().lerp(cInternal, 0.6), fraction: 0.48 });
+    t = traceList(stages[1], t) + 0.2;
+  }
+  // 3. the camera stays on the internals: the remaining ones and the connections between them
+  cameraKeys.push({ t: t - 0.2, target: cInternal.clone(), fraction: 0.5 });
+  phases.push({ start: t, text: 'Between the internals' });
+  var internalTargets = new Set(stages[2].map(function (o) { return o.b; }));
+  zInternal.filter(function (n) { return !appearsAt.has(n) && !internalTargets.has(n); })
+    .sort(compareIds).forEach(function (n, i) { appear(n, t + i * V_STEP); });
+  t = traceList(stages[2], t + 0.3) + 0.2;
+  zInternal.filter(function (n) { return !appearsAt.has(n); }).forEach(function (n, i) { appear(n, t + i * V_STEP); });
+
+  // 4. from the internals to the externals: the camera stays on the internals, a bit wider
+  if (stages[3].length) {
+    phases.push({ start: t, text: 'Reaching the externals' });
+    cameraKeys.push({ t: t, target: cInternal.clone().lerp(cExternal, 0.2), fraction: 0.64 });
+    t = traceList(stages[3], t) + 0.2;
+  }
+  // 5. processes that end at the client (e.g. a webhook notification)
+  if (stages[4].length) {
+    phases.push({ start: t, text: 'Responding to the client' });
+    cameraKeys.push({ t: t, target: cInternal.clone().lerp(cClient, 0.45), fraction: 0.72 });
+    t = traceList(stages[4], t) + 0.2;
+  }
+  // 6. last, the direct client -> external connections (red)
+  if (stages[5].length) {
+    phases.push({ start: t, text: 'Direct client → external connections' });
+    cameraKeys.push({ t: t, target: cClient.clone().lerp(cExternal, 0.5), fraction: 0.82 });
+    t = traceList(stages[5], t) + 0.2;
+  }
+  // points without any connection
+  base.filter(function (n) { return !appearsAt.has(n); }).forEach(function (n, i) { appear(n, t + i * 0.2); });
+  t += 0.4;
 
   cameraKeys.push({ t: t - 0.2, target: CENTER.clone(), fraction: 0.9 });
   t += 0.6;

@@ -93,7 +93,7 @@ MIT.
 
 ## Agradecimiento
 
-A **Intelix Synergy**, a su cultura y a su esencia, que influyeron para que construyera el profesional que soy hoy en día. Y a lo que aún queda de ella, que me llevó a una conclusión: no importa el dinero, ni el cargo que ejerzas; lo que importa es la persona en quien te conviertes en el proceso.
+A **[Intelix Synergy](https://intelix.biz)**, a su cultura y a su esencia, que influyeron para que construyera el profesional que soy hoy en día. Y a lo que aún queda de ella, que me llevó a una conclusión: no importa el dinero, ni el cargo que ejerzas; lo que importa es la persona en quien te conviertes en el proceso.
 
 De nuevo, gracias.
 

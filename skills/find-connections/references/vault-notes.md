@@ -73,7 +73,7 @@ points:
     pos_x: 18              # semantic value Z (External)
     pos_y: 50
     pos_z: 88              # semantic value X (Client)
-    color: blue            # by dominant semantic axis, before the swap
+    color: blue            # repos by type (frontend blue); virtual points by dominant axis
     count_client: 4        # counts per semantic axis — NOT swapped
     count_internal: 14
     count_external: 1
@@ -203,11 +203,12 @@ External axis. Points close to each other are spread in a ring (see
 
 Obsidian's native Graph View supports **color groups**. The power
 maintains those groups in `allspark/graphs/.obsidian/graph.json`, key
-`colorGroups`, with these three entries (one per axis):
+`colorGroups`, with these four entries:
 
 ```json
 "colorGroups": [
   { "query": "[color:blue]",   "color": { "a": 1, "rgb": 3900150 } },
+  { "query": "[color:teal]",   "color": { "a": 1, "rgb": 3056554 } },
   { "query": "[color:green]",  "color": { "a": 1, "rgb": 2278750 } },
   { "query": "[color:orange]", "color": { "a": 1, "rgb": 16347926 } }
 ]
@@ -215,7 +216,7 @@ maintains those groups in `allspark/graphs/.obsidian/graph.json`, key
 
 Merge rules for `graph.json`:
 
-- Upsert: only those three entries are added or replaced (identified by
+- Upsert: only those four entries are added or replaced (identified by
   their exact `query`). Groups the user has created and the rest of the
   file's keys (forces, filters, etc.) are preserved.
 - If the file does not exist, it is created with only `colorGroups`;

@@ -96,22 +96,29 @@ transforming values. Exact contract (fields, types, required) in
 
 ## What it looks like (what the template does)
 
-- **Build sequence on open, with a guided camera** (it can be
-  skipped with a button and replayed with "Rebuild"): the three axes and the
-  cube frame are drawn → the camera moves in close to the first point and each
-  repo or system appears in process order (frontend, client, monolith,
-  backend, Acme without a repo, worker, external), **focused with zoom**; as
-  soon as it appears, its connections to the points already present are drawn
-  → with each point the camera pulls back a bit more (from 30% to 78% of the
-  final distance) → the camera ends in the full view. Connections are neon curves (valley
-  toward internal points, an arc that falls onto external points from above, a
-  straight coral line when the client calls an external directly, an arc toward
-  the client) with an arrow at the target and a light pulse showing the
-  direction. The step per point gets shorter with many repos (between 1.1 s and
-  0.35 s); if the user drags the camera, it stops following the tour.
-- **Shapes and colors**: repos = glowing spheres, colored by dominant axis
-  (blue client, green internal, orange external); systems without a repo =
-  wireframe sphere. Connections colored by the connection's axis (the direct
+- **Build sequence on open, in process order** (it can be skipped with a
+  button and replayed with "Rebuild"), with a guided camera:
+  1. the three axes and the cube frame are drawn;
+  2. **the client front**: frontends and client systems appear, with the
+     camera focusing closely on each one;
+  3. **toward the internals**: their lines go out to the internals, and each
+     internal appears when its line arrives;
+  4. **between the internals**: the camera stays on the internals while the
+     connections between them are drawn (e.g. backend → worker);
+  5. **toward the externals**: the camera stays on the internals, a bit
+     wider, and each external appears when its arc arrives;
+  6. **response to the client**: processes that end at the client (e.g. a
+     webhook notification);
+  7. **direct**: last, the red client → external vectors;
+  8. the camera ends in the full view.
+  Connections are neon curves (valley toward internal points, an arc that
+  falls onto external points from above, a straight coral line when the
+  client calls an external directly, an arc toward the client) with an arrow
+  at the target and a light pulse showing the direction. If the user drags
+  the camera, it stops following the tour.
+- **Shapes and colors**: repos = glowing spheres, colored by type
+  (frontend blue, MVC monolith teal, backend and worker green); systems
+  without a repo = wireframe sphere in the color of their axis. Connections colored by the connection's axis (the direct
   client → external one, in coral); `no-target-evidence` ones appear faint.
 - **Size and names**: the more repos and systems there are, the smaller all
   points are drawn (100% up to 14, minimum 50% from 56), so that

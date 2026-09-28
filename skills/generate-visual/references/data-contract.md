@@ -32,7 +32,7 @@ values. The coordinates **already come with the X/Z swap** from the export.
 | `role` | Yes | `frontend` \| `backend` \| `mvc-monolith` \| `worker` \| `external` | Order of appearance in the animation. |
 | `axis` | Virtual points | `X` \| `Y` \| `Z` | |
 | `pos_x`, `pos_y`, `pos_z` | Yes | number `0..100` | With swap applied. |
-| `color` | Yes | `blue` \| `green` \| `orange` | By dominant axis. |
+| `color` | Yes | `blue` \| `teal` \| `green` \| `orange` | Repos by type (frontend blue, MVC monolith teal, backend/worker green); systems without a repo by dominant axis. |
 | `count_client`, `count_internal`, `count_external` | No (repos) | integers | Sphere size and tooltip. Named by semantic axis on purpose: they are counts, not coordinates, and do not go through the swap. |
 
 ## `vectors[]`

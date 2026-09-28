@@ -14,7 +14,8 @@ connects to.
 
 From these MOCs the shared Obsidian graph is generated or updated, which
 represents the application universe as an XYZ cube: one point per repo or
-repo-less system, color by dominant axis, and one vector per connection.
+repo-less system (repos colored by type, repo-less systems by dominant axis),
+and one vector per connection.
 It is manual; it does not run as an automatic part of `generate-steering`.
 
 ## Phase 0 — Vault gate (only once per workspace)

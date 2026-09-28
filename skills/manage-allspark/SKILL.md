@@ -64,7 +64,7 @@ notify.
 6. **`.kiro/allspark/`** (prescan environment and JSON) is local to each
    workspace: it is never uploaded to the shared vault or merged.
 7. **`allspark/graphs/.obsidian/graph.json`** is uploaded only with the
-   power's three color entries (see "Colors and shapes in the Obsidian
+   power's four color entries (see "Colors and shapes in the Obsidian
    Graph View" in `skills/find-connections/references/vault-notes.md`); each
    person's groups
    and personal settings do not travel.

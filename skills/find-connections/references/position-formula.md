@@ -14,7 +14,7 @@ base-axis rule — it is anchor + smooth migration.
 | `frontend` | Repo with client-facing UI that does not expose an API | (58, 48, 5) → client zone | (100, 0, 100) | `count_Z` (direct external connections it makes) |
 | `mvc-monolith` | All in one: UI + server logic | (72, 76, 62) | (40, 100, 20) | `count_Y` (internal traffic toward other Acme repos) |
 | `backend` | Exposes endpoints, no UI | (70, 70, 70) | (0, 100, 0) | `count_Y` (own internal traffic) |
-| `worker` | Processes queues/jobs, does not serve requests | (8, 68, 62) | (15, 40, 100) | `count_Z` (connections toward external systems) |
+| `worker` | Processes queues/jobs, does not serve requests | (2, 66, 30) → worker zone | (0, 100, 100) | `count_Z` (connections toward external systems) |
 | Virtual Client (`external`, axis X) | A client's system, no repo | (60, 30, 5) → client zone | (100, 0, 0) | number of repos that reference it |
 | Virtual Internal (`external`, axis Y) | Acme system outside the workspace | (70, 72, 70) | (0, 100, 0) | number of repos that reference it |
 | Virtual External (`external`, axis Z) | Real third party | (40, 30, 95) → external zone | (0, 0, 100) | number of repos that reference it |
@@ -31,7 +31,8 @@ third parties stay on the edges, each one stuck to its face of the cube:
 |---|---|---|---|
 | **Client** | `frontend`, Virtual Client | Stuck to the ZY plane (`z = CLIENT_PLANE = 4`, almost no external traffic), along the Client axis but pulled back toward the origin (x ≈ 55–75), low in Y | Left, on the Client axis |
 | **Internal** | `backend`, `mvc-monolith`, Virtual Internal | Center of the cube, shifted toward the corner near the camera (x, z ≈ 45–70), high in Y | Top, center |
-| **External** | Virtual External (and the `worker` points on the External axis side) | Stuck to the Client ≈ 0 plane (`x = EXTERNAL_PLANE = 6`), spread along the External axis around `EXTERNAL_CENTER = 86`, low in Y | Right, on the External axis |
+| **Worker** | `worker` | Next to the Y axis: Client between 1 and 7 (see below), high in Y, leaning toward External according to its third-party traffic | Up, stuck to the Internal axis, to the right |
+| **External** | Virtual External | Stuck to the Client ≈ 0 plane (`x = EXTERNAL_PLANE = 6`), spread along the External axis around `EXTERNAL_CENTER = 86`, low in Y | Right, on the External axis |
 
 Client sits on the left and External on the right of the screen, and
 Internal on top (see the camera angle in `generate-visual`). The values are
@@ -41,6 +42,16 @@ The growth axis of **Front** is still Z: the more direct external
 connections it accumulates, the further it moves away from its plane toward
 the external side — it is the position reflecting real traffic, with no
 separate state or mark.
+
+**Worker Client value between 1 and 7.** A worker serves Acme and third
+parties, almost never the client, so it lives next to the Y axis:
+
+```
+jitter = (hash(id) % 100) / 100                      # deterministic spread
+x      = 1 + 3 × jitter + 3 × count_X / (count_X + K_fine)
+# base 1–4 so two workers never share the exact same plane,
+# plus up to 3 from its real traffic toward the client: range 1..7
+```
 
 ### Migration formula
 
@@ -203,6 +214,7 @@ for each cluster with n >= 2:
 |---|---|
 | Client zone (`frontend`, Virtual Client) | ZY plane: `z` fixed at `CLIENT_PLANE`, spread over (x, y). |
 | External zone (Virtual External) | Client ≈ 0 plane: `x` fixed at `EXTERNAL_PLANE`, spread over (y, z) centered at `z = EXTERNAL_CENTER`. |
+| Worker zone (`worker`) | Each worker keeps its own Client value (1–7) and the ring spreads over (y, z). |
 | Internal zone (remaining repos and Virtual Internal) | Horizontal (x, z) tilted `TILT`: x and z are scaled by `cos(TILT)`, and each member adds to its `y` the value `r × depth × sin(TILT) × 1.4`, with `depth = -(cos a + sin a)/√2`. |
 
 Order of application: positions of repos and systems → fix the plane of the
@@ -278,21 +290,26 @@ The control point **is written into the export** (`allspark.md`, field
 have to recalculate it. It does not appear in the notes of
 `allspark/graphs/`: there the vector is a wikilink.
 
-## Color — only 3, by dominant axis of the final position
+## Color — repos by type, systems without a repo by dominant axis
 
-There is no color per category (front/internal/external) — there is color
-by **axis with the highest value** in the final coordinates (x,y,z),
-calculated after applying the migration and the fine variation. A Front
-point that migrated a lot toward Z ends up painted in the Z color, not the
-color of its original category — the color follows the real position, not
-the label.
+**Workspace repos: color by type.** Every repo in the workspace is one of
+Acme's own systems, so its color does not come from the axis with the most
+traffic but from who it serves:
+
+| Repo type | Color | Hex | Why |
+|---|---|---|---|
+| `frontend` | Blue | `#3B82F6` | Its axis is the client |
+| `mvc-monolith` | Teal | `#2EA3AA` | Blend of blue and green: influenced by both front and back |
+| `backend` | Green | `#22C55E` | Internal service |
+| `worker` | Green | `#22C55E` | Internal service: it serves Acme (Y) and third parties, not the client |
+
+**Systems without a repo (virtual points): color by dominant axis**, as
+always — the axis with the highest value in the final position:
 
 ```
 color = axis with the highest value among {x, y, z}
 # tie: priority X > Y > Z (arbitrary but deterministic)
 ```
-
-Concrete colors per axis:
 
 | Axis | Color | Hex |
 |---|---|---|
@@ -300,18 +317,11 @@ Concrete colors per axis:
 | Y — Internal (Acme) | Green | `#22C55E` |
 | Z — External | Orange | `#F97316` |
 
-The orange of Z is intentional: a Front that migrates toward Z (more direct
-external connections) ends up orange, visually reinforcing that it moves
-away from the client face toward the external background.
+Systems without a repo are drawn dashed (wireframe), so an orange external
+is never mistaken for a repo.
 
 Vectors take the color of the connection's axis, with a single exception:
 the **direct** vector client zone → external is coral `#F43F5E`.
-
-Only 3 colors for repos and virtual points, one per axis — not one per
-category or connection type. Each point is painted with a single color
-according to its dominant axis, without blends or shades, even if that point
-has real presence on all three axes at once (that is already reflected by
-the position, not the color).
 
 ## Final axis transformation — X/Z swap only in the export (mandatory)
 
