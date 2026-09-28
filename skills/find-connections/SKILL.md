@@ -157,7 +157,7 @@ all protocols:
 Both **outbound and inbound** connections of each repo are collected — the
 inbound ones are what later make reverse validation possible.
 
-Since v1.10.0 the scan is split into a **mechanical and cheap** part run by
+The scan is split into a **mechanical and cheap** part run by
 a script, and a **judgment** part done by Kiro. Full detail in
 `references/prescan.md`.
 
@@ -166,7 +166,7 @@ a script, and a **judgment** part done by Kiro. Full detail in
 Create `.kiro/allspark/.venv-prescan` (Python 3.10+, isolated environment),
 install `assets/prescan/requirements.txt` and run `prescan.py --verify`. If
 any step fails, the prescan is unavailable for this run: the exact error is
-reported and all repos go through full manual reading (as before v1.10.0).
+reported and all repos go through full manual reading.
 It never blocks Phase 2.
 
 #### 2.B.1 — Deterministic prescan (script, per repo)
@@ -180,8 +180,15 @@ tree-sitter (it is not a text search), reads contracts (`.proto`, WSDL,
 OpenAPI) and non-secret config, and never opens real `.env` files, k8s
 Secrets or credential keys. This pass consumes none of Kiro's reasoning.
 
-Exit code `2` (stack without rules, e.g. Kotlin or Go) or `1` (error): that
-repo goes to full manual reading in 2.B.2, reported separately.
+Pass as `--stack` only names listed by `prescan.py --stacks` (languages,
+frameworks and single-language libraries like `celery`); protocols such as
+`kafka` or `grpc` are not stacks.
+
+Exit code `2` (stack without rules, e.g. Kotlin or Go) or `1` (error,
+including invalid arguments): that repo goes to full manual reading in
+2.B.2, reported separately. With exit `0`, any language listed in
+`stacks_without_pattern` (declared, or detected by its source files, e.g.
+Kotlin in a `spring` repo) is still read by hand.
 
 #### 2.B.2 — Candidate classification (Kiro)
 

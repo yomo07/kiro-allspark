@@ -13,6 +13,7 @@
     "nestjs": ["typescript", "tsx", "javascript"],
     "express": ["typescript", "tsx", "javascript"],
     "node": ["typescript", "tsx", "javascript"],
+    "nodejs": ["typescript", "tsx", "javascript"],
     "angular": ["typescript", "tsx", "javascript"],
     "react": ["typescript", "tsx", "javascript"],
     "vue": ["typescript", "tsx", "javascript"],
@@ -22,13 +23,17 @@
     "django": ["python"],
     "flask": ["python"],
     "fastapi": ["python"],
+    "celery": ["python"],
     "python": ["python"],
     "spring": ["java"],
     "java": ["java"],
     "dotnet": ["csharp"],
+    "dotnet-core": ["csharp"],
     "aspnet": ["csharp"],
+    "masstransit": ["csharp"],
     "csharp": ["csharp"],
     "rails": ["ruby"],
+    "sidekiq": ["ruby"],
     "ruby": ["ruby"]
   }
 }

@@ -91,6 +91,15 @@ CALL_TYPES = {"call", "call_expression", "invocation_expression", "method_invoca
 
 VERBS = ("get", "post", "put", "patch", "delete", "head", "options")
 
+# Source extensions of languages the prescan has no grammar for. If a repo has
+# them, the language is added to stacks_without_pattern even if tech.md did not
+# declare it (e.g. a Spring repo written in Kotlin), so it is never missed.
+UNSUPPORTED_EXT = {
+    ".kt": "kotlin", ".kts": "kotlin", ".go": "go", ".php": "php", ".scala": "scala",
+    ".rs": "rust", ".ex": "elixir", ".exs": "elixir", ".swift": "swift", ".dart": "dart",
+    ".groovy": "groovy", ".vb": "vbnet", ".fs": "fsharp",
+}
+
 
 # --------------------------------------------------------------------------
 # Utilities
@@ -774,7 +783,7 @@ def is_config(rel_path):
         and not matches(rel_path, ["package*.json", "tsconfig*.json", "angular.json", "*.lock*", "composer.json"])
 
 
-def cache_key(repo, stacks, role):
+def cache_key(repo, stacks, role, repo_id, max_kb):
     try:
         head = subprocess.run(["git", "-C", repo, "rev-parse", "HEAD"], capture_output=True, text=True, timeout=10)
         status = subprocess.run(["git", "-C", repo, "status", "--porcelain"], capture_output=True, text=True, timeout=30)
@@ -783,8 +792,11 @@ def cache_key(repo, stacks, role):
     except (OSError, subprocess.SubprocessError):
         return None
     h = hashlib.sha256()
-    for part in (PRESCAN_VERSION, head.stdout, status.stdout, ",".join(stacks), role or ""):
-        h.update(part.encode())
+    for part in (PRESCAN_VERSION, head.stdout, status.stdout, ",".join(stacks), role or "",
+                 repo_id or "", str(max_kb)):
+        h.update(part.encode() + b"\0")
+    # manifest.json (languages, stacks, rules_version) also invalidates the cache
+    h.update(open(os.path.join(HERE, "manifest.json"), "rb").read())
     for folder in ("rules", "queries"):
         for f in sorted(os.listdir(os.path.join(HERE, folder))):
             h.update(open(os.path.join(HERE, folder, f), "rb").read())
@@ -834,8 +846,18 @@ def verify():
     return 0 if ok else 1
 
 
+class ArgumentParser(argparse.ArgumentParser):
+    """argparse exits with 2 on bad arguments, which collides with the
+    documented meaning of 2 (no stack with rules). Invocation errors exit 1."""
+
+    def error(self, message):
+        self.print_usage(sys.stderr)
+        print(f"{self.prog}: error: {message}", file=sys.stderr)
+        sys.exit(1)
+
+
 def main():
-    ap = argparse.ArgumentParser(description="Deterministic prescan of kiro-allspark")
+    ap = ArgumentParser(description="Deterministic prescan of kiro-allspark")
     ap.add_argument("--repo")
     ap.add_argument("--id")
     ap.add_argument("--stack", help="one or more, comma-separated (from tech.md)")
@@ -868,7 +890,7 @@ def main():
     known = [s for s in stacks if s in M["stacks"]]
     without_pattern = [s for s in stacks if s not in M["stacks"]]
 
-    key = cache_key(repo, stacks, a.role) if a.cache else None
+    key = cache_key(repo, stacks, a.role, a.id, a.max_kb) if a.cache else None
     if key and os.path.isfile(a.output):
         try:
             previous = json.load(open(a.output, encoding="utf-8"))
@@ -905,8 +927,12 @@ def main():
     scanner = Scanner(repo, languages, warnings)
     extra, contracts = [], []
     scanned = 0
+    undeclared = {}  # language without grammar -> number of files found
     for path, rel_path in walk_repo(repo, ign, a.max_kb * 1024, warnings):
         ext = os.path.splitext(path)[1].lower()
+        if ext in UNSUPPORTED_EXT:
+            lang = UNSUPPORTED_EXT[ext]
+            undeclared[lang] = undeclared.get(lang, 0) + 1
         if path.endswith(".proto"):
             extra.extend(proto_pass(path, repo))
             contracts.append(rel_path)
@@ -923,6 +949,11 @@ def main():
                 scanned += 1
             except Exception as e:  # noqa: BLE001
                 warnings.append(f"could not parse {rel_path}: {type(e).__name__}: {e}")
+
+    for lang, n in sorted(undeclared.items()):
+        if lang not in without_pattern:
+            without_pattern.append(lang)
+            warnings.append(f"{n} {lang} source file(s) found and not scanned (no grammar): read by hand")
 
     if scanner.django_warning:
         warnings.append("Django: include() prefixes are not composed; routes stay relative to their urls.py")

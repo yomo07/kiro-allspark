@@ -8,7 +8,7 @@ an early step found nothing — the chain must be exhausted.
    is hardcoded directly in the source code. With prescan, these are the
    `chain_step: 1` candidates with `high` confidence in the JSON (the
    `chain_step: 2` and `3` ones feed steps 2 and 3 below). See
-   `references/framework-patterns.md` for the concrete outbound call
+   `framework-patterns.md` for the concrete outbound call
    detection patterns per stack (Spring, Express/NestJS, Django, Rails).
    Do not assume "there are no calls" without having reviewed the patterns
    specific to the repo's framework — many live in annotations/beans

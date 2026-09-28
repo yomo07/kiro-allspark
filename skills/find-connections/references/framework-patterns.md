@@ -1,6 +1,6 @@
 # Detection patterns per framework
 
-**Human-readable description of the patterns.** Since v1.10.0 the executable
+**Human-readable description of the patterns.** The executable
 version of these same patterns lives in `assets/prescan/rules/<language>.json`
 and is applied by the deterministic prescan (step 2.B.1, see `prescan.md`).
 This document remains the reference for understanding what is searched for

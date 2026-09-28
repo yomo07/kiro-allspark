@@ -5,7 +5,7 @@
 Each point belongs to one of three **categories**, each with a fixed anchor
 and a pure extreme toward which it migrates according to its traffic
 volume. It is not a free proportion among the three axes, nor the exclusive
-base-axis rule used before — it is anchor + smooth migration.
+base-axis rule — it is anchor + smooth migration.
 
 ### Categories — derived from the repo role (see `repo-roles.md`)
 
@@ -81,7 +81,7 @@ importance, not only that of the axis that won.
 ```
 K_fine = 8                # smaller than K, noticeable even with little traffic
 DELTA_MAX = 25             # displacement ceiling of a secondary axis —
-                           # enlarged on purpose (previously 10) so that the
+                           # large on purpose so that the
                            # points float with more space between them, instead
                            # of feeling stuck to the anchor plane
 FLOOR_RADIUS = 0.4          # minimum fraction of DELTA_MAX, ALWAYS > 0 —
@@ -134,9 +134,8 @@ are what guarantee they do not fall on the exact same triple. If two or more
 virtual points on the same axis appear with the same rounded `(x,y,z)`
 triple, it is a sign that this rule was not applied — not a legitimate tie.
 
-This replaces the previous purely decorative radius+angle mechanism:
-previously the position on the secondary axes did not depend on real
-traffic, only on a hash to avoid visual overlap. Now **the full position
+The position on the secondary axes is not decorative (it does not come
+from a hash only meant to avoid visual overlap): **the full position
 (all three axes) is a combination of the number of mapped endpoints
 (inbound and outbound) and the relative importance of each axis against the
 other two** — a point with a lot of real traffic on its secondary axis
@@ -217,7 +216,8 @@ is satisfied by construction.
 
 All point positions go from `0` to `100`. The only thing that can leave the
 cube are **the control points of the internal → external arcs**: their `cy`
-can exceed `100` on purpose (see "Curved vector"), so that the arc falls
+can exceed `100` on purpose (see "Curved vector — shape according to
+source and target"), so that the arc falls
 onto the external point from above. Renders draw the cube from `0` to `100`
 and those arcs naturally stay outside.
 
@@ -315,7 +315,7 @@ the position, not the color).
 
 ## Final axis transformation — X/Z swap only in the export (mandatory)
 
-**This replaces the previous camera convention, and applies only when
+**This applies only when
 generating `allspark/export/allspark.md`** (the compiled export consumed by
 `generate-visual`) — **never** to the individual notes of
 `allspark/graphs/`, which keep showing `pos_x`/`pos_y`/`pos_z` exactly as
@@ -343,9 +343,9 @@ for the External axis (Z) is written in the `pos_x` field. `pos_y`
 (Internal) is not touched.
 
 **The swap applies to ALL coordinates of the export, not only to the axes.**
-A real bug of the previous version was inverting the axis lines but leaving
-the points with their coordinates not inverted: the axes were right and the
-points fell near the wrong plane. Inside `allspark.md` the following go
+A typical mistake is inverting the axis lines but leaving the points with
+their coordinates not inverted: the axes look right and the points fall
+near the wrong plane. Inside `allspark.md` the following go
 through the same swap, without exception:
 
 1. The export's axis declaration (`axes:` — which field is which axis).

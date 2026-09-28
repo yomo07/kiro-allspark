@@ -52,7 +52,7 @@ along as a pending state.
 If later the missing backend is added to the workspace (new repo) or
 appears mapped in the vault shared by another team, the
 **virtual-point→real-point merge** rule applies (see below) — not a manual
-reclassification via `suspected`.
+reclassification.
 
 ## Repo identity — real name in Git
 
@@ -67,12 +67,12 @@ already used as the deterministic point ID in the vault (see
 
 The workspace maintains a **master registry of declared repos**
 (`allspark/repos-master.yaml` in the vault — see
-`references/notification.md` of `manage-allspark`), the list of repos that
+`skills/manage-allspark/references/notification.md`), the list of repos that
 the team formally recognizes as part of its universe. When
 `find-connections` discovers, during Phase 1, a repo within the workspace
 that is **not** in that master registry:
 
-- Nothing is assumed about it (neither internal, nor suspected, nor is it
+- Nothing is assumed about it (neither internal nor external, nor is it
   given special classification treatment).
 - It is simply marked as **new repo, pending notification** in the Phase 1
   report.

@@ -10,9 +10,10 @@ each repo's code. `manage-allspark` does not generate content — it
 manages the relationship between what you generated locally and the shared
 vault, which is a single source across teams (see
 `references/notification.md` for the repo master registry,
-`references/vault-notes.md` of `find-connections` for the note
-format, and "Multi-team merge between vaults" in `references/moc-schema.md`
-for the underlying merge rules).
+`skills/find-connections/references/vault-notes.md` for the note format, and
+"Multi-team merge between vaults" in
+`skills/find-connections/references/moc-schema.md` for the underlying merge
+rules).
 
 It is invoked manually; it does not run as part of the other skills.
 
@@ -47,7 +48,7 @@ notify.
      to the `resolve` queue.
 3. Special case — **merging a virtual point into a real point**: if any of
    the files to upload triggers a merge (see
-   `references/vault-notes.md` of `find-connections`), treat the
+   `skills/find-connections/references/vault-notes.md`), treat the
    operation as atomic: the merged point and every repo note that pointed
    to it travel together in the same upload. If any of those "pointing"
    notes was touched in parallel by another team, the whole merge goes
@@ -63,7 +64,9 @@ notify.
 6. **`.kiro/allspark/`** (prescan environment and JSON) is local to each
    workspace: it is never uploaded to the shared vault or merged.
 7. **`allspark/graphs/.obsidian/graph.json`** is uploaded only with the
-   power's three color entries (see `vault-notes.md`); each person's groups
+   power's three color entries (see "Colors and shapes in the Obsidian
+   Graph View" in `skills/find-connections/references/vault-notes.md`); each
+   person's groups
    and personal settings do not travel.
 
 ### `sync` — bring in what is new from the shared vault

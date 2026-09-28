@@ -5,7 +5,7 @@
 The most expensive part of Phase 2 was mechanical: finding in the code every
 `@Post('confirm')`, every `restTemplate.postForEntity(...)`, every
 `producer.send({ topic })`. That requires no judgment, only recognizing code
-structures. Since v1.10.0 that search is done by **a fixed Python script
+structures. That search is done by **a fixed Python script
 that Kiro runs** (`assets/prescan/prescan.py`), with real AST parsing
 (tree-sitter), not text search. Kiro receives a list of **candidates**
 already located (file, line, value) and spends its reasoning only on what
@@ -72,7 +72,7 @@ python3 -m venv .kiro/allspark/.venv-prescan
   package: they download nothing at runtime.
 - **If any step fails** (no Python 3.10+, no access to PyPI, `--verify`
   errors out): the prescan is **unavailable for this run** and Kiro does
-  the full manual reading of all repos, as before v1.10.0. It never blocks
+  the full manual reading of all repos. It never blocks
   Phase 2. The user is told which step failed and the exact message, so
   they can decide whether to install something.
 
@@ -92,10 +92,11 @@ After 2.A (role already defined), one command per repo:
 
 | Argument | Where it comes from |
 |---|---|
-| `--stack` | The repo's `tech.md` (e.g. `nestjs`, `spring`, `django,celery`). `prescan.py --stacks` lists the supported ones. |
+| `--stack` | The repo's `tech.md` (e.g. `nestjs`, `spring`, `django,celery`). Only the names listed by `prescan.py --stacks` are valid: languages and frameworks (`django`, `spring`, `aspnet`...) and libraries tied to one language (`celery`, `sidekiq`, `masstransit`). Protocols or brokers such as `kafka`, `rabbitmq` or `grpc` are **not** stacks: the rules of each language already detect them, so do not pass them. Any other name goes to `stacks_without_pattern`. |
 | `--role` | Step 2.A. It does not narrow the search (the mapping is complete): it is used to warn about inconsistencies, e.g. a `frontend` with inbound routes. |
 | `--id` | Real Git name (the same deterministic ID as in the vault). |
 | `--cache` | Reuses the JSON if the repo's commit and state did not change (see "Cache"). |
+| `--max-kb` | Optional. Size limit per file, in KB (default `1024`). Larger files are skipped and listed in `warnings`. |
 
 **Exit codes:**
 
@@ -103,12 +104,16 @@ After 2.A (role already defined), one command per repo:
 - `2` — no declared stack has rules (e.g. Kotlin, Go, PHP): the JSON is
   written anyway with contracts and config, and that repo goes to manual
   reading in 2.B.2.
-- `1` — real error (dependencies, nonexistent repo): that repo goes to
-  manual reading and the error is reported.
+- `1` — real error (dependencies, nonexistent repo, missing or invalid
+  arguments): that repo goes to manual reading and the error is reported.
 
 A repo with mixed stacks (e.g. `spring` + a Kotlin module) exits with `0`
 and lists the unsupported ones in `stacks_without_pattern`: Kiro reads only
-that part by hand.
+that part by hand. The script also adds a language to
+`stacks_without_pattern` on its own when it finds source files without a
+grammar (`.kt`, `.go`, `.php`, `.scala`, `.rs`...), even if `tech.md` did
+not declare it — e.g. a `spring` repo written in Kotlin is never reported
+as fully scanned.
 
 ## What it walks and what it does not
 
@@ -236,8 +241,8 @@ run is not considered finished.
 ## Cache
 
 With `--cache`, the key combines: `HEAD` commit, `git status` (uncommitted
-changes), stack, role, script version and the content of rules and
-queries. If it matches the one in the existing JSON, it is not re-scanned. A
+changes), stack, role, `--id`, `--max-kb`, script version and the content
+of `manifest.json`, rules and queries. If it matches the one in the existing JSON, it is not re-scanned. A
 repo without git is always scanned. When in doubt, delete the JSON and
 re-scan: the cache only saves time, it never decides anything.
 
@@ -252,8 +257,9 @@ re-scan: the cache only saves time, it never decides anything.
    names.
 3. Document the pattern in `framework-patterns.md` (the human-readable
    description still lives there).
-4. Test against a sample repo and bump `rules_version` in `manifest.json`
-   (invalidates the caches).
+4. Test against a sample repo and bump `rules_version` in `manifest.json`.
+   Any change to `manifest.json`, `rules/` or `queries/` invalidates the
+   caches.
 
 As long as a stack is not in `manifest.json`, it shows up in
 `stacks_without_pattern` and is read by hand: missing support is reported,

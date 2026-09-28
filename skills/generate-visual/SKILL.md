@@ -33,7 +33,7 @@ and no tokens are spent generating the scene.
    `find-connections`; if missing, it is requested the same way as there).
 2. `allspark/export/allspark.md` exists, is valid YAML and has `points`.
 3. `axes.pos_x == external` and `axes.pos_z == client` in the export. If
-   not, the export predates v1.8.0 or was left without the swap: **it stops**
+   not, the export was left without the swap: **it stops**
    and suggests regenerating it with `find-connections` instead of drawing
    an inverted cube.
 
