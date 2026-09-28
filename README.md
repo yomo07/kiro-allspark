@@ -34,7 +34,7 @@ third party).
 
 | Skill | What it does |
 |---|---|
-| `generate-steering` | Generates `tech.md`, `structure.md` and `.kiroignore` per repo. It is the basis for detecting the stack and the role. |
+| `generate-steering` | Generates `product.md`, `tech.md`, `structure.md` and `.kiroignore` per repo. It is the basis for detecting the stack and the role. |
 | `find-connections` | Defines roles, detects and validates the connections, writes the connections MOC and updates the graph. |
 | `generate-visual` | Generates the 3D cube as a single HTML file. Always asks first. |
 | `manage-allspark` | Syncs the vault shared between teams without overwriting other teams' work. |
@@ -63,6 +63,7 @@ third party).
 
 ```
 <repo>/.kiro/steering/
+├── product.md
 ├── tech.md
 ├── structure.md
 └── moc.md                  ← the repo's connections

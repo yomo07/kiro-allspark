@@ -3,6 +3,27 @@
 All use standard Kiro frontmatter. Default is `inclusion: always` unless
 stated otherwise.
 
+## product.md
+
+```markdown
+---
+inclusion: always
+---
+# Product
+
+## Purpose
+- What the repo does, in one or two lines
+
+## Users
+- Who uses it (end client, internal team, other systems)
+
+## Main features
+-
+
+## Business context
+- Where it fits in the company's product (optional)
+```
+
 ## tech.md
 
 ```markdown

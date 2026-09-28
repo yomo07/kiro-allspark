@@ -5,8 +5,8 @@
 First public release.
 
 ### Includes
-- **`generate-steering`**: basic per-repo steering docs (`tech.md`,
-  `structure.md`) and a standard `.kiroignore`.
+- **`generate-steering`**: basic per-repo steering docs (`product.md`,
+  `tech.md`, `structure.md`) and a standard `.kiroignore`.
 - **`find-connections`**: each repo's role (frontend, backend,
   MVC monolith, worker), detection of all its connections (HTTP, SOAP,
   gRPC, Kafka/RabbitMQ queues, webhooks, S3), validation from both

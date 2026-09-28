@@ -1,6 +1,6 @@
 ---
 name: generate-steering
-description: "Generates a repo's basic steering docs (tech and structure) in standard Kiro format, without creating files outside the standard steering. They are the base find-connections uses to detect each repo's stack and role. Use when a repo without steering docs is detected or when the user asks to regenerate them."
+description: "Generates a repo's basic steering docs (product, tech and structure) in standard Kiro format, without creating files outside the standard steering. They are the base find-connections uses to detect each repo's stack and role. Use when a repo without steering docs is detected or when the user asks to regenerate them."
 ---
 
 # generate-steering
@@ -19,8 +19,12 @@ configuration if it exists, or recursively search for `.git` folders across
 the whole tree if it does not — never assume all repos sit at a single
 depth level.
 
-## What it generates (automatic, always)
+## What it generates (automatic, always, per repo)
 
+- `.kiro/steering/product.md` — what the repo is for: purpose, users,
+  main features and business context. Taken from the README, package
+  metadata and the code; what cannot be inferred is left as `-`, never
+  invented.
 - `.kiro/steering/tech.md` — stack, language, main dependencies
 - `.kiro/steering/structure.md` — folder organization, layers, repo patterns
 - `.kiroignore` — standard exclusion patterns, including `.kiro/allspark/`
@@ -45,8 +49,8 @@ See `references/steering-templates.md` for each file's template.
 ## Reset rules (new repo)
 
 When a new repo is started and clean steering docs are requested, this skill
-deletes and regenerates only what it generates itself: `tech.md`,
-`structure.md`, `.kiroignore`.
+deletes and regenerates only what it generates itself: `product.md`,
+`tech.md`, `structure.md`, `.kiroignore`.
 
 - `database.md` is never deleted by this flow, whether it exists or not.
 - `moc.md` is never deleted by this flow — its lifecycle is independent
