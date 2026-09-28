@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Kiro Allspark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Chakra+Petch:wght@500;600&display=swap">
+<!-- kiro-allspark template / generate-visual skill. Do not hand-edit the data block:
+     it is regenerated from allspark/export/allspark.md. -->
+<style>
+  :root {
+    --bg: #070b1e;
+    --bg-panel: rgba(13, 19, 48, 0.72);
+    --border-panel: rgba(129, 146, 255, 0.16);
+    --text: #dfe4ff;
+    --text-soft: #8f98c8;
+    --accent: #8b9cff;
+    --client: #3b82f6;
+    --internal: #22c55e;
+    --external: #f97316;
+    --direct: #f43f5e;
+    --title: "Chakra Petch", "Rajdhani", "Segoe UI", system-ui, sans-serif;
+    --ui: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: radial-gradient(120% 90% at 70% 20%, #111a44 0%, var(--bg) 55%, #04060f 100%);
+    color: var(--text); font-family: var(--ui); font-size: 15px; line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+
+  .header {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 22px); left: 26px;
+    max-width: min(440px, calc(100vw - 52px)); pointer-events: none;
+  }
+  .header h1 {
+    margin: 0; font-family: var(--title); font-weight: 600; font-size: clamp(30px, 4.2vw, 46px);
+    letter-spacing: 0.04em; line-height: 1;
+    background: linear-gradient(100deg, var(--client) 0%, var(--internal) 48%, var(--external) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 18px rgba(99, 132, 255, 0.35));
+  }
+  .header p { margin: 8px 0 0; color: var(--text-soft); font-size: 14px; }
+  .header p strong { color: var(--text); font-weight: 500; }
+
+  #phase {
+    position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); transform: translateX(-50%);
+    font-family: var(--title); font-size: 15px; letter-spacing: 0.06em; color: var(--accent);
+    text-shadow: 0 0 12px rgba(139, 156, 255, 0.6); pointer-events: none;
+    transition: opacity 0.6s ease; white-space: nowrap;
+  }
+  #phase .bar { display: block; height: 2px; margin-top: 8px; background: rgba(139,156,255,0.15); border-radius: 2px; overflow: hidden; }
+  #phase .bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--client), var(--internal), var(--external)); }
+
+  .panel {
+    position: fixed; background: var(--bg-panel); border: 1px solid var(--border-panel);
+    border-radius: 14px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .legend { left: 26px; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); padding: 14px 16px; }
+  .legend h2 { margin: 0 0 8px; font-family: var(--title); font-weight: 500; font-size: 13px; color: var(--text-soft); letter-spacing: 0.04em; }
+  .legend ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+  .legend li { display: flex; align-items: center; gap: 9px; font-size: 13.5px; }
+  .legend svg { width: 16px; height: 16px; flex: none; overflow: visible; }
+  .legend .sep { height: 1px; background: var(--border-panel); margin: 4px 0; }
+
+  .controls {
+    right: 26px; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); padding: 10px;
+    display: flex; flex-wrap: wrap; gap: 6px; max-width: min(420px, calc(100vw - 52px)); justify-content: flex-end;
+  }
+  .controls button {
+    font: 500 13.5px var(--ui); color: var(--text); background: rgba(139, 156, 255, 0.08);
+    border: 1px solid rgba(139, 156, 255, 0.22); border-radius: 999px; padding: 6px 13px; cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .controls button:hover { background: rgba(139, 156, 255, 0.18); }
+  .controls button[aria-pressed="false"] { color: var(--text-soft); background: transparent; border-style: dashed; }
+  .controls button.primary { border-color: var(--accent); color: #fff; background: rgba(139, 156, 255, 0.22); }
+  .controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  #tooltip {
+    position: fixed; z-index: 5; pointer-events: none; min-width: 190px; max-width: 300px; padding: 11px 13px;
+    background: rgba(8, 12, 32, 0.92); border: 1px solid var(--border-panel); border-radius: 10px;
+    font-size: 13px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+  #tooltip .name { font-family: var(--title); font-size: 15px; font-weight: 600; margin-bottom: 2px; word-break: break-word; }
+  #tooltip .kind { color: var(--text-soft); margin-bottom: 8px; }
+  #tooltip dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; }
+  #tooltip dt { color: var(--text-soft); }
+  #tooltip dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+  #notice {
+    position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center;
+    font-size: 16px; color: var(--text);
+  }
+  #notice div { max-width: 460px; padding: 22px 26px; }
+  #notice h2 { font-family: var(--title); margin: 0 0 8px; font-size: 20px; color: var(--external); }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 720px) {
+    .header { left: 18px; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+    .header p { font-size: 13px; }
+    .controls { right: 12px; left: 12px; max-width: none; justify-content: center; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); padding: 8px; }
+    .controls button { padding: 5px 11px; font-size: 13px; }
+    .legend { left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 104px); padding: 8px 12px; }
+    .legend h2, .legend .sep { display: none; }
+    .legend ul { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+    .legend li { font-size: 12.5px; gap: 6px; }
+    .legend svg { width: 12px; height: 12px; }
+    #phase { top: calc(env(safe-area-inset-top, 0px) + 140px); bottom: auto; font-size: 13px; }
+  }
+  @media (prefers-reduced-motion: reduce) { #phase { transition: none; } }
+</style>
+</head>
+<body>
+<canvas id="scene" tabindex="0" aria-label="3D cube of the application universe: drag to rotate, scroll to zoom"></canvas>
+
+<header class="header">
+  <h1>Allspark</h1>
+  <p id="summary">Loading the cube…</p>
+</header>
+
+<div id="phase" aria-live="polite"><span id="phase-text"></span><span class="bar"><i id="phase-bar"></i></span></div>
+
+<aside class="panel legend" aria-label="Legend">
+  <h2>Legend</h2>
+  <ul>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--client)"/></svg>Client</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--internal)"/></svg>Internal (Acme)</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--external)"/></svg>External</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="var(--text-soft)" stroke-width="1.6" stroke-dasharray="2.4 1.6"/></svg>System without repo</li>
+    <li class="sep" aria-hidden="true"></li>
+    <li><svg viewBox="0 0 16 16"><path d="M2 13 14 3" stroke="var(--direct)" stroke-width="2.4" stroke-linecap="round"/></svg>Direct client → external</li>
+  </ul>
+</aside>
+
+<nav class="panel controls" aria-label="View controls">
+  <button type="button" id="btn-build" class="primary">Skip animation</button>
+  <button type="button" id="btn-view">Initial view</button>
+  <button type="button" data-layer="vectors" aria-pressed="true">Connections</button>
+  <button type="button" data-layer="names" aria-pressed="true">Names</button>
+</nav>
+
+<div id="tooltip" role="tooltip" hidden></div>
+<div id="notice" hidden><div class="panel"><h2 id="notice-title"></h2><p id="notice-text"></p></div></div>
+
+<!-- DATA: generate-visual replaces ONLY the content of this block with the JSON derived from allspark.md.
+     Escape "<" as \u003c inside the JSON. -->
+<script id="allspark-data" type="application/json">__ALLSPARK_JSON__</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (s) { return document.querySelector(s); };
+
+  function notice(title, text) {
+    $('#notice-title').textContent = title; $('#notice-text').textContent = text;
+    $('#notice').hidden = false; $('#phase').hidden = true; $('#summary').textContent = '';
+  }
+
+  // ---------- 1. Data ----------
+  if (typeof THREE === 'undefined' || !THREE.OrbitControls) {
+    notice('Three.js did not load', 'The cube loads Three.js from a CDN. Check your internet connection and open the file again.');
+    return;
+  }
+  var data;
+  try {
+    var raw = $('#allspark-data').textContent.trim();
+    if (raw.indexOf('__ALLSPARK_' + 'JSON__') === 0) {   // template without data (literal split on purpose)
+      notice('Template without data', 'This file is the empty template. Generate the visualization with the generate-visual skill of kiro-allspark.');
+      return;
+    }
+    data = JSON.parse(raw);
+  } catch (e) {
+    notice('Invalid data', 'The data block is not valid JSON (' + e.message + '). Run generate-visual again.');
+    return;
+  }
+  data.points = data.points || []; data.vectors = data.vectors || [];
+  if (!data.points.length) { notice('Empty cube', 'allspark.md has no points yet. Run Phase 2 of find-connections first.'); return; }
+
+  var COLOR = { blue: 0x3b82f6, green: 0x22c55e, orange: 0xf97316 };
+  var COLOR_DIRECT = 0xf43f5e;   // client -> external without going through an internal point
+  var COLOR_SEMANTIC = { client: COLOR.blue, internal: COLOR.green, external: COLOR.orange };
+  var COLOR_VECTOR_AXIS = { X: COLOR.blue, Y: COLOR.green, Z: COLOR.orange };
+  var AXIS_NAME = { client: 'Client', internal: 'Internal (Acme)', external: 'External' };
+  // The data ALREADY comes with the X/Z swap applied (allspark.md). No swap is done here.
+  var axes = data.axes || { pos_x: 'external', pos_y: 'internal', pos_z: 'client' };
+  var S = 5;                                   // cube 0..100 -> -5..5
+  function w(v) { return (Number(v) - 50) / 50 * S; }
+  function vec(p) { return new THREE.Vector3(w(p.pos_x), w(p.pos_y), w(p.pos_z)); }
+  function typeOf(p) { return p.type === 'virtual' || p.role === 'external' ? 'virtual' : 'repo'; }
+  function shortName(id) {
+    var s = String(id); var h = s.lastIndexOf('#');
+    if (h >= 0) { var r = s.slice(h + 1).split('/'); return r[r.length - 1]; }
+    var b = s.split('/'); return b[b.length - 1];
+  }
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function main() {
+  // ---------- 2. Scene ----------
+  var canvas = $('#scene');
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x070b1e, 1);
+  var scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x070b1e, 0.022);
+
+  var camera = new THREE.PerspectiveCamera(40, 1, 0.1, 500);
+  // Initial angle: ~15° elevation, Internal vertical, Client down to the left
+  // and External to the right. pos_z (Client) on the left, pos_x (External) on the right.
+  var CAM_DIR = new THREE.Vector3(1, 0.52, 1.59).normalize();
+  var CENTER = new THREE.Vector3(0, -0.3, 0);
+  // Distance that frames the cube, its labels and the curves that exit below (sphere of radius FRAME_R)
+  var FRAME_R = 8.2, FINAL_DIST = 24, START_DIST = 35;
+  function computeDistances(aspect, fov) {
+    var v = THREE.MathUtils.degToRad(fov), h = 2 * Math.atan(Math.tan(v / 2) * aspect);
+    FINAL_DIST = FRAME_R / Math.sin(Math.min(v, h) / 2); START_DIST = FINAL_DIST * 1.45;
+  }
+  computeDistances(window.innerWidth / window.innerHeight, window.innerWidth < 720 ? 52 : 40);
+  camera.position.copy(CAM_DIR).multiplyScalar(reduced ? FINAL_DIST : START_DIST);
+
+  var controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.dampingFactor = 0.08;
+  controls.minDistance = 7; controls.maxDistance = 60; controls.target.set(0, -0.3, 0);
+
+  scene.add(new THREE.AmbientLight(0x7f8cff, 0.45));
+  var light1 = new THREE.PointLight(0xffffff, 1.1, 80); light1.position.set(9, 12, 10); scene.add(light1);
+  var light2 = new THREE.PointLight(0x6d5bff, 0.8, 80); light2.position.set(-10, -4, -8); scene.add(light2);
+
+  var composer = null, bloom = null;
+  if (THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass) {
+    try {
+      composer = new THREE.EffectComposer(renderer);
+      composer.addPass(new THREE.RenderPass(scene, camera));
+      bloom = new THREE.UnrealBloomPass(new THREE.Vector2(512, 512), 0.6, 0.45, 0.28);
+      composer.addPass(bloom);
+    } catch (e) { composer = null; }
+  }
+
+  // Shared glow texture
+  function glowTexture() {
+    var c = document.createElement('canvas'); c.width = c.height = 128;
+    var g = c.getContext('2d'); var gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(255,255,255,0.55)');
+    gr.addColorStop(0.6, 'rgba(255,255,255,0.12)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+  }
+  var GLOW = glowTexture();
+  function glowSprite(color, scale, opacity) {
+    var m = new THREE.SpriteMaterial({ map: GLOW, color: color, transparent: true, opacity: opacity,
+      blending: THREE.AdditiveBlending, depthWrite: false });
+    var s = new THREE.Sprite(m); s.scale.setScalar(scale); s.userData.baseOpacity = opacity; return s;
+  }
+  function label(text, color, height, weight) {
+    var c = document.createElement('canvas'); var g = c.getContext('2d');
+    var px = 64; var font = (weight || 600) + ' ' + px + 'px "Chakra Petch", "Segoe UI", sans-serif';
+    g.font = font; var width = Math.ceil(g.measureText(text).width) + 24;
+    c.width = width; c.height = px + 24; g.font = font; g.textBaseline = 'middle';
+    g.shadowColor = color; g.shadowBlur = 16; g.fillStyle = color; g.fillText(text, 12, c.height / 2);
+    var tex = new THREE.CanvasTexture(c); tex.minFilter = THREE.LinearFilter;
+    var m = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0 });
+    var s = new THREE.Sprite(m); s.scale.set(height * c.width / c.height, height, 1); return s;
+  }
+
+  // Star field ("second brain" background)
+  (function () {
+    var n = 1600, pos = new Float32Array(n * 3);
+    for (var i = 0; i < n; i++) {
+      var r = 55 + Math.random() * 90, t = Math.random() * Math.PI * 2, f = Math.acos(2 * Math.random() - 1);
+      pos[i * 3] = r * Math.sin(f) * Math.cos(t); pos[i * 3 + 1] = r * Math.cos(f); pos[i * 3 + 2] = r * Math.sin(f) * Math.sin(t);
+    }
+    var geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var mat = new THREE.PointsMaterial({ size: 0.9, map: GLOW, color: 0x9fb0ff, transparent: true, opacity: 0.42,
+      blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+    var stars = new THREE.Points(geo, mat); stars.name = 'stars'; scene.add(stars);
+  })();
+
+  // ---------- 3. Cube structure ----------
+  var cube = new THREE.Group(); scene.add(cube);
+  var frame = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2 * S, 2 * S, 2 * S)),
+    new THREE.LineBasicMaterial({ color: 0x5b6bd6, transparent: true, opacity: 0 }));
+  cube.add(frame);
+  var grid = new THREE.GridHelper(2 * S, 10, 0x3a4697, 0x27306b);
+  grid.position.y = -S; grid.material.transparent = true; grid.material.opacity = 0; cube.add(grid);
+
+  var ORIGIN = new THREE.Vector3(-S, -S, -S);
+  var visualAxes = ['pos_x', 'pos_y', 'pos_z'].map(function (field, i) {
+    var sem = axes[field]; var color = COLOR_SEMANTIC[sem] || 0xffffff;
+    var end = ORIGIN.clone(); end.setComponent(i, S + 0.6);
+    var curve = new THREE.LineCurve3(ORIGIN, end);
+    var geo = new THREE.TubeGeometry(curve, 40, 0.035, 8, false);
+    var mat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false });
+    var tube = new THREE.Mesh(geo, mat); geo.setDrawRange(0, 0); cube.add(tube);
+    var tip = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.36, 16), mat.clone());
+    tip.position.copy(end); tip.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), end.clone().sub(ORIGIN).normalize());
+    tip.scale.setScalar(0.001); cube.add(tip);
+    var lb = label(AXIS_NAME[sem] || sem, '#' + color.toString(16).padStart(6, '0'), 0.55);
+    lb.position.copy(end.clone().add(end.clone().sub(ORIGIN).normalize().multiplyScalar(0.9)));
+    if (i === 1) lb.position.x += 0.4;
+    cube.add(lb);
+    return { tube: tube, tip: tip, label: lb };
+  });
+
+  // ---------- 4. Points ----------
+  var byId = {}, pickables = [], nodes = [];
+  var ROLE_ORDER = { frontend: 0, 'mvc-monolith': 1, backend: 2, worker: 3 };
+  // More points -> all of them smaller, so the cube does not get crowded (14 points = base size)
+  var nBase = data.points.filter(function (p) { var t = typeOf(p); return t === 'repo' || t === 'virtual'; }).length;
+  var SCALE = Math.max(0.5, Math.min(1, Math.sqrt(14 / Math.max(1, nBase))));
+  data.points.forEach(function (p) {
+    var type = typeOf(p);
+    var color = COLOR[p.color] != null ? COLOR[p.color] : 0xffffff;
+    var g = new THREE.Group(); g.position.copy(vec(p));
+    var mesh, radius, glow;
+    if (type === 'repo') {
+      var total = (p.count_client || 0) + (p.count_internal || 0) + (p.count_external || 0);
+      radius = Math.min(0.5, 0.24 * (1 + 0.45 * Math.log10(1 + total))) * SCALE;
+      mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 3),
+        new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.45, roughness: 0.3, metalness: 0.15 }));
+      glow = glowSprite(color, radius * 6, 0.38);
+    } else { // system without repo
+      radius = 0.22 * SCALE;
+      mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 1),
+        new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.9 }));
+      mesh.add(new THREE.Mesh(new THREE.SphereGeometry(radius * 0.35, 12, 12), new THREE.MeshBasicMaterial({ color: color })));
+      glow = glowSprite(color, radius * 5, 0.24);
+    }
+    g.add(glow); g.add(mesh);
+    var lb = label(shortName(p.id), '#' + color.toString(16).padStart(6, '0'), (type === 'repo' ? 0.42 : type === 'virtual' ? 0.36 : 0.26) * Math.max(0.75, SCALE), type === 'repo' ? 600 : 500);
+    lb.userData.hasName = type === 'repo' || type === 'virtual';
+    lb.position.set(0, radius + 0.3, 0); g.add(lb);
+    g.scale.setScalar(0.0001); g.visible = true;
+    var node = { p: p, type: type, group: g, mesh: mesh, glow: glow, label: lb, radius: radius, color: color,
+      home: g.position.clone(), vectors: [], links: [] };
+    mesh.userData.node = node; pickables.push(mesh);
+    byId[p.id] = node; nodes.push(node); scene.add(g);
+  });
+
+  var links = [];
+
+  // ---------- 6. Vectors (neon arcs) ----------
+  var vectors = [], missing = 0;
+  data.vectors.forEach(function (v) {
+    var a = byId[v.source], b = byId[v.target];
+    if (!a || !b) { missing++; return; }
+    var o = a.home, d = b.home, c;
+    if (v.curve) c = new THREE.Vector3(w(v.curve.cx), w(v.curve.cy), w(v.curve.cz));
+    else { // same calculation as position-formula.md (swap-invariant)
+      // convex toward the client; arc (rises and falls from above) toward an external point;
+      // straight if it goes from the client zone directly to an external point; concave toward an internal point
+      var towardClient = b.type === 'virtual' && b.p.axis === 'X';
+      var towardExternal = b.type === 'virtual' && b.p.axis === 'Z';
+      var fromClient = a.p.role === 'frontend' || (a.type === 'virtual' && a.p.axis === 'X');
+      var dist = o.distanceTo(d) / (2 * S) * 100;
+      var offset = 12 + 0.15 * dist;
+      var yC = towardClient ? Math.min(100, Math.max(a.p.pos_y, b.p.pos_y) + offset)
+             : towardExternal ? (fromClient ? (a.p.pos_y + b.p.pos_y) / 2 : Math.max(a.p.pos_y, b.p.pos_y) + offset)
+             : Math.max(0, Math.min(a.p.pos_y, b.p.pos_y) - offset);
+      if (towardExternal && fromClient) v.direct = true;
+      c = new THREE.Vector3((o.x + d.x) / 2, w(yC), (o.z + d.z) / 2);
+    }
+    var curve = new THREE.QuadraticBezierCurve3(o, c, d);
+    var color = v.direct ? COLOR_DIRECT : (COLOR_VECTOR_AXIS[v.axis] || COLOR[b.p.color] || 0xffffff);
+    var weak = v.reverse_validation === 'no-target-evidence';
+    var SEG = 72, RAD = 8;
+    var core = new THREE.Mesh(new THREE.TubeGeometry(curve, SEG, 0.02, RAD, false),
+      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: weak ? 0.4 : 0.8, blending: THREE.AdditiveBlending, depthWrite: false }));
+    var halo = new THREE.Mesh(new THREE.TubeGeometry(curve, SEG, 0.075, RAD, false),
+      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: weak ? 0.05 : 0.1, blending: THREE.AdditiveBlending, depthWrite: false }));
+    core.geometry.setDrawRange(0, 0); halo.geometry.setDrawRange(0, 0);
+    scene.add(halo); scene.add(core);
+    var length = curve.getLength();
+    var tArrow = Math.max(0.6, 1 - (b.radius + 0.22) / length);
+    var arrow = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.24, 12),
+      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: weak ? 0.5 : 1, blending: THREE.AdditiveBlending, depthWrite: false }));
+    arrow.position.copy(curve.getPointAt(tArrow));
+    arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), curve.getTangentAt(tArrow).normalize());
+    arrow.scale.setScalar(0.0001); scene.add(arrow);
+    var pulse = glowSprite(0xffffff, 0.42, 0); pulse.material.color.setHex(color).lerp(new THREE.Color(0xffffff), 0.45); scene.add(pulse);
+    var obj = { v: v, a: a, b: b, curve: curve, core: core, halo: halo, arrow: arrow, pulse: pulse, length: length,
+      tArrow: tArrow, weak: weak, seg: SEG, rad: RAD, phase: Math.random(), active: false,
+      opC: core.material.opacity, opH: halo.material.opacity, opA: arrow.material.opacity };
+    a.vectors.push(obj); b.vectors.push(obj); vectors.push(obj);
+  });
+
+  // ---------- 7. Summary ----------
+  var count = { repo: 0, virtual: 0 };
+  nodes.forEach(function (n) { count[n.type] = (count[n.type] || 0) + 1; });
+  var parts = ['<strong>' + count.repo + '</strong> repos', '<strong>' + count.virtual + '</strong> systems without repo',
+    '<strong>' + vectors.length + '</strong> connections'];
+  var meta = data.meta || {};
+  $('#summary').innerHTML = (meta.workspace ? escapeHtml(meta.workspace) + '. ' : '') + parts.join(', ') + '.' +
+    (meta.generated ? '<br>Generated on ' + escapeHtml(meta.generated) + ' from allspark.md' : '') +
+    (missing ? '<br>' + missing + ' connections point to points that are not in the export.' : '');
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  // ---------- 8. Build timeline ----------
+  function smooth(k) { return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; }
+  function bounce(k) { var c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); }
+  var tasks = [], phases = [], DURATION = 0;
+  function task(start, dur, fn) { tasks.push({ start: start, dur: dur, fn: fn }); DURATION = Math.max(DURATION, start + dur); }
+
+  var t = 0.2;
+  phases.push({ start: t, text: 'Drawing the axes' });
+  task(t, 1.4, function (k) { frame.material.opacity = 0.2 * smooth(k); grid.material.opacity = 0.16 * smooth(k); });
+  visualAxes.forEach(function (e, i) {
+    task(t + 0.15 + i * 0.22, 1.1, function (k) {
+      var kk = smooth(k); e.tube.geometry.setDrawRange(0, Math.ceil(kk * 40) * 8 * 6);
+      e.tip.scale.setScalar(kk > 0.92 ? bounce((kk - 0.92) / 0.08) : 0.0001);
+    });
+    task(t + 1.0 + i * 0.22, 0.6, function (k) { e.label.material.opacity = k; });
+  });
+
+  // Process order: client -> Acme -> externals
+  var ROLE_RANK = { frontend: 0, 'mvc-monolith': 2, backend: 3, worker: 5 };
+  var AXIS_RANK = { X: 1, Y: 4, Z: 6 };
+  function rank(n) {
+    if (n.type === 'repo') return ROLE_RANK.hasOwnProperty(n.p.role) ? ROLE_RANK[n.p.role] : 3;
+    return AXIS_RANK.hasOwnProperty(n.p.axis) ? AXIS_RANK[n.p.axis] : 6;
+  }
+  function trace(o) {
+    return function (k) {
+      var kk = smooth(k), n = Math.ceil(kk * o.seg) * o.rad * 6;
+      o.core.geometry.setDrawRange(0, n); o.halo.geometry.setDrawRange(0, n);
+      o.arrow.scale.setScalar(kk > 0.9 ? bounce((kk - 0.9) / 0.1) : 0.0001);
+      if (k >= 1) o.active = true;
+    };
+  }
+
+  // Camera keys: {t, target, fraction of FINAL_DIST}. The camera keeps the CAM_DIR angle,
+  // focuses on each point as it appears and pulls back as the universe grows.
+  var cameraKeys = [{ t: 0, target: CENTER.clone(), fraction: 1.15 }];
+  var NEAR_FRACTION = 0.3, FAR_FRACTION = 0.78;
+
+  t = 1.9;
+  var base = nodes.filter(function (n) { return n.type === 'repo' || n.type === 'virtual'; }).sort(function (a, b) {
+    return rank(a) - rank(b) || (a.p.id < b.p.id ? -1 : 1);
+  });
+  var index = new Map(); base.forEach(function (n, i) { index.set(n, i); });
+  var STEP = Math.max(0.35, Math.min(1.1, 16 / Math.max(1, base.length)));
+  base.forEach(function (n, i) {
+    var ti = t + i * STEP;
+    var progress = base.length > 1 ? i / (base.length - 1) : 1;
+    cameraKeys.push({ t: ti - 0.2, target: n.home.clone(),
+      fraction: NEAR_FRACTION + (FAR_FRACTION - NEAR_FRACTION) * smooth(progress) });
+    phases.push({ start: ti, text: 'Adding ' + shortName(n.p.id) });
+    task(ti, 0.75, function (k) {
+      n.group.scale.setScalar(Math.max(0.0001, bounce(k)));
+      n.glow.material.opacity = n.glow.userData.baseOpacity * (1 + 1.2 * Math.sin(Math.PI * k));
+      n.label.material.opacity = Math.max(0, (k - 0.4) / 0.6);
+    });
+    // connections appear when their second end enters the scene
+    vectors.filter(function (o) { return Math.max(index.get(o.a), index.get(o.b)) === i; })
+      .forEach(function (o, j) { task(ti + 0.35 + j * 0.12, 0.9, trace(o)); });
+  });
+  t += base.length * STEP + 0.4;
+
+  cameraKeys.push({ t: t - 0.2, target: CENTER.clone(), fraction: 0.9 });
+  t += 0.6;
+  cameraKeys.push({ t: t, target: CENTER.clone(), fraction: 1 });
+  t += 1.2;
+  phases.push({ start: t, text: '' });
+  DURATION = Math.max(DURATION, t);
+
+  // ---------- 9. State, layers and interaction ----------
+  var clock = new THREE.Clock(), tBuild = 0, building = true, sway = true, tSway = 0;
+  var guided = !reduced;                                 // the camera follows the keys until the user takes over
+  var camTarget = CENTER.clone(), camDist = FINAL_DIST * 1.15;
+  function currentKey(tt) { var c = cameraKeys[0]; for (var i = 0; i < cameraKeys.length; i++) if (cameraKeys[i].t <= tt) c = cameraKeys[i]; return c; }
+  function placeCamera() {
+    camera.position.copy(camTarget).add(CAM_DIR.clone().multiplyScalar(camDist));
+    controls.target.copy(camTarget);
+  }
+  var layers = { vectors: true, names: true };
+  var selection = null;
+
+  function applyAll(tt) { tasks.forEach(function (ta) { var k = (tt - ta.start) / ta.dur; if (k >= 0) ta.fn(Math.min(1, k)); else ta.fn(0); }); }
+  function finishBuild() {
+    tBuild = DURATION + 1; applyAll(tBuild); building = false;
+    if (guided || sway) { camTarget.copy(CENTER); camDist = FINAL_DIST; placeCamera(); }
+    guided = false;
+    vectors.forEach(function (o) { o.active = true; });
+    $('#phase').style.opacity = 0; $('#btn-build').textContent = 'Rebuild';
+    applyLayers();
+  }
+  function restartBuild() {
+    tBuild = 0; building = true; selection = null; applySelection();
+    nodes.forEach(function (n) { n.group.position.copy(n.home); n.group.scale.setScalar(0.0001); });
+    links.forEach(function (e) { e.line.material.opacity = 0; });
+    vectors.forEach(function (o) { o.active = false; o.pulse.material.opacity = 0; });
+    visualAxes.forEach(function (e) { e.label.material.opacity = 0; });
+    applyAll(0);
+    camTarget.copy(CENTER); camDist = FINAL_DIST * 1.15; placeCamera();
+    guided = !reduced; sway = true; tSway = 0;
+    $('#phase').style.opacity = 1; $('#btn-build').textContent = 'Skip animation';
+  }
+  $('#btn-build').addEventListener('click', function () { if (building) finishBuild(); else restartBuild(); });
+  $('#btn-view').addEventListener('click', function () {
+    camTarget.copy(CENTER); camDist = FINAL_DIST; placeCamera(); sway = !reduced; tSway = 0;
+  });
+  controls.addEventListener('start', function () { sway = false; guided = false; });
+
+  function nodeVisible() { return true; }
+  function applyLayers() {
+    nodes.forEach(function (n) { n.group.visible = nodeVisible(n); n.label.visible = layers.names && n.label.userData.hasName; });
+    vectors.forEach(function (o) { var v = layers.vectors; o.core.visible = o.halo.visible = o.arrow.visible = o.pulse.visible = v; });
+    links.forEach(function (e) { e.line.visible = nodeVisible(e.a) && nodeVisible(e.b); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-layer]'), function (b) {
+    b.addEventListener('click', function () {
+      var c = b.getAttribute('data-layer'); layers[c] = !layers[c]; b.setAttribute('aria-pressed', String(layers[c])); applyLayers();
+    });
+  });
+
+  // Selection: highlights a point with its connections and dims the rest
+  function related(n) {
+    var set = new Set([n]);
+    n.vectors.forEach(function (o) { set.add(o.a); set.add(o.b); });
+    n.links.forEach(function (e) { set.add(e.a); set.add(e.b); });
+    return set;
+  }
+  function applySelection() {
+    var rel = selection ? related(selection) : null;
+    nodes.forEach(function (n) {
+      var on = !rel || rel.has(n);
+      n.mesh.material.opacity = on ? (n.type === 'virtual' ? 0.9 : 1) : 0.12; n.mesh.material.transparent = true;
+      n.glow.material.opacity = on ? n.glow.userData.baseOpacity : 0.04;
+      n.label.material.opacity = on ? 1 : 0.15;
+    });
+    vectors.forEach(function (o) {
+      var on = !selection || o.a === selection || o.b === selection;
+      o.core.material.opacity = on ? o.opC : 0.05; o.halo.material.opacity = on ? o.opH : 0.01; o.arrow.material.opacity = on ? o.opA : 0.06;
+    });
+    links.forEach(function (e) {
+      var on = !selection || e.a === selection || e.b === selection;
+      if (!building) e.line.material.opacity = on ? e.opacity : 0.05;
+    });
+  }
+
+  var ray = new THREE.Raycaster(), pointer = new THREE.Vector2(), hover = null, tip = $('#tooltip');
+  function readPointer(ev) {
+    var r = canvas.getBoundingClientRect();
+    pointer.x = ((ev.clientX - r.left) / r.width) * 2 - 1; pointer.y = -((ev.clientY - r.top) / r.height) * 2 + 1;
+  }
+  function pick() {
+    ray.setFromCamera(pointer, camera);
+    var hits = ray.intersectObjects(pickables.filter(function (m) { var n = m.userData.node; return n.group.visible && n.group.scale.x > 0.5; }), false);
+    return hits.length ? hits[0].object.userData.node : null;
+  }
+  var TYPE_TXT = { repo: function (p) { return 'Repo ' + (p.role || ''); }, virtual: function (p) { return 'System without repo, axis ' + (p.axis || ''); } };
+  function semanticValue(p, sem) {
+    for (var field in axes) if (axes[field] === sem) return p[field];
+    return '';
+  }
+  function showTip(n, ev) {
+    var p = n.p, rows = [];
+    rows.push(['Client', semanticValue(p, 'client')], ['Internal', semanticValue(p, 'internal')], ['External', semanticValue(p, 'external')]);
+    if (n.type === 'repo' && p.count_internal != null) rows.push(['Endpoints C / I / E', (p.count_client || 0) + ' / ' + p.count_internal + ' / ' + (p.count_external || 0)]);
+    rows.push(['Connections', n.vectors.length]);
+    tip.innerHTML = '<div class="name">' + escapeHtml(p.id) + '</div><div class="kind">' + escapeHtml(TYPE_TXT[n.type](p)) + '</div><dl>' +
+      rows.map(function (f) { return '<dt>' + escapeHtml(f[0]) + '</dt><dd>' + escapeHtml(f[1]) + '</dd>'; }).join('') + '</dl>';
+    tip.hidden = false;
+    var x = ev.clientX + 16, y = ev.clientY + 16, r = tip.getBoundingClientRect();
+    if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 16;
+    if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - 16;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  canvas.addEventListener('pointermove', function (ev) {
+    readPointer(ev); hover = pick(); canvas.style.cursor = hover ? 'pointer' : 'grab';
+    if (hover) showTip(hover, ev); else tip.hidden = true;
+  });
+  canvas.addEventListener('pointerleave', function () { tip.hidden = true; });
+  var down = null;
+  canvas.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, y: ev.clientY }; });
+  canvas.addEventListener('pointerup', function (ev) {
+    if (!down || Math.hypot(ev.clientX - down.x, ev.clientY - down.y) > 5) return;
+    readPointer(ev); var n = pick(); selection = (n && n !== selection) ? n : null; applySelection();
+  });
+  window.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape') { selection = null; applySelection(); tip.hidden = true; }
+  });
+
+  function resize() {
+    var width = window.innerWidth, height = window.innerHeight;
+    renderer.setSize(width, height, false); camera.aspect = width / height;
+    camera.fov = width < 720 ? 52 : 40; camera.updateProjectionMatrix();
+    computeDistances(camera.aspect, camera.fov);
+    if (composer) { composer.setSize(width, height); bloom.resolution.set(width, height); }
+  }
+  window.addEventListener('resize', resize); resize();
+
+  // ---------- 10. Loop ----------
+  var phaseTxt = $('#phase-text'), phaseBar = $('#phase-bar'), currentPhase = -1;
+  function loop() {
+    var dt = Math.min(0.05, clock.getDelta()), now = clock.elapsedTime;
+    if (building) {
+      tBuild += dt; applyAll(tBuild);
+      if (guided) {
+        var cl = currentKey(tBuild), f = 1 - Math.exp(-dt * 2.2);
+        camTarget.lerp(cl.target, f);
+        camDist += (FINAL_DIST * cl.fraction - camDist) * f;
+        placeCamera();
+      }
+      var f = -1; for (var i = 0; i < phases.length; i++) if (tBuild >= phases[i].start) f = i;
+      if (f !== currentPhase && f >= 0) { currentPhase = f; phaseTxt.textContent = phases[f].text; }
+      phaseBar.style.width = Math.min(100, 100 * tBuild / DURATION) + '%';
+      if (tBuild >= DURATION) finishBuild();
+    }
+    if (sway && !reduced && !building) { // gentle oscillation: never flips the client → external reading
+      tSway += dt;
+      var ang = Math.sin(tSway * 0.18) * 0.32, len = camera.position.distanceTo(controls.target);
+      var d = CAM_DIR.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), ang);
+      camera.position.copy(controls.target).add(d.multiplyScalar(len));
+    }
+    if (!reduced) vectors.forEach(function (o) {
+      if (!o.active || !o.core.visible) { o.pulse.material.opacity = 0; return; }
+      var vel = 0.9 / Math.max(2, o.length) * (o.weak ? 0.5 : 1);
+      var u = (now * vel * 3 + o.phase) % 1;
+      o.pulse.position.copy(o.curve.getPointAt(u * o.tArrow));
+      var on = !selection || o.a === selection || o.b === selection;
+      o.pulse.material.opacity = (on ? 0.7 : 0.05) * Math.sin(Math.PI * u);
+    });
+    var st = scene.getObjectByName('stars'); if (st && !reduced) st.rotation.y += dt * 0.004;
+    controls.update();
+    if (composer) composer.render(); else renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+
+    applyAll(0);
+    if (reduced) finishBuild();
+    requestAnimationFrame(loop);
+  } // end of main()
+
+  // Wait for the label font (max. 1.2 s) before building the scene, so the 3D text does not use the fallback font
+  var ready = false; function once() { if (!ready) { ready = true; main(); } }
+  if (document.fonts && document.fonts.load) {
+    Promise.all([document.fonts.load('600 64px "Chakra Petch"'), document.fonts.load('500 64px "Chakra Petch"')]).then(once, once);
+    setTimeout(once, 1200);
+  } else once();
+})();
+</script>
+</body>
+</html>

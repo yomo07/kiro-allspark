@@ -1,0 +1,34 @@
+{
+  "rules_version": "1.0.0",
+  "languages": {
+    "typescript": {"module": "tree_sitter_typescript", "function": "language_typescript", "extensions": [".ts", ".mts", ".cts"], "query": "typescript.scm", "rules": "typescript.json"},
+    "tsx": {"module": "tree_sitter_typescript", "function": "language_tsx", "extensions": [".tsx"], "query": "typescript.scm", "rules": "typescript.json"},
+    "javascript": {"module": "tree_sitter_javascript", "function": "language", "extensions": [".js", ".jsx", ".mjs", ".cjs"], "query": "typescript.scm", "rules": "typescript.json"},
+    "python": {"module": "tree_sitter_python", "function": "language", "extensions": [".py"], "query": "python.scm", "rules": "python.json"},
+    "java": {"module": "tree_sitter_java", "function": "language", "extensions": [".java"], "query": "java.scm", "rules": "java.json"},
+    "csharp": {"module": "tree_sitter_c_sharp", "function": "language", "extensions": [".cs"], "query": "csharp.scm", "rules": "csharp.json"},
+    "ruby": {"module": "tree_sitter_ruby", "function": "language", "extensions": [".rb"], "query": "ruby.scm", "rules": "ruby.json"}
+  },
+  "stacks": {
+    "nestjs": ["typescript", "tsx", "javascript"],
+    "express": ["typescript", "tsx", "javascript"],
+    "node": ["typescript", "tsx", "javascript"],
+    "angular": ["typescript", "tsx", "javascript"],
+    "react": ["typescript", "tsx", "javascript"],
+    "vue": ["typescript", "tsx", "javascript"],
+    "nextjs": ["typescript", "tsx", "javascript"],
+    "typescript": ["typescript", "tsx", "javascript"],
+    "javascript": ["typescript", "tsx", "javascript"],
+    "django": ["python"],
+    "flask": ["python"],
+    "fastapi": ["python"],
+    "python": ["python"],
+    "spring": ["java"],
+    "java": ["java"],
+    "dotnet": ["csharp"],
+    "aspnet": ["csharp"],
+    "csharp": ["csharp"],
+    "rails": ["ruby"],
+    "ruby": ["ruby"]
+  }
+}

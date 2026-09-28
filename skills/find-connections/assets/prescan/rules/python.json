@@ -1,0 +1,366 @@
+{
+ "language": "python",
+ "rules": [
+  {
+   "id": "py.web.route",
+   "form": "call",
+   "in_decorator": true,
+   "methods": [
+    "get",
+    "post",
+    "put",
+    "patch",
+    "delete",
+    "route",
+    "api_route",
+    "head",
+    "options"
+   ],
+   "protocol": "http",
+   "direction": "inbound",
+   "method": {
+    "kwarg": [
+     "methods"
+    ],
+    "fallback": "name"
+   },
+   "value": [
+    {
+     "arg": 0
+    },
+    {
+     "kwarg": [
+      "path",
+      "rule"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "py.django.url",
+   "form": "call",
+   "no_object": true,
+   "files": [
+    "urls.py"
+   ],
+   "methods": [
+    "path",
+    "re_path",
+    "url"
+   ],
+   "protocol": "http",
+   "direction": "inbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "mark_if_arg": {
+    "arg": 1,
+    "calls": [
+     "include"
+    ],
+    "note": "include() entry: it is a prefix prepended to the routes of the included urls.py, not an endpoint of its own",
+    "confidence": "uncertain"
+   }
+  },
+  {
+   "id": "py.http.client",
+   "form": "call",
+   "group": "py.http",
+   "object_regex": "^(requests|httpx|aiohttp|\\w*[Ss]ession|\\w*[Cc]lient|self\\.\\w*([Ss]ession|[Cc]lient))$",
+   "methods": [
+    "get",
+    "post",
+    "put",
+    "patch",
+    "delete",
+    "head",
+    "options"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    },
+    {
+     "kwarg": [
+      "url"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "py.http.generic",
+   "form": "call",
+   "group": "py.http",
+   "methods": [
+    "get",
+    "post",
+    "put",
+    "patch",
+    "delete"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "value_filter": "url-or-path",
+   "confidence": "uncertain",
+   "note": "object not recognized as an HTTP client: confirm it is a network call"
+  },
+  {
+   "id": "py.urllib",
+   "form": "call",
+   "methods": [
+    "urlopen"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "py.soap.zeep",
+   "form": "call",
+   "group": "py.soap",
+   "object_regex": "^zeep$",
+   "methods": [
+    "Client",
+    "AsyncClient"
+   ],
+   "protocol": "soap",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    },
+    {
+     "kwarg": [
+      "wsdl"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "py.soap.client",
+   "form": "call",
+   "group": "py.soap",
+   "no_object": true,
+   "methods": [
+    "Client",
+    "AsyncClient"
+   ],
+   "protocol": "soap",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    },
+    {
+     "kwarg": [
+      "wsdl"
+     ]
+    }
+   ],
+   "value_filter": "wsdl"
+  },
+  {
+   "id": "py.grpc.channel",
+   "form": "call",
+   "object_regex": "^grpc(\\.aio)?$",
+   "methods": [
+    "insecure_channel",
+    "secure_channel"
+   ],
+   "protocol": "grpc",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "py.grpc.server",
+   "form": "call",
+   "methods_regex": "^add_\\w+Servicer_to_server$",
+   "protocol": "grpc",
+   "direction": "inbound",
+   "value": [
+    {
+     "text": "method",
+     "pattern": "^add_(\\w+)Servicer_to_server$"
+    }
+   ]
+  },
+  {
+   "id": "py.rabbit.publish",
+   "form": "call",
+   "methods": [
+    "basic_publish"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "outbound",
+   "value": [
+    {
+     "join": [
+      {
+       "kwarg": [
+        "exchange"
+       ]
+      },
+      {
+       "kwarg": [
+        "routing_key"
+       ]
+      }
+     ],
+     "sep": "/"
+    },
+    {
+     "join": [
+      {
+       "arg": 0
+      },
+      {
+       "arg": 1
+      }
+     ],
+     "sep": "/",
+     "min_args": 2
+    }
+   ]
+  },
+  {
+   "id": "py.rabbit.consume",
+   "form": "call",
+   "methods": [
+    "basic_consume"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "inbound",
+   "value": [
+    {
+     "kwarg": [
+      "queue"
+     ]
+    },
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "py.kafka.produce",
+   "form": "call",
+   "object_regex": "(?i)producer$",
+   "methods": [
+    "send",
+    "send_and_wait",
+    "produce"
+   ],
+   "protocol": "queue-kafka",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    },
+    {
+     "kwarg": [
+      "topic"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "py.kafka.consumer",
+   "form": "call",
+   "no_object": true,
+   "methods": [
+    "KafkaConsumer",
+    "AIOKafkaConsumer"
+   ],
+   "protocol": "queue-kafka",
+   "direction": "inbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "py.kafka.subscribe",
+   "form": "call",
+   "object_regex": "(?i)consumer$",
+   "methods": [
+    "subscribe"
+   ],
+   "protocol": "queue-kafka",
+   "direction": "inbound",
+   "value": [
+    {
+     "arg": 0
+    },
+    {
+     "kwarg": [
+      "topics"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "py.celery.enqueue",
+   "form": "call",
+   "methods": [
+    "delay",
+    "apply_async"
+   ],
+   "protocol": "queue",
+   "direction": "outbound",
+   "value": [
+    {
+     "text": "object"
+    }
+   ],
+   "confidence": "uncertain",
+   "note": "Celery task: the broker comes from the Celery config"
+  },
+  {
+   "id": "py.celery.task",
+   "form": "annotation",
+   "names_regex": "(^|\\.)(task|shared_task)$",
+   "protocol": "queue",
+   "direction": "inbound",
+   "value": [
+    {
+     "owner": true
+    }
+   ],
+   "note": "Celery task: the broker comes from the Celery config"
+  },
+  {
+   "id": "py.s3.bucket",
+   "form": "pair",
+   "keys": [
+    "Bucket"
+   ],
+   "protocol": "s3",
+   "direction": "outbound",
+   "value": [
+    {
+     "pair_value": true
+    }
+   ]
+  }
+ ]
+}

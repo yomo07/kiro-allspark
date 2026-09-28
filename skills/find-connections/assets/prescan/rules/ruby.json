@@ -1,0 +1,195 @@
+{
+ "language": "ruby",
+ "rules": [
+  {
+   "id": "rb.rails.route",
+   "form": "call",
+   "no_object": true,
+   "files": [
+    "routes.rb"
+   ],
+   "methods": [
+    "get",
+    "post",
+    "put",
+    "patch",
+    "delete",
+    "match"
+   ],
+   "protocol": "http",
+   "direction": "inbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "block_prefix": [
+    "namespace",
+    "scope"
+   ]
+  },
+  {
+   "id": "rb.rails.resources",
+   "form": "call",
+   "no_object": true,
+   "files": [
+    "routes.rb"
+   ],
+   "methods": [
+    "resources",
+    "resource"
+   ],
+   "protocol": "http",
+   "direction": "inbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "block_prefix": [
+    "namespace",
+    "scope"
+   ],
+   "note": "full REST routes of the resource (index, show, create, update, destroy)"
+  },
+  {
+   "id": "rb.faraday",
+   "form": "call",
+   "object_regex": "^Faraday$",
+   "methods": [
+    "new",
+    "get",
+    "post",
+    "put",
+    "patch",
+    "delete"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "method": "name",
+   "value": [
+    {
+     "kwarg": [
+      "url"
+     ]
+    },
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "rb.http",
+   "form": "call",
+   "object_regex": "^(HTTParty|RestClient|HTTP|Typhoeus|Excon)$",
+   "methods": [
+    "get",
+    "post",
+    "put",
+    "patch",
+    "delete",
+    "head"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "rb.nethttp",
+   "form": "call",
+   "object_regex": "Net::HTTP$",
+   "methods": [
+    "get",
+    "get_response",
+    "post_form",
+    "start",
+    "new"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "rb.savon",
+   "form": "call",
+   "object_regex": "^Savon$",
+   "methods": [
+    "client"
+   ],
+   "protocol": "soap",
+   "direction": "outbound",
+   "value": [
+    {
+     "kwarg": [
+      "wsdl",
+      "endpoint"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rb.bunny.publish",
+   "form": "call",
+   "object_regex": "(?i)exchange$",
+   "methods": [
+    "publish"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "outbound",
+   "value": [
+    {
+     "kwarg": [
+      "routing_key"
+     ]
+    },
+    {
+     "text": "object"
+    }
+   ]
+  },
+  {
+   "id": "rb.bunny.consume",
+   "form": "call",
+   "object_regex": "(?i)queue$",
+   "methods": [
+    "subscribe"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "inbound",
+   "value": [
+    {
+     "text": "object"
+    }
+   ],
+   "confidence": "uncertain"
+  },
+  {
+   "id": "rb.sidekiq",
+   "form": "call",
+   "methods": [
+    "perform_async",
+    "perform_in",
+    "perform_at"
+   ],
+   "protocol": "queue",
+   "direction": "outbound",
+   "value": [
+    {
+     "text": "object"
+    }
+   ],
+   "confidence": "uncertain",
+   "note": "Sidekiq job (Redis broker)"
+  }
+ ]
+}

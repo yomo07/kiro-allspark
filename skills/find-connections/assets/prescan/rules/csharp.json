@@ -1,0 +1,251 @@
+{
+ "language": "csharp",
+ "rules": [
+  {
+   "id": "cs.aspnet.route",
+   "form": "annotation",
+   "names": [
+    "HttpGet",
+    "HttpPost",
+    "HttpPut",
+    "HttpDelete",
+    "HttpPatch",
+    "HttpHead",
+    "HttpOptions"
+   ],
+   "protocol": "http",
+   "direction": "inbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    },
+    {
+     "kwarg": [
+      "template"
+     ]
+    }
+   ],
+   "requires_value": false,
+   "methods_only": true,
+   "container_prefix": [
+    "Route",
+    "RoutePrefix"
+   ]
+  },
+  {
+   "id": "cs.minimal.route",
+   "form": "call",
+   "methods": [
+    "MapGet",
+    "MapPost",
+    "MapPut",
+    "MapDelete",
+    "MapPatch"
+   ],
+   "protocol": "http",
+   "direction": "inbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "cs.httpclient",
+   "form": "call",
+   "methods": [
+    "GetAsync",
+    "PostAsync",
+    "PutAsync",
+    "DeleteAsync",
+    "PatchAsync",
+    "SendAsync",
+    "GetStringAsync",
+    "GetStreamAsync",
+    "GetByteArrayAsync",
+    "GetFromJsonAsync",
+    "PostAsJsonAsync",
+    "PutAsJsonAsync",
+    "PatchAsJsonAsync",
+    "DeleteFromJsonAsync"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "cs.soap.wcf",
+   "form": "new",
+   "types_regex": "(SoapClient|PortTypeClient)$",
+   "protocol": "soap",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 1
+    },
+    {
+     "arg": 0
+    }
+   ],
+   "confidence": "uncertain",
+   "note": "generated WCF client: the endpoint is usually in the config"
+  },
+  {
+   "id": "cs.grpc.channel",
+   "form": "call",
+   "object_regex": "^GrpcChannel$",
+   "methods": [
+    "ForAddress"
+   ],
+   "protocol": "grpc",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "cs.grpc.server",
+   "form": "call",
+   "methods": [
+    "MapGrpcService"
+   ],
+   "protocol": "grpc",
+   "direction": "inbound",
+   "value": [
+    {
+     "text": "generic"
+    }
+   ]
+  },
+  {
+   "id": "cs.kafka.consume",
+   "form": "call",
+   "object_regex": "(?i)consumer$",
+   "methods": [
+    "Subscribe"
+   ],
+   "protocol": "queue-kafka",
+   "direction": "inbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "cs.kafka.produce",
+   "form": "call",
+   "methods": [
+    "ProduceAsync",
+    "Produce"
+   ],
+   "protocol": "queue-kafka",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "cs.rabbit.publish",
+   "form": "call",
+   "methods": [
+    "BasicPublish",
+    "BasicPublishAsync"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "outbound",
+   "value": [
+    {
+     "join": [
+      {
+       "kwarg": [
+        "exchange"
+       ]
+      },
+      {
+       "kwarg": [
+        "routingKey"
+       ]
+      }
+     ],
+     "sep": "/"
+    },
+    {
+     "join": [
+      {
+       "arg": 0
+      },
+      {
+       "arg": 1
+      }
+     ],
+     "sep": "/",
+     "min_args": 2
+    }
+   ]
+  },
+  {
+   "id": "cs.rabbit.consume",
+   "form": "call",
+   "methods": [
+    "BasicConsume",
+    "BasicConsumeAsync"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "inbound",
+   "value": [
+    {
+     "kwarg": [
+      "queue"
+     ]
+    },
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "cs.masstransit",
+   "form": "call",
+   "object_regex": "(?i)(bus|publishendpoint|sendendpoint)$",
+   "methods": [
+    "Publish",
+    "Send"
+   ],
+   "protocol": "queue",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "confidence": "uncertain",
+   "note": "MassTransit: queue/exchange by message-type convention"
+  },
+  {
+   "id": "cs.s3.bucket",
+   "form": "pair",
+   "keys": [
+    "BucketName"
+   ],
+   "protocol": "s3",
+   "direction": "outbound",
+   "value": [
+    {
+     "pair_value": true
+    }
+   ]
+  }
+ ]
+}

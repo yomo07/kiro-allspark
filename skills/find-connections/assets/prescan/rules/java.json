@@ -1,0 +1,361 @@
+{
+ "language": "java",
+ "rules": [
+  {
+   "id": "java.spring.route",
+   "form": "annotation",
+   "names": [
+    "GetMapping",
+    "PostMapping",
+    "PutMapping",
+    "DeleteMapping",
+    "PatchMapping",
+    "RequestMapping"
+   ],
+   "protocol": "http",
+   "direction": "inbound",
+   "method": {
+    "kwarg": [
+     "method"
+    ],
+    "fallback": "name"
+   },
+   "value": [
+    {
+     "kwarg": [
+      "value",
+      "path"
+     ]
+    },
+    {
+     "arg": 0
+    }
+   ],
+   "requires_value": false,
+   "methods_only": true,
+   "container_prefix": [
+    "RequestMapping"
+   ],
+   "invert_if_container": {
+    "names": [
+     "FeignClient"
+    ],
+    "base": [
+     {
+      "kwarg": [
+       "url"
+      ]
+     },
+     {
+      "kwarg": [
+       "name",
+       "value"
+      ]
+     },
+     {
+      "arg": 0
+     }
+    ]
+   }
+  },
+  {
+   "id": "java.resttemplate",
+   "form": "call",
+   "object_regex": "(?i)(resttemplate|restoperations)$",
+   "methods": [
+    "getForObject",
+    "getForEntity",
+    "postForObject",
+    "postForEntity",
+    "postForLocation",
+    "put",
+    "delete",
+    "patchForObject",
+    "exchange",
+    "execute"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "java.webclient",
+   "form": "call",
+   "methods": [
+    "uri",
+    "baseUrl"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "value_filter": "url-or-path"
+  },
+  {
+   "id": "java.soap.url",
+   "form": "call",
+   "group": "java.soap",
+   "methods": [
+    "marshalSendAndReceive",
+    "sendSourceAndReceiveToResult"
+   ],
+   "protocol": "soap",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "value_filter": "url-or-path"
+  },
+  {
+   "id": "java.soap.default",
+   "form": "call",
+   "group": "java.soap",
+   "methods": [
+    "marshalSendAndReceive"
+   ],
+   "protocol": "soap",
+   "direction": "outbound",
+   "value": [
+    {
+     "text": "object"
+    }
+   ],
+   "confidence": "uncertain",
+   "note": "default URI of the WebServiceTemplate: resolve it in the bean config"
+  },
+  {
+   "id": "java.soap.service",
+   "form": "annotation",
+   "names": [
+    "WebService"
+   ],
+   "protocol": "soap",
+   "direction": "inbound",
+   "value": [
+    {
+     "owner": true
+    }
+   ]
+  },
+  {
+   "id": "java.kafka.listener",
+   "form": "annotation",
+   "names": [
+    "KafkaListener"
+   ],
+   "protocol": "queue-kafka",
+   "direction": "inbound",
+   "value": [
+    {
+     "kwarg": [
+      "topics",
+      "topicPattern"
+     ]
+    },
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "java.kafka.template",
+   "form": "call",
+   "object_regex": "(?i)kafkatemplate$",
+   "methods": [
+    "send",
+    "sendDefault"
+   ],
+   "protocol": "queue-kafka",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "java.rabbit.listener",
+   "form": "annotation",
+   "names": [
+    "RabbitListener"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "inbound",
+   "value": [
+    {
+     "kwarg": [
+      "queues",
+      "queuesToDeclare"
+     ]
+    },
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "java.rabbit.template",
+   "form": "call",
+   "object_regex": "(?i)(rabbittemplate|amqptemplate|rabbitoperations)$",
+   "methods": [
+    "convertAndSend",
+    "send",
+    "convertSendAndReceive"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "outbound",
+   "value": [
+    {
+     "join": [
+      {
+       "arg": 0
+      },
+      {
+       "arg": 1
+      }
+     ],
+     "sep": "/",
+     "min_args": 3
+    },
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "java.stream",
+   "form": "call",
+   "object_regex": "(?i)streambridge$",
+   "methods": [
+    "send"
+   ],
+   "protocol": "queue",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "note": "Spring Cloud Stream binding: the real destination is in the config"
+  },
+  {
+   "id": "java.grpc.channel",
+   "form": "call",
+   "object_regex": "^(ManagedChannelBuilder|NettyChannelBuilder|OkHttpChannelBuilder|Grpc)$",
+   "methods": [
+    "forAddress",
+    "forTarget",
+    "newChannelBuilder"
+   ],
+   "protocol": "grpc",
+   "direction": "outbound",
+   "value": [
+    {
+     "join": [
+      {
+       "arg": 0
+      },
+      {
+       "arg": 1
+      }
+     ],
+     "sep": ":",
+     "min_args": 2
+    },
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "java.grpc.stub",
+   "form": "call",
+   "methods": [
+    "newBlockingStub",
+    "newStub",
+    "newFutureStub"
+   ],
+   "protocol": "grpc",
+   "direction": "outbound",
+   "value": [
+    {
+     "text": "object",
+     "pattern": "(\\w+?)Grpc$"
+    }
+   ],
+   "confidence": "uncertain",
+   "note": "gRPC stub: the host comes from the channel"
+  },
+  {
+   "id": "java.grpc.client",
+   "form": "annotation",
+   "names": [
+    "GrpcClient"
+   ],
+   "protocol": "grpc",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    },
+    {
+     "kwarg": [
+      "value"
+     ]
+    }
+   ],
+   "note": "address in grpc.client.<name>.address"
+  },
+  {
+   "id": "java.grpc.service",
+   "form": "annotation",
+   "names": [
+    "GrpcService"
+   ],
+   "protocol": "grpc",
+   "direction": "inbound",
+   "value": [
+    {
+     "owner": true
+    }
+   ]
+  },
+  {
+   "id": "java.grpc.implbase",
+   "form": "inheritance",
+   "bases_regex": "ImplBase$",
+   "protocol": "grpc",
+   "direction": "inbound",
+   "value": [
+    {
+     "text": "base",
+     "pattern": "(\\w+)ImplBase$"
+    }
+   ]
+  },
+  {
+   "id": "java.s3.bucket",
+   "form": "call",
+   "methods": [
+    "bucket"
+   ],
+   "protocol": "s3",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  }
+ ]
+}

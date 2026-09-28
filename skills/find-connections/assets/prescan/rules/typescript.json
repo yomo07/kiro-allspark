@@ -1,0 +1,316 @@
+{
+ "language": "typescript",
+ "rules": [
+  {
+   "id": "ts.nest.route",
+   "form": "annotation",
+   "names": [
+    "Get",
+    "Post",
+    "Put",
+    "Patch",
+    "Delete",
+    "All",
+    "Options",
+    "Head"
+   ],
+   "protocol": "http",
+   "direction": "inbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "requires_value": false,
+   "methods_only": true,
+   "container_prefix": [
+    "Controller"
+   ]
+  },
+  {
+   "id": "ts.nest.grpc",
+   "form": "annotation",
+   "names": [
+    "GrpcMethod",
+    "GrpcStreamMethod"
+   ],
+   "protocol": "grpc",
+   "direction": "inbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "ts.nest.event",
+   "form": "annotation",
+   "names": [
+    "EventPattern",
+    "MessagePattern"
+   ],
+   "protocol": "queue",
+   "direction": "inbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "note": "broker not determined by the pattern: resolve it with the transport (RMQ/KAFKA) in the module config"
+  },
+  {
+   "id": "ts.express.route",
+   "form": "call",
+   "group": "ts.http",
+   "object_regex": "^(app|router|server|\\w*[Rr]outer|\\w*[Aa]pp)$",
+   "methods": [
+    "get",
+    "post",
+    "put",
+    "patch",
+    "delete",
+    "all",
+    "options",
+    "head"
+   ],
+   "protocol": "http",
+   "direction": "inbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "value_filter": "path"
+  },
+  {
+   "id": "ts.http.client",
+   "form": "call",
+   "group": "ts.http",
+   "object_regex": "(^|\\.)(axios|http|httpService|httpClient|\\$http|got|superagent|ky)$",
+   "methods": [
+    "get",
+    "post",
+    "put",
+    "patch",
+    "delete",
+    "head",
+    "options"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "ts.http.generic",
+   "form": "call",
+   "group": "ts.http",
+   "methods": [
+    "get",
+    "post",
+    "put",
+    "patch",
+    "delete"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "method": "name",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "value_filter": "url-or-path",
+   "confidence": "uncertain",
+   "note": "object not recognized as an HTTP client: confirm it is a network call"
+  },
+  {
+   "id": "ts.fetch",
+   "form": "call",
+   "no_object": true,
+   "methods": [
+    "fetch"
+   ],
+   "protocol": "http",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "ts.soap",
+   "form": "call",
+   "object_regex": "^soap$",
+   "methods": [
+    "createClient",
+    "createClientAsync"
+   ],
+   "protocol": "soap",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "ts.grpc.client",
+   "form": "new",
+   "types_regex": "(ServiceClient|GrpcClient)$|^grpc\\.Client$",
+   "protocol": "grpc",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "service": {
+    "text": "type",
+    "pattern": "(\\w+?)(Client)?$"
+   }
+  },
+  {
+   "id": "ts.grpc.server",
+   "form": "call",
+   "methods": [
+    "addService"
+   ],
+   "protocol": "grpc",
+   "direction": "inbound",
+   "value": [
+    {
+     "arg": 0,
+     "pattern": "^([\\w.]+?)(\\.service)?$"
+    }
+   ]
+  },
+  {
+   "id": "ts.kafka.produce",
+   "form": "call",
+   "methods": [
+    "send",
+    "sendBatch"
+   ],
+   "protocol": "queue-kafka",
+   "direction": "outbound",
+   "value": [
+    {
+     "key": [
+      "topic"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ts.kafka.consume",
+   "form": "call",
+   "methods": [
+    "subscribe"
+   ],
+   "protocol": "queue-kafka",
+   "direction": "inbound",
+   "value": [
+    {
+     "key": [
+      "topic",
+      "topics"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ts.rabbit.publish",
+   "form": "call",
+   "object_regex": "(^|\\.)(ch|canal|\\w*[Cc]hannel)$",
+   "methods": [
+    "publish"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "outbound",
+   "value": [
+    {
+     "join": [
+      {
+       "arg": 0
+      },
+      {
+       "arg": 1
+      }
+     ],
+     "sep": "/"
+    }
+   ]
+  },
+  {
+   "id": "ts.rabbit.queue",
+   "form": "call",
+   "object_regex": "(^|\\.)(ch|canal|\\w*[Cc]hannel)$",
+   "methods": [
+    "sendToQueue"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "ts.rabbit.consume",
+   "form": "call",
+   "object_regex": "(^|\\.)(ch|canal|\\w*[Cc]hannel)$",
+   "methods": [
+    "consume"
+   ],
+   "protocol": "queue-rabbitmq",
+   "direction": "inbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ]
+  },
+  {
+   "id": "ts.nest.emit",
+   "form": "call",
+   "object_regex": "(^|\\.)(client|\\w*Client|\\w*Proxy)$",
+   "methods": [
+    "emit",
+    "send"
+   ],
+   "protocol": "queue",
+   "direction": "outbound",
+   "value": [
+    {
+     "arg": 0
+    }
+   ],
+   "value_filter": "literal",
+   "confidence": "uncertain",
+   "note": "NestJS ClientProxy: the transport (RMQ/KAFKA) is in the module config"
+  },
+  {
+   "id": "ts.s3.bucket",
+   "form": "pair",
+   "keys": [
+    "Bucket"
+   ],
+   "protocol": "s3",
+   "direction": "outbound",
+   "value": [
+    {
+     "pair_value": true
+    }
+   ]
+  }
+ ]
+}
