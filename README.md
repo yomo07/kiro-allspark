@@ -78,6 +78,14 @@ allspark/                   ← in the vault
 
 It never reads real `.env` files, Kubernetes Secrets or credential keys.
 
+## Author
+
+**Yoel Moreno**
+
+- GitHub: [@yomo07](https://github.com/yomo07)
+- Email: [yoel.moreno.ym@gmail.com](mailto:yoel.moreno.ym@gmail.com)
+- Issues and suggestions: [github.com/yomo07/kiro-allspark/issues](https://github.com/yomo07/kiro-allspark/issues)
+
 ## License
 
 MIT.

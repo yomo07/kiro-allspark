@@ -4,8 +4,12 @@
   "version": "1.0.0",
   "description": "Documents the connections between the repos of a multi-root Kiro workspace: defines each repo's role (frontend, backend, MVC monolith, worker), detects its connections (HTTP, SOAP, gRPC, Kafka/RabbitMQ queues, webhooks, S3) with a deterministic Python prescan (tree-sitter), validates them from both ends and renders them as an Obsidian graph and an interactive 3D cube: client, internal service and third parties.",
   "author": {
-    "name": "Yoel Moreno"
+    "name": "Yoel Moreno",
+    "email": "yoel.moreno.ym@gmail.com",
+    "url": "https://github.com/yomo07"
   },
+  "homepage": "https://github.com/yomo07/kiro-allspark",
+  "repository": "https://github.com/yomo07/kiro-allspark",
   "license": "MIT",
   "keywords": [
     "steering",
