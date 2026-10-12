@@ -40,7 +40,7 @@ an early step found nothing — the chain must be exhausted.
    boundary that decides: if the backend is not mapped here, it is
    external, without ambiguity. It does not block the flow or require human
    confirmation. If the real backend repo shows up later (it is added to the
-   workspace or another team maps it), the virtual-point→real-point merge
+   workspace), the virtual-point→real-point merge
    rule applies (`axis-classification.md`), not a manual reclassification
    of this mark.
 
@@ -48,8 +48,8 @@ an early step found nothing — the chain must be exhausted.
    `PROVEEDOR_` (Spanish for `PROVIDER_`), `INTERNAL_` in the identifier,
    when there is nothing better.
 
-7. **Manual overrides** — `domains.yaml` in the vault (not in the repos, so
-   that it is never lost to `.gitignore`). Highest priority over the
+7. **Manual overrides** — `domains.yaml` in the workspace's `allspark/`
+   folder (not in the repos, so that it is never lost to `.gitignore`). Highest priority over the
    automatic heuristics when an entry exists for that domain/bucket.
 
 ## Default when the chain is exhausted without resolving
@@ -60,8 +60,8 @@ the 7-step chain is exhausted without resolving anything, the connection is
 HTTP/SOAP, gRPC, queue, webhook or S3. The virtual point created has role
 `external`. There is no `pending-confirmation` or any other
 "review later" state — the workspace is the boundary that decides
-everything (see "Front without intermediate backend" and "New repo outside
-the master registry" in `axis-classification.md`). The `source: unresolved`
+everything (see "Front without intermediate backend" in
+`axis-classification.md`). The `source: unresolved`
 field in the MOC already records that the classification came by
 elimination, not by direct evidence — that is enough traceability; there is
 no need for a separate state that blocks or marks the connection as

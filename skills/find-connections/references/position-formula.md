@@ -1,5 +1,12 @@
 # Position and count formula
 
+> **The positions are computed by a script, not by hand.** This document is
+> the specification of `assets/layout/layout.py` (pure Python standard
+> library, deterministic): in phase 2.F Kiro writes the Level 1 data to a
+> JSON file, runs the script and copies its result into the export.
+> Do not compute coordinates mentally. See "The layout script"
+> at the end of the position sections.
+
 ## Position (x, y, z) — defines WHERE the repo lives in the cube
 
 Each point belongs to one of three **categories**, each with a fixed anchor
@@ -20,23 +27,26 @@ base-axis rule — it is anchor + smooth migration.
 | Virtual External (`external`, axis Z) | Real third party | (40, 30, 95) → external zone | (0, 0, 100) | number of repos that reference it |
 
 The three "Virtual" categories never have their own count (there is no code
-to scan) — they all migrate according to how many repos in the vault
+to scan) — they all migrate according to how many repos in the workspace
 reference them as target, using the same migration formula.
 
-**Three zones.** The business is providing a software service, so the bulk
+**Four zones.** The business is providing a software service, so the bulk
 of the cube — top and center — is the internal work; the client and the
-third parties stay on the edges, each one stuck to its face of the cube:
+third parties stay on the edges, each one stuck to its face of the cube.
+Each zone is a **box** that is filled evenly (see "Volume fill"):
 
-| Zone | Who | Where they live | Reading |
-|---|---|---|---|
-| **Client** | `frontend`, Virtual Client | Stuck to the ZY plane (`z = CLIENT_PLANE = 4`, almost no external traffic), along the Client axis but pulled back toward the origin (x ≈ 55–75), low in Y | Left, on the Client axis |
-| **Internal** | `backend`, `mvc-monolith`, Virtual Internal | Center of the cube, shifted toward the corner near the camera (x, z ≈ 45–70), high in Y | Top, center |
-| **Worker** | `worker` | Next to the Y axis: Client between 1 and 7 (see below), high in Y, leaning toward External according to its third-party traffic | Up, stuck to the Internal axis, to the right |
-| **External** | Virtual External | Stuck to the Client ≈ 0 plane (`x = EXTERNAL_PLANE = 6`), spread along the External axis around `EXTERNAL_CENTER = 86`, low in Y | Right, on the External axis |
+| Zone | Who | Box (semantic x, y, z) | Stuck to | Reading |
+|---|---|---|---|---|
+| **Client** | `frontend`, Virtual Client | x 30–100, y 5–75, z from `CLIENT_PLANE = 4`, thickness 8–30 | plane z ≈ 0 (almost no external traffic) | Left, on the Client axis |
+| **Internal** | `backend`, `mvc-monolith`, Virtual Internal | x 38–96, y 40–100, z 38–96 | — (the whole box) | Top, center |
+| **Worker** | `worker` | x from 1, thickness 6–20, y 56–100, z 8–70 | plane x ≈ 0, next to the Y axis | Up, stuck to the Internal axis |
+| **External** | Virtual External | x from `EXTERNAL_PLANE = 6`, thickness 8–28, y 0–52, z 36–100 | plane x ≈ 0 | Right, on the External axis |
 
-Client sits on the left and External on the right of the screen, and
-Internal on top (see the camera angle in `generate-visual`). The values are
-an adjustable starting point, just like `K` and `DELTA_MAX`.
+The four boxes are disjoint from each other and from the database box next
+to the origin, so points of different zones can never overlap. Client sits on
+the left and External on the right of the screen, and Internal on top (see
+the camera angle in `generate-visual`). The values are an adjustable
+starting point, just like `K` and `DELTA_MAX`.
 
 The growth axis of **Front** is still Z: the more direct external
 connections it accumulates, the further it moves away from its plane toward
@@ -159,14 +169,13 @@ vector (arc)" below: a control point is explicitly calculated per vector.
 even without secondary traffic — so the points always "float" a minimum,
 instead of feeling stuck to the plane of their category.
 
-**In the vault, this is not shown as a separate piece of data** — the
-frontmatter of each note in `allspark/graphs/` still shows only `pos_x`,
-`pos_y`, `pos_z` (the already calculated values, anchor + dominant + the two
-secondary ones, all together, **without any swap** — see section "Final
-axis transformation" below, which applies only when generating the
-`allspark.md` export, never to these notes). The intermediate factors are
-part of the power's internal calculation, not fields that appear on their
-own in the note when opening the vault.
+**This is not shown as a separate piece of data** — what is recorded is only
+`pos_x`, `pos_y`, `pos_z` (the already calculated values, anchor + dominant +
+the two secondary ones, all together; in `layout.json` and in the repo's MOC
+they come **without any swap** — see section "Final axis transformation"
+below, which applies only when generating the `allspark.md` export). The
+intermediate factors are part of the power's internal calculation, not fields
+that are written anywhere.
 
 ### Final result per point
 
@@ -183,46 +192,66 @@ the starting position before having a signal. Different is a repo with
 signals that were badly detected (see `framework-patterns.md`), which is a
 scanning problem, not a formula problem.
 
-## Anti-overlap rings
+## Grouping of systems without a repo, and volume fill
 
-The jitter and `FLOOR_RADIUS` prevent two points from falling on the same
-triple, but not from being crowded: several backends with similar traffic
-end up a few units apart and their names overlap. That is why, after
-calculating all the positions, nearby points are spread over a **circular
-orbit** (static) around their common center.
+### Grouping by provider
+
+A system without a repo is not one point per host: `api.stripe.com`,
+`files.stripe.com` and `cdn.stripe.com` are **one provider**. Before
+positioning, the script groups them:
+
+| Axis | Group key | Example |
+|---|---|---|
+| X (Client) and Z (External) | Registrable domain: the last 2 labels (3 if the TLD has two levels: `com.ve`, `gob.ve`, `co.uk`, `com.br`...) | `api.stripe.com`, `files.stripe.com` → `stripe.com` |
+| Y (Internal, Acme) | Name without role suffix (`-batch`, `-reports`, `-sso`, `-api`, `-web`, `-ui`, `-db`), because every internal system shares one domain | `core-banking.acme.local`, `core-banking-batch.acme.local` → `core-banking.acme.local` |
+
+Connections are merged per `(source, target group, protocol)` and their
+`endpoints` are **added up**: the weight of the merged connection is the
+number of endpoints it stands for. The host-level detail stays in the MOC of
+each repo and in Levels 2 and 3.
+
+### Volume fill
+
+Each zone is a box (table above) that is **filled evenly in 3D**, never a
+ring: the radius of a ring grows linearly with the number of points, so
+with dozens of points it exceeds the cube, the points end up pressed against
+the walls and some fall on the very same position. The volume fill has no
+such limit.
 
 ```
-CLUSTER_THRESHOLD = 10     # two points closer than this belong to the same cluster
-MIN_CHORD    = 17     # minimum separation between ring neighbors
-MIN_RING_RADIUS  = 7
-TILT   = 35°    # tilt of the ring plane (internal layers)
+FILL = 0.7        SEP_MAX = 20        SEP_FLOOR = 5.5
 
-clusters = connected components of "distance < CLUSTER_THRESHOLD", per layer
-for each cluster with n >= 2:
-    center = average of its positions
-    r = max(MIN_RING_RADIUS, MIN_CHORD / (2 × sin(π / n)))
-    center is shifted inward so that the whole ring fits in 0..100
-    order = by original angle around the center (tie-break by ID)
-    angle_0 = 2π × (hash(id of the first) % 360) / 360
-    member k → angle_k = angle_0 + 2π × k / n
+sep    = min(SEP_MAX, (FILL × box_volume / n) ^ (1/3))      # the LARGEST separation the box allows
+# stuck zones (client, external, worker): the box volume is area × T, with the thickness
+T      = clamp(tk × n^(1/3), tmin, tmax)                    # tk = 5 (client, external), 3.2 (worker)
+if sep < 9 and T < tmax:  T = tmax and sep is recomputed    # thicker before a tighter separation
+
+# even initial position on each FREE axis, keeping the order of importance
+target = box_lo + (box_hi − box_lo) × (0.5 × rank + 0.5 × normalized_value)
+#        rank = order among the zone's points on that axis (ties broken by hash),
+#        normalized_value = the formula's value between the zone's min and max
+# stuck axis: spread over the whole thickness with a golden-ratio sequence
+
+repeat up to 600 times:
+    every pair closer than sep is pushed apart, half each
+    every point is pulled 3% toward its target
+    every point is clamped inside its box
+    stop when the worst overlap is < 0.05
 ```
 
-**Layers and planes** — a ring never mixes layers, and each one is spread
-**within the plane of its zone**:
-
-| Layer | Ring plane |
-|---|---|
-| Client zone (`frontend`, Virtual Client) | ZY plane: `z` fixed at `CLIENT_PLANE`, spread over (x, y). |
-| External zone (Virtual External) | Client ≈ 0 plane: `x` fixed at `EXTERNAL_PLANE`, spread over (y, z) centered at `z = EXTERNAL_CENTER`. |
-| Worker zone (`worker`) | Each worker keeps its own Client value (1–7) and the ring spreads over (y, z). |
-| Internal zone (remaining repos and Virtual Internal) | Horizontal (x, z) tilted `TILT`: x and z are scaled by `cos(TILT)`, and each member adds to its `y` the value `r × depth × sin(TILT) × 1.4`, with `depth = -(cos a + sin a)/√2`. |
-
-Order of application: positions of repos and systems → fix the plane of the
-client zone and of the external zone → rings of each zone.
-
-The result is written into `pos_x/y/z` like any position: the ring is not a
-separate piece of data nor an animation. The "no overlap" check of Phase 2
-is satisfied by construction.
+- **Order of importance is kept, magnitude only in part.** A repo with more
+  traffic still sits toward its extreme, but 50% of the position is its
+  order among its zone's points and 50% its real value: distances are no
+  longer proportional to counts.
+- **Deterministic**: ids are sorted, the jitter is a hash of the id and the
+  number of iterations is fixed. The same input gives the same output.
+- **Achieved separation is measured**, not estimated: if any zone ends with
+  two points closer than 6, the script reports a warning (`overflow`) with
+  the zone and the separation achieved, instead of hiding it.
+- **Capacity (measured):** no overlapping pairs up to 450 points in a
+  workspace (about 0.3 s for 79 points, 18 s for 450 in pure Python).
+  Beyond that, or if a warning appears, enlarge the box of that zone in
+  `ZONES` or split the workspace.
 
 ## Coordinate range
 
@@ -282,13 +311,133 @@ curve(t) = (1-t)² × source + 2(1-t)t × control + t² × target,  t ∈ [0,1]
   adding `protocol_index × 4` to `offset` (on the straight line, shifting
   the midpoint `protocol_index × 4` in Y).
 - The straight vector is marked in the export with `direct: true` (see
-  `vault-notes.md`), so that the render paints it coral without
+  `export-format.md`), so that the render paints it coral without
   recalculating.
 
 The control point **is written into the export** (`allspark.md`, field
-`curve` of each vector — see `vault-notes.md`) so that the render does not
-have to recalculate it. It does not appear in the notes of
-`allspark/graphs/`: there the vector is a wikilink.
+`curve` of each vector — see `export-format.md`) so that the render does not
+have to recalculate it. It does not appear in the repos' MOCs.
+
+## Database nuclei
+
+Modules (Level 2) and their endpoints are **not points of the
+cube**: they are shown as trees and strands over the points that already
+exist (see `generate-visual`), so they need no position. Databases, on the
+other hand, are points from Level 1: every database that a repo of the
+workspace uses is **a nucleus near the origin of the axes**. Data is the
+foundation all three axes rest on, and the origin is the only empty region
+of the cube.
+
+### Identity
+
+```
+id = <engine>://<host>/<database-name>        # e.g. postgres://payments-db/payments
+```
+
+Built from the database configuration (connection string, datasource or ORM
+config — see `prescan.md`), **never including credentials**. Two repos that
+point to the same engine + host + name share **a single nucleus**.
+
+### Position
+
+Databases are a fifth zone: a **box of their own next to the origin**, filled
+in 3D with the same volume fill as every other zone (see "Volume fill"). It is
+the only region of the cube that no other zone uses, it starts a little away
+from the origin and it rises like a column, so the nuclei spread upward.
+
+```
+DB_BOX = x 8–26 (Client), y 6–50 (Internal), z 8–30 (External)       # semantic
+DB_SEP_MAX = 24        DB_SEP_FLOOR = 6
+
+sep = clamp((FILL × box_volume / n_db) ^ (1/3), DB_SEP_FLOOR, DB_SEP_MAX)
+
+# the more used, the lower: on the Internal axis the order is by uses, the most
+# used at the bottom; on the other two axes the order comes from a hash of the id
+y_target = 6 + 44 × (1 − normalized_uses)
+```
+
+The relaxation is the same as for the other zones (pairs closer than `sep` are
+pushed apart, weak pull toward the target, clamped to the box). A single
+database sits at the center of the box. Positions are written into
+`pos_x/y/z` like any point (and swapped in the export). Measured from 1 to 40
+databases: no coordinate outside 0–100, everything inside the box, and no
+neighbour closer than 6.
+
+### Size and electrons
+
+```
+nucleus radius ∝ 1 + 0.5 × log2(repos that use it)
+
+uses_k    = repos of the workspace that use database k
+electrons = 3                                            if every database has the same uses
+          = round(1 + 4 × (uses_k − min) / (max − min))  otherwise   → 1..5
+```
+
+The most used database of the workspace has 5 electrons and the least used
+1. In the 3D view the electrons **orbit slowly** on tilted orbits, like an
+atom.
+
+**The orbit never crosses a neighbour.** The script exports, for each
+database, `orbit`: the largest electron orbit allowed, in cube units.
+
+```
+orbit = 0.42 × distance to the nearest other database        # 14 if it is the only one
+```
+
+The render takes the smaller of this and the natural orbit of the nucleus and
+shrinks the nucleus and its orbits to fit, so atoms get smaller when there are
+many (2.8 units with 40 databases, 14 with one).
+
+### Data links
+
+Each repo–database usage is a `data` link (gold `#FACC15`) from the repo
+down to the nucleus. In the global view the many links are shown as a single
+bundle, and each repo's own links appear when the repo is selected.
+
+| Type | Color | Hex | Shape (3D cube) |
+|---|---|---|---|
+| Database | Gold | `#FACC15` | Nucleus with 1–5 orbiting electrons |
+
+## Repos not documented yet
+
+A repo of the workspace that has no MOC (no documented entry point reached
+it) has no connections, so its counts are zero. The script still positions it
+like any repo of its category — it lands in its zone, among the documented
+ones — takes part in the volume fill like every point, and exports it with
+`documented: false`. The 3D view draws it **small, hollow and dotted**, so the
+cube shows the coverage: how much is documented and how much is still to tell.
+A documented frontend or monolith is exported with `entry_point: true` and is
+drawn with a ring. Positions are recomputed from everything documented so far,
+so a repo moves a little when it goes from not documented to documented
+(deterministically).
+
+A repo marked as not documented that turns out to have connections is treated
+as documented, with a warning.
+
+## The layout script
+
+`assets/layout/layout.py` implements everything above (anchors, migration,
+secondary axes, grouping, volume fill, database nuclei, merging of
+connections) and additionally applies the **X/Z swap** of the export, so
+that Kiro never has to. Input and output are documented in the script
+header; in short:
+
+```bash
+python3 <skill>/assets/layout/layout.py --input .kiro/allspark/level1.json --output .kiro/allspark/layout.json
+python3 <skill>/assets/layout/layout.py --selftest      # checks determinism, grouping, no overlaps and the swap
+```
+
+- **Input:** repos with their role (and `documented: false` for the ones without a
+  MOC yet), systems without a repo with their axis,
+  connections with their endpoints, and databases with the repos that use
+  them.
+- **Output:** `points` (with `pos` in semantic coordinates for the MOCs
+  and `export` already swapped), `vectors` (merged, with `endpoints`
+  and `direct` when the client zone calls an external point straight),
+  `links` (repo → database), per-zone `zones` diagnostics and `warnings`.
+- Only the standard library of Python 3.8+ is needed: no environment to set
+  up. If Python is not available, Kiro reports it and the visualization is
+  not generated (the MOCs are not affected).
 
 ## Color — repos by type, systems without a repo by dominant axis
 
@@ -327,21 +476,20 @@ the **direct** vector client zone → external is coral `#F43F5E`.
 
 **This applies only when
 generating `allspark/export/allspark.md`** (the compiled export consumed by
-`generate-visual`) — **never** to the individual notes of
-`allspark/graphs/`, which keep showing `pos_x`/`pos_y`/`pos_z` exactly as
-they were calculated, without swap, because those notes are for a human to
-browse in Obsidian.
+`generate-visual`) — **never** to `layout.json`'s `pos` or to the position
+recorded in the repos' MOCs, which keep `pos_x`/`pos_y`/`pos_z` exactly as
+they were calculated, without swap.
 
 **Everything above in this document (anchors, extremes, migration, color by
 dominant axis) stays exactly the same, untouched, and that is how it is
-written in the notes of `allspark/graphs/`.** `axis X` is still the Client
+recorded in the MOCs.** `axis X` is still the Client
 semantics, `axis Y` the Internal one, `axis Z` the External one — all the
 internal calculation of this file uses those names unchanged. The swap is a
 **last, mechanical step, applied only once, only when building the
 export**, right before writing each point entry into `allspark.md`:
 
 ```
-# Only inside allspark.md — the notes of allspark/graphs/ do NOT go through this
+# Only inside allspark.md — the MOCs and layout.json's `pos` do NOT go through this
 pos_x_export = value_computed_for_axis_Z   (External)
 pos_y_export = value_computed_for_axis_Y   (Internal, unchanged)
 pos_z_export = value_computed_for_axis_X   (Client)
@@ -361,7 +509,8 @@ through the same swap, without exception:
 1. The export's axis declaration (`axes:` — which field is which axis).
 2. Each real point (`frontend`, `backend`, `mvc-monolith`, `worker`).
 3. Each virtual point (Client, Internal, External).
-4. Each curve control point (`curve.cx`, `curve.cz`).
+4. Each database nucleus.
+5. Each curve control point (`curve.cx`, `curve.cz`).
 
 The render consumes `allspark.md` as is, **without doing any swap of its
 own** — neither on the axis lines nor on the points. If the render inverts
@@ -374,9 +523,8 @@ Quick sanity check: a well-behaved `frontend` has to come out in the export
 with a very low `pos_x` (stuck to the ZY plane) and a medium-high `pos_z`
 (on the Client axis); and every Virtual External, with a very low `pos_z`
 (stuck to the Client ≈ 0 plane) and a high `pos_x` (on the External axis).
-The notes of `allspark/graphs/` keep the original values without swap —
-they are two representations of the same calculation, each one for its
-consumer.
+The MOCs keep the original values without swap — they are two
+representations of the same calculation, each one for its consumer.
 
 **The color is not affected by this swap.** The color of each point is
 still determined by which semantic axis was dominant (Client/Internal/
@@ -385,10 +533,9 @@ the value ended up written in within `allspark.md`. A Front point that
 migrated toward External is still painted orange, regardless of that value
 now living in `pos_x` of the export.
 
-**Why the swap only in the export and not in the notes:** the notes of
-`allspark/graphs/` are for direct human reading in Obsidian — there
-`pos_x = Client` has to remain intuitive for whoever opens them.
-`allspark.md` on the other hand is consumption data for the render, where
+**Why the swap only in the export and not in the MOCs:** the MOCs are for
+direct human reading — there `pos_x = Client` has to remain intuitive for
+whoever opens them. `allspark.md` on the other hand is consumption data for the render, where
 what matters is that a simple render, without any special camera rotation,
 already reads client on the left and external on the right correctly.
 
@@ -396,8 +543,8 @@ already reads client on the left and external on the right correctly.
 
 The visual path of a process (the sequence of points it goes through) is
 never calculated by comparing position values between points — it
-exclusively follows the explicit wikilink graph of each note (see
-`vault-notes.md`, section "Outbound/inbound vectors"). Fixed rule:
+exclusively follows the explicit connections (source → target) of the MOCs
+and the `vectors` and `hops` of the export. Fixed rule:
 
 - The first node of any path is always a `frontend`, `mvc-monolith` or
   **Virtual Client** point. A `backend` or `worker` can never be the first

@@ -1,0 +1,1264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Kiro Allspark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Chakra+Petch:wght@500;600&display=swap">
+<!-- kiro-allspark template / generate-visual skill. Do not hand-edit the data block:
+     it is regenerated from allspark/export/allspark.md. -->
+<style>
+  :root {
+    --bg: #070b1e;
+    --bg-panel: rgba(13, 19, 48, 0.72);
+    --border-panel: rgba(129, 146, 255, 0.16);
+    --text: #dfe4ff;
+    --text-soft: #8f98c8;
+    --accent: #8b9cff;
+    --client: #3b82f6;
+    --internal: #22c55e;
+    --external: #f97316;
+    --monolith: #2ea3aa;
+    --direct: #f43f5e;
+    --title: "Chakra Petch", "Rajdhani", "Segoe UI", system-ui, sans-serif;
+    --ui: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: radial-gradient(120% 90% at 70% 20%, #111a44 0%, var(--bg) 55%, #04060f 100%);
+    color: var(--text); font-family: var(--ui); font-size: 15px; line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+
+  .header {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 22px); left: 26px;
+    max-width: min(440px, calc(100vw - 52px)); pointer-events: none;
+  }
+  .header h1 {
+    margin: 0; font-family: var(--title); font-weight: 600; font-size: clamp(30px, 4.2vw, 46px);
+    letter-spacing: 0.04em; line-height: 1;
+    background: linear-gradient(100deg, var(--client) 0%, var(--internal) 48%, var(--external) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 18px rgba(99, 132, 255, 0.35));
+  }
+  .header p { margin: 8px 0 0; color: var(--text-soft); font-size: 14px; }
+  .header p strong { color: var(--text); font-weight: 500; }
+
+  #phase {
+    position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); transform: translateX(-50%);
+    font-family: var(--title); font-size: 15px; letter-spacing: 0.06em; color: var(--accent);
+    text-shadow: 0 0 12px rgba(139, 156, 255, 0.6); pointer-events: none;
+    transition: opacity 0.6s ease; white-space: nowrap;
+  }
+  #phase .bar { display: block; height: 2px; margin-top: 8px; background: rgba(139,156,255,0.15); border-radius: 2px; overflow: hidden; }
+  #phase .bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--client), var(--internal), var(--external)); }
+
+  .panel {
+    position: fixed; background: var(--bg-panel); border: 1px solid var(--border-panel);
+    border-radius: 14px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .legend { left: 26px; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); padding: 14px 16px; }
+  .legend h2 { margin: 0 0 8px; font-family: var(--title); font-weight: 500; font-size: 13px; color: var(--text-soft); letter-spacing: 0.04em; }
+  .legend ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+  .legend li { display: flex; align-items: center; gap: 9px; font-size: 13.5px; }
+  .legend svg { width: 16px; height: 16px; flex: none; overflow: visible; }
+  .legend .sep { height: 1px; background: var(--border-panel); margin: 4px 0; }
+
+  .controls {
+    right: 26px; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); padding: 10px;
+    display: flex; flex-wrap: wrap; gap: 6px; max-width: min(420px, calc(100vw - 52px)); justify-content: flex-end;
+  }
+  .controls button {
+    font: 500 13.5px var(--ui); color: var(--text); background: rgba(139, 156, 255, 0.08);
+    border: 1px solid rgba(139, 156, 255, 0.22); border-radius: 999px; padding: 6px 13px; cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .controls button:hover { background: rgba(139, 156, 255, 0.18); }
+  .controls button[aria-pressed="false"] { color: var(--text-soft); background: transparent; border-style: dashed; }
+  .controls button.primary { border-color: var(--accent); color: #fff; background: rgba(139, 156, 255, 0.22); }
+  .controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  #tooltip {
+    position: fixed; z-index: 5; pointer-events: none; min-width: 190px; max-width: 300px; padding: 11px 13px;
+    background: rgba(8, 12, 32, 0.92); border: 1px solid var(--border-panel); border-radius: 10px;
+    font-size: 13px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+  #tooltip .name { font-family: var(--title); font-size: 15px; font-weight: 600; margin-bottom: 2px; word-break: break-word; }
+  #tooltip .kind { color: var(--text-soft); margin-bottom: 8px; }
+  #tooltip dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; }
+  #tooltip dt { color: var(--text-soft); }
+  #tooltip dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+  #notice {
+    position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center;
+    font-size: 16px; color: var(--text);
+  }
+  #notice div { max-width: 460px; padding: 22px 26px; }
+  #notice h2 { font-family: var(--title); margin: 0 0 8px; font-size: 20px; color: var(--external); }
+  .modules-panel {
+    top: calc(env(safe-area-inset-top, 0px) + 22px); right: 26px; width: min(332px, calc(100vw - 52px));
+    max-height: calc(100vh - 170px); overflow: auto; padding: 14px 14px 10px;
+  }
+  .modules-panel h2 { margin: 0 0 8px; font-family: var(--title); font-weight: 500; font-size: 13px; color: var(--text-soft); letter-spacing: 0.04em; }
+  .modules-panel ul, .modules-panel ol { list-style: none; margin: 0; padding: 0; }
+  .modules-panel > ul { display: grid; gap: 4px; }
+  .mbtn {
+    width: 100%; display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer;
+    font: 500 13.5px var(--ui); color: var(--text); background: rgba(139, 156, 255, 0.06);
+    border: 1px solid transparent; border-radius: 10px; padding: 6px 10px; transition: background 0.2s, border-color 0.2s;
+  }
+  .mbtn:hover { background: rgba(139, 156, 255, 0.16); }
+  .mbtn[aria-pressed="true"] { border-color: var(--c); background: rgba(139, 156, 255, 0.14); }
+  .mbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .mbtn i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); flex: none; }
+  .mbtn span { flex: 1; min-width: 0; }
+  .mbtn em { font-style: normal; color: var(--text-soft); font-size: 12px; white-space: nowrap; }
+  .steps { margin: 6px 0 8px 14px !important; padding-left: 12px !important; border-left: 1px dashed var(--border-panel); display: grid; gap: 6px; }
+  .steps li { font-size: 13px; display: grid; grid-template-columns: 18px 1fr; gap: 0 8px; align-items: baseline; }
+  .steps b {
+    display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%;
+    font: 600 11px var(--title); color: #07102a; background: var(--soft-c, var(--text));
+  }
+  .steps small { grid-column: 2; color: var(--text-soft); font-size: 12px; margin-top: -1px; }
+  .mini { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-panel); display: grid; gap: 5px; font-size: 12.5px; color: var(--text-soft); }
+  .mini div { display: flex; align-items: center; gap: 8px; }
+  .mini svg { width: 14px; height: 14px; flex: none; overflow: visible; }
+  .crumb { font-size: 12.5px; color: var(--text-soft); margin: 0 0 8px; line-height: 1.35; }
+  .crumb b { color: var(--text); font-weight: 600; }
+  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 10px; }
+  .levels button { font: 500 12.5px var(--ui); color: var(--text); background: rgba(139, 156, 255, 0.06); border: 1px solid transparent;
+    border-radius: 9px; padding: 6px 4px; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+  .levels button:hover:not(:disabled) { background: rgba(139, 156, 255, 0.16); }
+  .levels button[aria-pressed="true"] { border-color: var(--accent); background: rgba(139, 156, 255, 0.2); }
+  .levels button:disabled { opacity: 0.38; cursor: not-allowed; }
+  .sel { display: grid; gap: 4px; margin: 0 0 10px; font-size: 12px; color: var(--text-soft); letter-spacing: 0.03em; }
+  .sel select { width: 100%; font: 500 13.5px var(--ui); color: var(--text); color-scheme: dark; background: rgba(10, 16, 48, 0.9);
+    border: 1px solid var(--border-panel); border-radius: 9px; padding: 7px 9px; cursor: pointer; }
+  .sel select:focus-visible, .levels button:focus-visible, .open:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .info { margin: 0 0 10px; font-size: 13px; line-height: 1.45; }
+  .info p { margin: 0 0 6px; }
+  .info .doc { color: var(--text-soft); font-size: 12px; word-break: break-all; }
+  .open { width: 100%; margin-top: 6px; font: 500 13px var(--ui); color: #fff; background: rgba(139, 156, 255, 0.22);
+    border: 1px solid var(--accent); border-radius: 9px; padding: 7px; cursor: pointer; }
+  .open:hover { background: rgba(139, 156, 255, 0.34); }
+  .modules-panel ul.eplist { display: grid; gap: 4px; }
+  .modules-panel .mbtn em.method { font-weight: 600; letter-spacing: 0.03em; }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 720px) {
+    .header { left: 18px; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+    .header p { font-size: 13px; }
+    .controls { right: 12px; left: 12px; max-width: none; justify-content: center; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); padding: 8px; }
+    .controls button { padding: 5px 11px; font-size: 13px; }
+    .legend { left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 104px); padding: 8px 12px; }
+    .legend h2, .legend .sep { display: none; }
+    .legend ul { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+    .legend li { font-size: 12.5px; gap: 6px; }
+    .legend svg { width: 12px; height: 12px; }
+    #phase { top: calc(env(safe-area-inset-top, 0px) + 140px); bottom: auto; font-size: 13px; }
+    .modules-panel { top: calc(env(safe-area-inset-top, 0px) + 112px); right: 12px; left: 12px; width: auto; max-height: 30vh; }
+  }
+  @media (prefers-reduced-motion: reduce) { #phase { transition: none; } }
+</style>
+</head>
+<body>
+<canvas id="scene" tabindex="0" aria-label="3D cube of the application universe: drag to rotate, scroll to zoom"></canvas>
+
+<header class="header">
+  <h1>Allspark</h1>
+  <p id="summary">Loading the cube…</p>
+</header>
+
+<div id="phase" aria-live="polite"><span id="phase-text"></span><span class="bar"><i id="phase-bar"></i></span></div>
+
+<aside class="panel legend" aria-label="Legend">
+  <h2>Legend</h2>
+  <ul id="legend-list">
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--client)"/></svg>Frontend</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--monolith)"/></svg>MVC monolith</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--internal)"/></svg>Backend / Worker</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="var(--text-soft)" stroke-width="1.6" stroke-dasharray="2.4 1.6"/></svg>System without repo (color of its axis)</li>
+    <li id="legend-entry" hidden><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3.4" fill="var(--client)"/><ellipse cx="8" cy="8" rx="7" ry="7" fill="none" stroke="var(--client)" stroke-width="1.2" opacity=".7"/></svg>Entry point (ring)</li>
+    <li id="legend-ghost" hidden><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.5" fill="none" stroke="var(--text-soft)" stroke-width="1.2" stroke-dasharray="1.6 1.6"/></svg>Not documented yet</li>
+    <li id="legend-db" hidden><svg viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="7" ry="3" fill="none" stroke="#fbbf24" stroke-width="1" opacity=".55"/><circle cx="8" cy="8" r="3" fill="#fbbf24"/><circle cx="14.2" cy="8" r="1.4" fill="#fde68a"/></svg>Database (electrons = repos that use it)</li>
+    <li class="sep" aria-hidden="true"></li>
+    <li><svg viewBox="0 0 16 16"><path d="M2 13 14 3" stroke="var(--direct)" stroke-width="2.4" stroke-linecap="round"/></svg>Direct client → external</li>
+  </ul>
+</aside>
+
+<nav class="panel controls" aria-label="View controls">
+  <button type="button" id="btn-build" class="primary">Skip animation</button>
+  <button type="button" id="btn-view">Initial view</button>
+  <button type="button" data-layer="vectors" aria-pressed="true">Connections</button>
+  <button type="button" data-layer="names" aria-pressed="true">Names</button>
+  <button type="button" id="btn-tour" hidden>Play modules</button>
+  <button type="button" id="btn-panel" aria-pressed="true" hidden>Panel</button>
+</nav>
+
+<aside class="panel modules-panel" id="modules-panel" aria-label="Modules" hidden>
+  <div class="crumb" id="crumb" aria-live="polite">Global</div>
+  <div class="levels" role="group" aria-label="Level of detail">
+    <button type="button" data-mode="global" aria-pressed="true">Global</button>
+    <button type="button" data-mode="modules" aria-pressed="false">Modules</button>
+    <button type="button" data-mode="detail" aria-pressed="false">Detail</button>
+  </div>
+  <label class="sel">Module <select id="module-select" aria-label="Module"></select></label>
+  <label class="sel" id="ep-sel-wrap" hidden>Endpoint <select id="endpoint-select" aria-label="Endpoint"></select></label>
+  <div class="info" id="module-info" hidden>
+    <p id="mi-summary"></p><p class="doc" id="mi-doc"></p>
+    <button type="button" class="open" id="btn-open" hidden>Open detail ›</button>
+  </div>
+  <div class="info" id="ep-info" hidden></div>
+  <ul id="module-list"></ul>
+  <ul class="eplist" id="endpoint-list" hidden></ul>
+</aside>
+
+<div id="tooltip" role="tooltip" hidden></div>
+<div id="notice" hidden><div class="panel"><h2 id="notice-title"></h2><p id="notice-text"></p></div></div>
+
+<!-- DATA: generate-visual replaces ONLY the content of this block with the JSON derived from allspark.md.
+     Escape "<" as \u003c inside the JSON. -->
+<script id="allspark-data" type="application/json">{"meta": {"power_version": "3.3.0", "generated": "2026-10-05", "workspace": "acme-shop (demo)"}, "axes": {"pos_x": "external", "pos_y": "internal", "pos_z": "client"}, "points": [{"id": "acme/web-app", "type": "repo", "role": "frontend", "color": "blue", "pos_x": 6, "pos_y": 20, "pos_z": 86, "count_client": 24, "count_internal": 5, "count_external": 3, "entry_point": true}, {"id": "acme/admin-portal", "type": "repo", "role": "frontend", "color": "blue", "pos_x": 8, "pos_y": 32, "pos_z": 66, "count_client": 14, "count_internal": 3, "count_external": 0, "entry_point": true}, {"id": "acme/api-core", "type": "repo", "role": "backend", "color": "green", "pos_x": 22, "pos_y": 82, "pos_z": 46, "count_client": 12, "count_internal": 9, "count_external": 2}, {"id": "acme/auth-service", "type": "repo", "role": "backend", "color": "green", "pos_x": 12, "pos_y": 70, "pos_z": 64, "count_client": 6, "count_internal": 4, "count_external": 0}, {"id": "acme/payments-service", "type": "repo", "role": "backend", "color": "green", "pos_x": 42, "pos_y": 78, "pos_z": 26, "count_client": 3, "count_internal": 6, "count_external": 4}, {"id": "acme/notifications-worker", "type": "repo", "role": "worker", "color": "green", "pos_x": 34, "pos_y": 62, "pos_z": 10, "count_client": 0, "count_internal": 3, "count_external": 5}, {"id": "partner-erp", "type": "virtual", "role": "external", "axis": "X", "color": "blue", "pos_x": 4, "pos_y": 8, "pos_z": 96}, {"id": "Stripe", "type": "virtual", "role": "external", "axis": "Z", "color": "orange", "pos_x": 94, "pos_y": 66, "pos_z": 24}, {"id": "SendGrid", "type": "virtual", "role": "external", "axis": "Z", "color": "orange", "pos_x": 90, "pos_y": 44, "pos_z": 8}, {"id": "Twilio", "type": "virtual", "role": "external", "axis": "Z", "color": "orange", "pos_x": 86, "pos_y": 56, "pos_z": 4}, {"id": "invoices-bucket", "type": "virtual", "role": "external", "axis": "Z", "color": "orange", "pos_x": 88, "pos_y": 24, "pos_z": 18}, {"id": "postgresql://acme-db.internal/acme", "type": "database", "name": "acme-db", "engine": "postgresql", "pos_x": 8, "pos_y": 14, "pos_z": 8, "color": "gold", "repos": ["acme/api-core", "acme/auth-service", "acme/payments-service", "acme/notifications-worker", "acme/admin-portal"], "electrons": 5, "notes": "Persistent storage: orders, sessions, invoices, payment logs"}, {"id": "acme/legacy-reports", "type": "repo", "role": "backend", "color": "green", "documented": false, "pos_x": 18, "pos_y": 48, "pos_z": 30}], "vectors": [{"id": "v01", "source": "acme/web-app", "target": "acme/auth-service", "protocol": "http", "axis": "Y", "endpoints": 3}, {"id": "v02", "source": "acme/web-app", "target": "acme/api-core", "protocol": "http", "axis": "Y", "endpoints": 14}, {"id": "v03", "source": "acme/admin-portal", "target": "acme/api-core", "protocol": "http", "axis": "Y", "endpoints": 9}, {"id": "v04", "source": "acme/admin-portal", "target": "acme/auth-service", "protocol": "http", "axis": "Y", "endpoints": 2}, {"id": "v05", "source": "acme/api-core", "target": "acme/auth-service", "protocol": "http", "axis": "Y", "endpoints": 4}, {"id": "v06", "source": "acme/api-core", "target": "acme/payments-service", "protocol": "grpc", "axis": "Y", "endpoints": 6}, {"id": "v07", "source": "acme/payments-service", "target": "Stripe", "protocol": "http", "axis": "Z", "endpoints": 3}, {"id": "v08", "source": "Stripe", "target": "acme/payments-service", "protocol": "webhook", "axis": "Y", "endpoints": 1}, {"id": "v09", "source": "acme/payments-service", "target": "acme/notifications-worker", "protocol": "queue-kafka", "axis": "Y", "endpoints": 4}, {"id": "v10", "source": "acme/notifications-worker", "target": "SendGrid", "protocol": "http", "axis": "Z", "endpoints": 2}, {"id": "v11", "source": "acme/notifications-worker", "target": "Twilio", "protocol": "http", "axis": "Z", "endpoints": 1}, {"id": "v12", "source": "acme/api-core", "target": "invoices-bucket", "protocol": "s3", "axis": "Z", "endpoints": 3}, {"id": "v13", "source": "acme/notifications-worker", "target": "partner-erp", "protocol": "webhook", "axis": "X", "endpoints": 2}, {"id": "v14", "source": "partner-erp", "target": "acme/api-core", "protocol": "soap", "axis": "Y", "endpoints": 5}, {"id": "v15", "source": "acme/web-app", "target": "Stripe", "protocol": "http", "axis": "Z", "direct": true, "endpoints": 1}], "links": [{"id": "d01", "source": "acme/api-core", "target": "postgresql://acme-db.internal/acme", "label": "Query & insert", "type": "data"}, {"id": "d02", "source": "acme/auth-service", "target": "postgresql://acme-db.internal/acme", "label": "Session storage", "type": "data"}, {"id": "d03", "source": "acme/payments-service", "target": "postgresql://acme-db.internal/acme", "label": "Payment records", "type": "data"}, {"id": "d04", "source": "acme/notifications-worker", "target": "postgresql://acme-db.internal/acme", "label": "Order status updates", "type": "data"}, {"id": "d05", "source": "acme/admin-portal", "target": "postgresql://acme-db.internal/acme", "label": "Reports", "type": "data"}], "modules": [{"id": "acme/web-app#modules/sign-in", "name": "Sign in", "repo": "acme/web-app", "doc": "docs/acme-web-app/modules/sign-in/acme-web-app--sign-in.md", "summary": "Customers sign in with their email and password and land on their account.", "steps": [{"point": "acme/web-app", "note": "Login form"}, {"point": "acme/auth-service", "note": "Issues the session token"}, {"point": "postgresql://acme-db.internal/acme", "note": "Stores the session"}]}, {"id": "acme/web-app#modules/pay-order", "name": "Pay an order", "repo": "acme/web-app", "doc": "docs/acme-web-app/modules/pay-order/acme-web-app--pay-order.md", "summary": "Customers pay an order at checkout and receive the receipt by email.", "steps": [{"point": "acme/web-app", "note": "Checkout screen"}, {"point": "acme/api-core", "note": "Order and payment orchestration"}, {"point": "postgresql://acme-db.internal/acme", "note": "Stores the order"}, {"point": "acme/payments-service", "note": "Creates the charge"}, {"point": "Stripe", "note": "Card processor"}, {"point": "acme/payments-service", "note": "Receives the payment webhook"}, {"point": "postgresql://acme-db.internal/acme", "note": "Marks payment done"}, {"point": "acme/notifications-worker", "note": "Receipt job"}, {"point": "SendGrid", "note": "Receipt email"}]}, {"id": "acme/admin-portal#modules/issue-invoice", "name": "Issue an invoice", "repo": "acme/admin-portal", "doc": "docs/acme-admin-portal/modules/issue-invoice/acme-admin-portal--issue-invoice.md", "summary": "Staff issue an invoice for an order and the customer can download it as a PDF.", "steps": [{"point": "acme/admin-portal", "note": "Invoice screen"}, {"point": "acme/api-core", "note": "Generates the invoice"}, {"point": "postgresql://acme-db.internal/acme", "note": "Retrieves order data"}, {"point": "invoices-bucket", "note": "Stores the PDF"}]}, {"id": "acme/api-core#modules/partner-sync", "name": "Partner order sync", "summary": "A partner's system pushes its orders and gets the payment status back.", "steps": [{"point": "partner-erp", "note": "Pushes orders (SOAP)"}, {"point": "acme/api-core", "note": "Order intake"}, {"point": "postgresql://acme-db.internal/acme", "note": "Inserts partner order"}, {"point": "acme/payments-service", "note": "Payment check"}, {"point": "acme/notifications-worker", "note": "Status job"}, {"point": "postgresql://acme-db.internal/acme", "note": "Updates order status"}, {"point": "partner-erp", "note": "Receives the result by webhook"}]}, {"id": "acme/api-core#modules/payment-alerts", "name": "Failed payment alerts", "summary": "Customers get a text message when a payment fails.", "steps": [{"point": "acme/payments-service", "note": "Failed payment event"}, {"point": "postgresql://acme-db.internal/acme", "note": "Logs the failure"}, {"point": "acme/notifications-worker", "note": "Alert job"}, {"point": "Twilio", "note": "SMS to the customer"}]}, {"id": "acme/admin-portal#modules/dashboard", "name": "Admin dashboard", "repo": "acme/admin-portal", "doc": "docs/acme-admin-portal/modules/dashboard/acme-admin-portal--dashboard.md", "summary": "Staff see metrics and transactions at a glance.", "steps": [{"point": "acme/admin-portal", "note": "Query repo"}, {"point": "postgresql://acme-db.internal/acme", "note": "Retrieves metrics and transactions"}]}], "endpoints": [{"id": "acme/web-app#modules/sign-in::POST /auth/login", "module": "acme/web-app#modules/sign-in", "method": "POST", "route": "/auth/login", "summary": "The customer signs in and gets a session.", "hops": [{"source": "acme/web-app", "target": "acme/auth-service", "kind": "call", "protocol": "http"}, {"source": "acme/auth-service", "target": "postgresql://acme-db.internal/acme", "kind": "data", "protocol": "sql"}], "entities": ["sessions"], "operations": ["write"]}, {"id": "acme/web-app#modules/pay-order::POST /orders", "module": "acme/web-app#modules/pay-order", "method": "POST", "route": "/orders", "summary": "The customer places the order from the checkout.", "hops": [{"source": "acme/web-app", "target": "acme/api-core", "kind": "call", "protocol": "http"}, {"source": "acme/api-core", "target": "postgresql://acme-db.internal/acme", "kind": "data", "protocol": "sql"}], "entities": ["orders"], "operations": ["write"]}, {"id": "acme/web-app#modules/pay-order::POST /payments/confirm", "module": "acme/web-app#modules/pay-order", "method": "POST", "route": "/payments/confirm", "summary": "The customer confirms the payment and the card processor authorizes it.", "hops": [{"source": "acme/web-app", "target": "acme/api-core", "kind": "call", "protocol": "http"}, {"source": "acme/api-core", "target": "acme/payments-service", "kind": "call", "protocol": "grpc"}, {"source": "acme/payments-service", "target": "Stripe", "kind": "call", "protocol": "http"}, {"source": "acme/payments-service", "target": "postgresql://acme-db.internal/acme", "kind": "data", "protocol": "sql"}, {"source": "acme/payments-service", "target": "acme/notifications-worker", "kind": "call", "protocol": "queue-kafka"}, {"source": "acme/notifications-worker", "target": "SendGrid", "kind": "call", "protocol": "http"}], "entities": ["payments", "transactions"], "operations": ["read", "write"]}, {"id": "acme/web-app#modules/pay-order::GET /orders/{id}/receipt", "module": "acme/web-app#modules/pay-order", "method": "GET", "route": "/orders/{id}/receipt", "summary": "The customer opens the receipt of a paid order.", "hops": [{"source": "acme/web-app", "target": "acme/api-core", "kind": "call", "protocol": "http"}, {"source": "acme/api-core", "target": "postgresql://acme-db.internal/acme", "kind": "data", "protocol": "sql"}], "entities": ["orders", "payments"], "operations": ["read"]}, {"id": "acme/admin-portal#modules/issue-invoice::POST /invoices", "module": "acme/admin-portal#modules/issue-invoice", "method": "POST", "route": "/invoices", "summary": "Staff issue the invoice of an order.", "hops": [{"source": "acme/admin-portal", "target": "acme/api-core", "kind": "call", "protocol": "http"}, {"source": "acme/api-core", "target": "postgresql://acme-db.internal/acme", "kind": "data", "protocol": "sql"}, {"source": "acme/api-core", "target": "invoices-bucket", "kind": "call", "protocol": "s3"}], "entities": ["orders", "invoices"], "operations": ["read", "write"]}, {"id": "acme/admin-portal#modules/issue-invoice::GET /invoices/{id}/pdf", "module": "acme/admin-portal#modules/issue-invoice", "method": "GET", "route": "/invoices/{id}/pdf", "summary": "Staff download the PDF of an invoice.", "hops": [{"source": "acme/admin-portal", "target": "acme/api-core", "kind": "call", "protocol": "http"}, {"source": "acme/api-core", "target": "invoices-bucket", "kind": "call", "protocol": "s3"}]}, {"id": "acme/api-core#modules/partner-sync::POST /partner/orders", "module": "acme/api-core#modules/partner-sync", "method": "POST", "route": "/partner/orders", "summary": "The partner's system sends an order and gets an acknowledgement.", "hops": [{"source": "partner-erp", "target": "acme/api-core", "kind": "call", "protocol": "soap"}, {"source": "acme/api-core", "target": "postgresql://acme-db.internal/acme", "kind": "data", "protocol": "sql"}, {"source": "acme/api-core", "target": "acme/payments-service", "kind": "call", "protocol": "grpc"}], "entities": ["orders"], "operations": ["write"]}]}</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (s) { return document.querySelector(s); };
+
+  function notice(title, text) {
+    $('#notice-title').textContent = title; $('#notice-text').textContent = text;
+    $('#notice').hidden = false; $('#phase').hidden = true; $('#summary').textContent = '';
+  }
+
+  // ---------- 1. Data ----------
+  if (typeof THREE === 'undefined' || !THREE.OrbitControls) {
+    notice('Three.js did not load', 'The cube loads Three.js from a CDN. Check your internet connection and open the file again.');
+    return;
+  }
+  var data;
+  try {
+    var raw = $('#allspark-data').textContent.trim();
+    if (raw.indexOf('__ALLSPARK_' + 'JSON__') === 0) {   // template without data (literal split on purpose)
+      notice('Template without data', 'This file is the empty template. Generate the visualization with the generate-visual skill of kiro-allspark.');
+      return;
+    }
+    data = JSON.parse(raw);
+  } catch (e) {
+    notice('Invalid data', 'The data block is not valid JSON (' + e.message + '). Run generate-visual again.');
+    return;
+  }
+  data.points = data.points || []; data.vectors = data.vectors || [];
+  data.modules = data.modules || []; data.endpoints = data.endpoints || [];   // optional: Level 2 modules (ordered path) and Level 3 endpoints (hops)
+  if (!data.points.length) { notice('Empty cube', 'allspark.md has no points yet. Run Phase 2 of find-connections first.'); return; }
+
+  var COLOR = { blue: 0x3b82f6, teal: 0x2ea3aa, green: 0x22c55e, orange: 0xf97316 };
+  var COLOR_DB = 0xfbbf24;       // databases: gold nucleus, dim, near the origin of the axes
+  var COLOR_DIRECT = 0xf43f5e;   // client -> external without going through an internal point
+  var COLOR_SEMANTIC = { client: COLOR.blue, internal: COLOR.green, external: COLOR.orange };
+  var COLOR_VECTOR_AXIS = { X: COLOR.blue, Y: COLOR.green, Z: COLOR.orange };
+  var AXIS_NAME = { client: 'Client', internal: 'Internal (Acme)', external: 'External' };
+  // The data ALREADY comes with the X/Z swap applied (allspark.md). No swap is done here.
+  var axes = data.axes || { pos_x: 'external', pos_y: 'internal', pos_z: 'client' };
+  var S = 5;                                   // cube 0..100 -> -5..5
+  function w(v) { return (Number(v) - 50) / 50 * S; }
+  function vec(p) { return new THREE.Vector3(w(p.pos_x), w(p.pos_y), w(p.pos_z)); }
+  function typeOf(p) { return p.type === 'database' ? 'database' : (p.type === 'virtual' || p.role === 'external' ? 'virtual' : 'repo'); }
+  function shortName(id) {
+    var s = String(id); var h = s.lastIndexOf('#');
+    if (h >= 0) { var r = s.slice(h + 1).split('/'); return r[r.length - 1]; }
+    var b = s.split('/'); return b[b.length - 1];
+  }
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function main() {
+  // ---------- 2. Scene ----------
+  var canvas = $('#scene');
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x070b1e, 1);
+  var scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x070b1e, 0.022);
+
+  var camera = new THREE.PerspectiveCamera(40, 1, 0.1, 500);
+  // Initial angle: ~15° elevation, Internal vertical, Client down to the left
+  // and External to the right. pos_z (Client) on the left, pos_x (External) on the right.
+  var CAM_DIR = new THREE.Vector3(1, 0.52, 1.59).normalize();
+  var CENTER = new THREE.Vector3(0, -0.3, 0);
+  // Distance that frames the cube, its labels and the curves that exit below (sphere of radius FRAME_R)
+  var FRAME_R = 8.2, FINAL_DIST = 24, START_DIST = 35;
+  function computeDistances(aspect, fov) {
+    var v = THREE.MathUtils.degToRad(fov), h = 2 * Math.atan(Math.tan(v / 2) * aspect);
+    FINAL_DIST = FRAME_R / Math.sin(Math.min(v, h) / 2); START_DIST = FINAL_DIST * 1.45;
+  }
+  computeDistances(window.innerWidth / window.innerHeight, window.innerWidth < 720 ? 52 : 40);
+  camera.position.copy(CAM_DIR).multiplyScalar(reduced ? FINAL_DIST : START_DIST);
+
+  var controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.dampingFactor = 0.08;
+  controls.minDistance = 7; controls.maxDistance = 60; controls.target.set(0, -0.3, 0);
+
+  scene.add(new THREE.AmbientLight(0x7f8cff, 0.45));
+  var light1 = new THREE.PointLight(0xffffff, 1.1, 80); light1.position.set(9, 12, 10); scene.add(light1);
+  var light2 = new THREE.PointLight(0x6d5bff, 0.8, 80); light2.position.set(-10, -4, -8); scene.add(light2);
+
+  var composer = null, bloom = null;
+  if (THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass) {
+    try {
+      composer = new THREE.EffectComposer(renderer);
+      composer.addPass(new THREE.RenderPass(scene, camera));
+      bloom = new THREE.UnrealBloomPass(new THREE.Vector2(512, 512), 0.6, 0.45, 0.28);
+      composer.addPass(bloom);
+    } catch (e) { composer = null; }
+  }
+
+  // Shared glow texture
+  function glowTexture() {
+    var c = document.createElement('canvas'); c.width = c.height = 128;
+    var g = c.getContext('2d'); var gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(255,255,255,0.55)');
+    gr.addColorStop(0.6, 'rgba(255,255,255,0.12)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+  }
+  var GLOW = glowTexture();
+  function glowSprite(color, scale, opacity) {
+    var m = new THREE.SpriteMaterial({ map: GLOW, color: color, transparent: true, opacity: opacity,
+      blending: THREE.AdditiveBlending, depthWrite: false });
+    var s = new THREE.Sprite(m); s.scale.setScalar(scale); s.userData.baseOpacity = opacity; return s;
+  }
+  function label(text, color, height, weight) {
+    var c = document.createElement('canvas'); var g = c.getContext('2d');
+    var px = 64; var font = (weight || 600) + ' ' + px + 'px "Chakra Petch", "Segoe UI", sans-serif';
+    g.font = font; var width = Math.ceil(g.measureText(text).width) + 24;
+    c.width = width; c.height = px + 24; g.font = font; g.textBaseline = 'middle';
+    g.shadowColor = color; g.shadowBlur = 16; g.fillStyle = color; g.fillText(text, 12, c.height / 2);
+    var tex = new THREE.CanvasTexture(c); tex.minFilter = THREE.LinearFilter;
+    var m = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0 });
+    var s = new THREE.Sprite(m); s.scale.set(height * c.width / c.height, height, 1); return s;
+  }
+
+  // Star field ("second brain" background)
+  (function () {
+    var n = 1600, pos = new Float32Array(n * 3);
+    for (var i = 0; i < n; i++) {
+      var r = 55 + Math.random() * 90, t = Math.random() * Math.PI * 2, f = Math.acos(2 * Math.random() - 1);
+      pos[i * 3] = r * Math.sin(f) * Math.cos(t); pos[i * 3 + 1] = r * Math.cos(f); pos[i * 3 + 2] = r * Math.sin(f) * Math.sin(t);
+    }
+    var geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var mat = new THREE.PointsMaterial({ size: 0.9, map: GLOW, color: 0x9fb0ff, transparent: true, opacity: 0.42,
+      blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+    var stars = new THREE.Points(geo, mat); stars.name = 'stars'; scene.add(stars);
+  })();
+
+  // ---------- 3. Cube structure ----------
+  var cube = new THREE.Group(); scene.add(cube);
+  var frame = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2 * S, 2 * S, 2 * S)),
+    new THREE.LineBasicMaterial({ color: 0x5b6bd6, transparent: true, opacity: 0 }));
+  cube.add(frame);
+  var grid = new THREE.GridHelper(2 * S, 10, 0x3a4697, 0x27306b);
+  grid.position.y = -S; grid.material.transparent = true; grid.material.opacity = 0; cube.add(grid);
+
+  var ORIGIN = new THREE.Vector3(-S, -S, -S);
+  var visualAxes = ['pos_x', 'pos_y', 'pos_z'].map(function (field, i) {
+    var sem = axes[field]; var color = COLOR_SEMANTIC[sem] || 0xffffff;
+    var end = ORIGIN.clone(); end.setComponent(i, S + 0.6);
+    var curve = new THREE.LineCurve3(ORIGIN, end);
+    var geo = new THREE.TubeGeometry(curve, 40, 0.035, 8, false);
+    var mat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false });
+    var tube = new THREE.Mesh(geo, mat); geo.setDrawRange(0, 0); cube.add(tube);
+    var tip = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.36, 16), mat.clone());
+    tip.position.copy(end); tip.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), end.clone().sub(ORIGIN).normalize());
+    tip.scale.setScalar(0.001); cube.add(tip);
+    var lb = label(AXIS_NAME[sem] || sem, '#' + color.toString(16).padStart(6, '0'), 0.55);
+    lb.position.copy(end.clone().add(end.clone().sub(ORIGIN).normalize().multiplyScalar(0.9)));
+    if (i === 1) lb.position.x += 0.4;
+    cube.add(lb);
+    return { tube: tube, tip: tip, label: lb };
+  });
+
+  // ---------- 4. Points ----------
+  var byId = {}, pickables = [], nodes = [];
+  var ROLE_ORDER = { frontend: 0, 'mvc-monolith': 1, backend: 2, worker: 3 };
+  // More points -> all of them smaller, so the cube does not get crowded (14 points = base size)
+  var nBase = data.points.filter(function (p) { var t = typeOf(p); return t === 'repo' || t === 'virtual'; }).length;
+  var SCALE = Math.max(0.5, Math.min(1, Math.sqrt(14 / Math.max(1, nBase))));
+  // Databases live in their own box next to the origin, rising like a column (unless the export gives a position)
+  var dbSlot = 0;
+  data.points.forEach(function (p) {
+    if (p.type !== 'database') return;
+    if (p.pos_x == null) p.pos_x = 8;
+    if (p.pos_z == null) p.pos_z = 8;
+    if (p.pos_y == null) p.pos_y = 14 + 14 * dbSlot;
+    dbSlot++;
+  });
+  data.points.forEach(function (p) {
+    var type = typeOf(p);
+    var nm = type === 'database' ? (p.name || shortName(p.id)) : shortName(p.id);
+    var color = type === 'database' ? COLOR_DB : (COLOR[p.color] != null ? COLOR[p.color] : 0xffffff);
+    var g = new THREE.Group(); g.position.copy(vec(p));
+    var mesh, radius, glow, electrons = null, extras = [], ghost = false, pickR = 0;
+    if (type === 'repo' && p.documented === false) {       // not documented yet: hollow and dotted, smaller, with no centre
+      ghost = true;
+      radius = 0.17 * SCALE;
+      mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 1),
+        new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.55 }));
+      glow = glowSprite(color, radius * 4, 0.07);
+    } else if (type === 'repo') {
+      var total = (p.count_client || 0) + (p.count_internal || 0) + (p.count_external || 0);
+      radius = Math.min(0.5, 0.24 * (1 + 0.45 * Math.log10(1 + total))) * SCALE;
+      mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 3),
+        new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.45, roughness: 0.3, metalness: 0.15 }));
+      glow = glowSprite(color, radius * 6, 0.38);
+      if (p.entry_point) {                                  // entry point: a ring around the sphere, where the client interacts
+        var ringE = new THREE.Mesh(new THREE.TorusGeometry(radius * 1.85, Math.max(0.012, radius * 0.07), 8, 56),
+          new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.6, depthWrite: false }));
+        ringE.rotation.x = Math.PI / 2; mesh.add(ringE); extras.push({ m: ringE.material, base: 0.6 });
+      }
+    } else if (type === 'database') {
+      // nucleus in the data zone; size by how many repos use it; electrons = relative use (1..5)
+      var nUsers = (p.repos || []).length || (data.links || []).filter(function (l) { return l.target === p.id; }).length;
+      radius = Math.min(0.42, 0.2 * (1 + 0.5 * Math.log2(Math.max(1, nUsers)))) * SCALE;
+      var orbitMax = radius * 4.6;                           // world units; the export (`orbit`) limits it so atoms never cross
+      if (p.orbit != null) orbitMax = Math.min(orbitMax, p.orbit / 10);
+      else {                                                 // no limit in the export: keep atoms apart (0.42 x the distance to the nearest database)
+        var nearDb = Infinity;
+        data.points.forEach(function (q) { if (q !== p && q.type === 'database') nearDb = Math.min(nearDb, Math.hypot(q.pos_x - p.pos_x, q.pos_y - p.pos_y, q.pos_z - p.pos_z)); });
+        if (nearDb < Infinity) orbitMax = Math.min(orbitMax, 0.42 * nearDb / 10);
+      }
+      radius = Math.min(radius, orbitMax * 0.34);
+      pickR = orbitMax;
+      mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 2),
+        new THREE.MeshStandardMaterial({ color: COLOR_DB, emissive: COLOR_DB, emissiveIntensity: 0.3, roughness: 0.3, metalness: 0.2 }));
+      glow = glowSprite(COLOR_DB, radius * 6, 0.14);
+      var nElec = Math.max(1, Math.min(5, Math.round(p.electrons || nUsers) || 1));
+      var r0 = Math.max(radius * 1.7, orbitMax * 0.42);
+      var elSize = Math.max(0.03, Math.min(0.06 * Math.max(0.75, SCALE), orbitMax * 0.09));
+      electrons = [];
+      for (var k = 0; k < nElec; k++) {
+        var orbit = new THREE.Group();
+        orbit.rotation.set(0.5 + k * 0.72, 0, k * 1.05);
+        var rOrb = nElec > 1 ? r0 + (orbitMax - r0) * k / (nElec - 1) : (r0 + orbitMax) / 2;
+        var ring = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(
+          new THREE.EllipseCurve(0, 0, rOrb, rOrb).getPoints(48).map(function (q) { return new THREE.Vector3(q.x, 0, q.y); })),
+          new THREE.LineBasicMaterial({ color: COLOR_DB, transparent: true, opacity: 0.2, depthWrite: false }));
+        orbit.add(ring); extras.push({ m: ring.material, base: 0.2 });
+        var pivot = new THREE.Group(); orbit.add(pivot);
+        var el = new THREE.Mesh(new THREE.SphereGeometry(elSize, 12, 12), new THREE.MeshBasicMaterial({ color: 0xf1d98a, transparent: true }));
+        el.position.set(rOrb, 0, 0); pivot.add(el); extras.push({ m: el.material, base: 0.9 });
+        var eg = glowSprite(COLOR_DB, elSize * 4.5, 0.2); eg.position.copy(el.position); pivot.add(eg); extras.push({ m: eg.material, base: 0.2 });
+        pivot.rotation.y = Math.random() * Math.PI * 2;
+        mesh.add(orbit);
+        electrons.push({ pivot: pivot, speed: 0.55 + 0.18 * k });
+      }
+    } else { // system without repo
+      radius = 0.22 * SCALE;
+      mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 1),
+        new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.9 }));
+      mesh.add(new THREE.Mesh(new THREE.SphereGeometry(radius * 0.35, 12, 12), new THREE.MeshBasicMaterial({ color: color })));
+      glow = glowSprite(color, radius * 5, 0.24);
+    }
+    g.add(glow); g.add(mesh);
+    var lb = label(nm, '#' + color.toString(16).padStart(6, '0'), (ghost ? 0.3 : type === 'repo' ? 0.42 : type === 'database' ? 0.46 : type === 'virtual' ? 0.36 : 0.26) * Math.max(0.75, SCALE), ghost ? 400 : type === 'repo' ? 600 : 500);
+    lb.userData.hasName = type === 'repo' || type === 'virtual' || type === 'database';
+    lb.position.set(0, radius + 0.3, 0); g.add(lb);
+    g.scale.setScalar(0.0001); g.visible = true;
+    var node = { p: p, type: type, name: nm, ghost: ghost, entry: !!p.entry_point, group: g, mesh: mesh, glow: glow, label: lb, radius: radius, color: color,
+      home: g.position.clone(), vectors: [], links: [], electrons: electrons, extras: extras };
+    mesh.userData.node = node; pickables.push(mesh);
+    if (pickR) {   // generous invisible target around a nucleus, so it is easy to hover
+      var pk = new THREE.Mesh(new THREE.SphereGeometry(pickR, 12, 12), new THREE.MeshBasicMaterial({ visible: false }));
+      pk.userData.node = node; g.add(pk); pickables.push(pk);
+    }
+    byId[p.id] = node; nodes.push(node); scene.add(g);
+  });
+
+  var links = [];
+
+  // ---------- 6. Vectors (neon arcs) ----------
+  var vectors = [], missing = 0;
+  data.vectors.forEach(function (v) {
+    var a = byId[v.source], b = byId[v.target];
+    if (!a || !b) { missing++; return; }
+    var o = a.home, d = b.home, c;
+    if (v.curve) c = new THREE.Vector3(w(v.curve.cx), w(v.curve.cy), w(v.curve.cz));
+    else { // same calculation as position-formula.md (swap-invariant)
+      // convex toward the client; arc (rises and falls from above) toward an external point;
+      // straight if it goes from the client zone directly to an external point; concave toward an internal point
+      var towardClient = b.type === 'virtual' && b.p.axis === 'X';
+      var towardExternal = b.type === 'virtual' && b.p.axis === 'Z';
+      var fromClient = a.p.role === 'frontend' || (a.type === 'virtual' && a.p.axis === 'X');
+      var dist = o.distanceTo(d) / (2 * S) * 100;
+      var offset = 12 + 0.15 * dist;
+      var yC = towardClient ? Math.min(100, Math.max(a.p.pos_y, b.p.pos_y) + offset)
+             : towardExternal ? (fromClient ? (a.p.pos_y + b.p.pos_y) / 2 : Math.max(a.p.pos_y, b.p.pos_y) + offset)
+             : Math.max(0, Math.min(a.p.pos_y, b.p.pos_y) - offset);
+      if (towardExternal && fromClient) v.direct = true;
+      c = new THREE.Vector3((o.x + d.x) / 2, w(yC), (o.z + d.z) / 2);
+    }
+    var curve = new THREE.QuadraticBezierCurve3(o, c, d);
+    var color = v.direct ? COLOR_DIRECT : (COLOR_VECTOR_AXIS[v.axis] || COLOR[b.p.color] || 0xffffff);
+    var weak = v.reverse_validation === 'no-target-evidence';
+    var SEG = 72, RAD = 8, wk = 1 + 0.3 * Math.log2(Math.max(1, v.endpoints || 1));   // thicker = more endpoints
+    var core = new THREE.Mesh(new THREE.TubeGeometry(curve, SEG, 0.02 * wk, RAD, false),
+      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: weak ? 0.4 : 0.8, blending: THREE.AdditiveBlending, depthWrite: false }));
+    var halo = new THREE.Mesh(new THREE.TubeGeometry(curve, SEG, 0.075 * wk, RAD, false),
+      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: weak ? 0.05 : 0.1, blending: THREE.AdditiveBlending, depthWrite: false }));
+    core.geometry.setDrawRange(0, 0); halo.geometry.setDrawRange(0, 0);
+    scene.add(halo); scene.add(core);
+    var length = curve.getLength();
+    var tArrow = Math.max(0.6, 1 - (b.radius + 0.22) / length);
+    var arrow = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.24, 12),
+      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: weak ? 0.5 : 1, blending: THREE.AdditiveBlending, depthWrite: false }));
+    arrow.position.copy(curve.getPointAt(tArrow));
+    arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), curve.getTangentAt(tArrow).normalize());
+    arrow.scale.setScalar(0.0001); scene.add(arrow);
+    var pulse = glowSprite(0xffffff, 0.42, 0); pulse.material.color.setHex(color).lerp(new THREE.Color(0xffffff), 0.45); scene.add(pulse);
+    var obj = { v: v, a: a, b: b, curve: curve, core: core, halo: halo, arrow: arrow, pulse: pulse, length: length,
+      tArrow: tArrow, weak: weak, seg: SEG, rad: RAD, phase: Math.random(), active: false,
+      opC: core.material.opacity, opH: halo.material.opacity, opA: arrow.material.opacity };
+    a.vectors.push(obj); b.vectors.push(obj); vectors.push(obj);
+  });
+
+  // ---------- 6a. Databases: gold lines between the repos and the databases they use ----------
+  (data.links || []).forEach(function (l) {
+    var a = byId[l.source], b = byId[l.target];
+    if (!a || !b) { missing++; return; }
+    var mid = a.home.clone().add(b.home).multiplyScalar(0.5); mid.y += 0.45;
+    var curve = new THREE.QuadraticBezierCurve3(a.home.clone(), mid, b.home.clone());
+    var line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(32)),
+      new THREE.LineBasicMaterial({ color: COLOR_DB, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    scene.add(line);
+    var e = { a: a, b: b, curve: curve, line: line, opacity: 0.34, label: l.label || '' };
+    links.push(e); a.links.push(e); b.links.push(e);
+  });
+  var dbs = nodes.filter(function (n) { return n.type === 'database'; });
+
+  // ---------- 6b. Modules (Level 2): the ordered path of a module, drawn as a numbered trail ----------
+  // A module is a functionality the client perceives (Sign in, Pay an order) shared across repos. Its `steps` are the Path of
+  // its Level 2 file: one stop per point it touches, with a short note. If an export has no `steps`, the path is chained from
+  // the hops of its longest endpoint; a module that only touches one point has no trail, just its point lit.
+  var MODULE_COLORS = [0xfacc15, 0x22d3ee, 0xf5f5f5, 0xf472b6, 0xfde68a, 0x67e8f9, 0xc4b5fd, 0xfda4af];
+  var modules = [], moduleById = {};
+  function hex(c) { return '#' + c.toString(16).padStart(6, '0'); }
+  function segmentCurve(a, b) {   // reuse the connection's own curve when it exists (reversed if walked backwards)
+    for (var i = 0; i < vectors.length; i++) {
+      var o = vectors[i];
+      if (o.a === a && o.b === b) return { curve: o.curve, vec: o };
+      if (o.a === b && o.b === a) return { curve: new THREE.QuadraticBezierCurve3(o.curve.v2.clone(), o.curve.v1.clone(), o.curve.v0.clone()), vec: o };
+    }
+    for (var j = 0; j < links.length; j++) {   // repo <-> database links
+      var l = links[j];
+      if (l.a === a && l.b === b) return { curve: l.curve, vec: null, link: l };
+      if (l.a === b && l.b === a) return { curve: new THREE.QuadraticBezierCurve3(l.curve.v2.clone(), l.curve.v1.clone(), l.curve.v0.clone()), vec: null, link: l };
+    }
+    var mid = a.home.clone().add(b.home).multiplyScalar(0.5); mid.y += 0.9;
+    return { curve: new THREE.QuadraticBezierCurve3(a.home.clone(), mid, b.home.clone()), vec: null };
+  }
+  function stepsFromEndpoints(m) {
+    var best = null;
+    data.endpoints.forEach(function (e) { if (e.module === m.id && (e.hops || []).length && (!best || e.hops.length > best.hops.length)) best = e; });
+    var out = [];
+    if (best) best.hops.forEach(function (h, i) {
+      if (i === 0 || out[out.length - 1].point !== h.source) out.push({ point: h.source, note: '' });
+      out.push({ point: h.target, note: '' });
+    });
+    return out;
+  }
+  data.modules.forEach(function (m, mi) {
+    var raw = (m.steps && m.steps.length) ? m.steps : stepsFromEndpoints(m);
+    if (!raw.length && m.repo) raw = [m.repo];
+    var steps = raw.map(function (st) {
+      var n = byId[typeof st === 'string' ? st : st.point]; if (!n) return null;
+      return { node: n, note: (typeof st === 'string' ? '' : st.note) || '' };
+    }).filter(Boolean);
+    if (!steps.length) return;
+    var color = MODULE_COLORS[mi % MODULE_COLORS.length], points = [];
+    steps.forEach(function (st) { if (points.indexOf(st.node) < 0) points.push(st.node); });
+    var mo = { type: 'module', m: m, id: m.id || ('module-' + mi), name: m.name || String(m.id || ('Module ' + (mi + 1))).split(/[#\/]/).pop(),
+      repo: m.repo || '', summary: m.summary || '', doc: m.doc || '', endpoints: [], steps: steps,
+      points: points, allPoints: points.slice(), color: color, path: null, vectors: [], links: [], core: null, halo: null, pulse: null, badges: [],
+      seg: 0, rad: 8, length: 0, k: 0, target: 0, phase: Math.random() };
+    var total = 1, cum = [];
+    if (steps.length > 1) {
+      var path = new THREE.CurvePath();
+      for (var i = 0; i < steps.length - 1; i++) {
+        var sg = segmentCurve(steps[i].node, steps[i + 1].node); path.add(sg.curve);
+        if (sg.vec && mo.vectors.indexOf(sg.vec) < 0) mo.vectors.push(sg.vec);
+        if (sg.link && mo.links.indexOf(sg.link) < 0) mo.links.push(sg.link);
+      }
+      mo.seg = 56 * (steps.length - 1); total = path.getLength(); cum = path.getCurveLengths(); mo.length = total; mo.path = path;
+      mo.core = new THREE.Mesh(new THREE.TubeGeometry(path, mo.seg, 0.05, mo.rad, false),
+        new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+      mo.halo = new THREE.Mesh(new THREE.TubeGeometry(path, mo.seg, 0.13, mo.rad, false),
+        new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+      mo.core.geometry.setDrawRange(0, 0); mo.halo.geometry.setDrawRange(0, 0); mo.core.visible = mo.halo.visible = false;
+      scene.add(mo.halo); scene.add(mo.core);
+      mo.pulse = glowSprite(color, 0.7, 0); mo.pulse.visible = false; scene.add(mo.pulse);
+    }
+    var visits = new Map();   // one numbered badge per point: "2 · 5" when the module comes back to it
+    steps.forEach(function (st, i) {
+      if (!visits.has(st.node)) visits.set(st.node, { nums: [], at: i === 0 || !mo.path ? 0 : cum[i - 1] / total });
+      visits.get(st.node).nums.push(i + 1);
+    });
+    visits.forEach(function (v, n) {
+      var b = label(v.nums.join(' · '), hex(color), 0.5, 600);
+      b.position.copy(n.home).add(new THREE.Vector3(0, n.radius + (n.type === 'database' ? 1.25 : 0.95), 0)); b.userData.at = v.at; b.visible = false; scene.add(b); mo.badges.push(b);
+    });
+    modules.push(mo); moduleById[mo.id] = mo;
+  });
+  data.endpoints.forEach(function (e) {
+    var mo = moduleById[e.module];
+    if (!mo) { missing++; return; }
+    mo.endpoints.push(e);
+    (e.hops || []).forEach(function (h) {   // the points of its hops belong to the module too (dimming, camera)
+      [h.source, h.target].forEach(function (id) { var n = byId[id]; if (n && mo.allPoints.indexOf(n) < 0) mo.allPoints.push(n); });
+    });
+  });
+  modules.forEach(function (mo) { mo.allPoints.forEach(function (n) { (n.modules = n.modules || []).push(mo); }); });
+
+  // ---------- 6c. Endpoint strands (Level 3): one strand per endpoint of the opened module ----------
+  // Each hop of an endpoint is a thin tube over the same curve as the connection, shifted sideways so strands fan out;
+  // a travelling light walks the hops in order, so the direction reads at a glance. Built when a module is opened.
+  var strands = [], strandPick = [];
+  function lane(curve, amount) {
+    var dir = curve.v2.clone().sub(curve.v0), perp = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0));
+    if (perp.lengthSq() < 1e-6) perp.set(1, 0, 0);
+    perp.normalize().multiplyScalar(amount);
+    return new THREE.QuadraticBezierCurve3(curve.v0.clone(), curve.v1.clone().add(perp), curve.v2.clone());
+  }
+  function closeStrands() {
+    strands.forEach(function (st) {
+      st.parts.forEach(function (o) { scene.remove(o); if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+    });
+    strands = []; strandPick.length = 0;
+  }
+  function openStrands(mo) {
+    closeStrands();
+    var E = mo.endpoints.length, spread = Math.min(0.2, 1.0 / Math.max(1, E));
+    mo.endpoints.forEach(function (e, ei) {
+      var st = { ep: e, hops: [], parts: [], k: 0, phase: ei * 0.37 }, off = (ei - (E - 1) / 2) * spread;
+      (e.hops || []).forEach(function (h) {
+        var a = byId[h.source], b = byId[h.target]; if (!a || !b) return;
+        var cv = lane(segmentCurve(a, b).curve, off), kind = h.kind === 'data' ? 'data' : 'call', col = kind === 'data' ? COLOR_DB : mo.color;
+        var SEG = 40, RAD = 6;
+        var core = new THREE.Mesh(new THREE.TubeGeometry(cv, SEG, 0.032, RAD, false),
+          new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+        var halo = new THREE.Mesh(new THREE.TubeGeometry(cv, SEG, 0.1, RAD, false),
+          new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false }));
+        var hit = new THREE.Mesh(new THREE.TubeGeometry(cv, 24, 0.16, 6, false), new THREE.MeshBasicMaterial({ visible: false }));
+        hit.userData.strand = st; hit.userData.hop = h;
+        core.geometry.setDrawRange(0, 0); halo.geometry.setDrawRange(0, 0);
+        scene.add(halo); scene.add(core); scene.add(hit);
+        st.hops.push({ h: h, curve: cv, core: core, halo: halo, seg: SEG, rad: RAD });
+        st.parts.push(core, halo, hit); strandPick.push(hit);
+      });
+      if (!st.hops.length) return;
+      st.spark = glowSprite(mo.color, 0.5, 0); st.spark.material.color.setHex(mo.color).lerp(new THREE.Color(0xffffff), 0.5);
+      scene.add(st.spark); st.parts.push(st.spark); strands.push(st);
+    });
+  }
+
+  // ---------- 7. Summary ----------
+  var count = { repo: 0, virtual: 0 };
+  nodes.forEach(function (n) { count[n.type] = (count[n.type] || 0) + 1; });
+  var ghosts = nodes.filter(function (n) { return n.ghost; }), entryCount = nodes.filter(function (n) { return n.entry; }).length;
+  var mapped = vectors.reduce(function (t, o) { return t + (o.v.endpoints || 0); }, 0);
+  var parts = ['<strong>' + (count.repo - ghosts.length) + '</strong> repos', '<strong>' + count.virtual + '</strong> systems without repo'];
+  if (count.database) parts.push('<strong>' + count.database + '</strong> ' + (count.database === 1 ? 'database' : 'databases'));
+  parts.push('<strong>' + vectors.length + '</strong> connections' + (mapped ? ' covering <strong>' + mapped + '</strong> endpoints' : ''));
+  if (entryCount) parts.push('<strong>' + entryCount + '</strong> entry point' + (entryCount === 1 ? '' : 's') + ' documented');
+  if (ghosts.length) parts.push('<strong>' + ghosts.length + '</strong> repo' + (ghosts.length === 1 ? '' : 's') + ' not documented yet');
+  if (modules.length) parts.push('<strong>' + modules.length + '</strong> modules' + (data.endpoints.length ? ' with <strong>' + data.endpoints.length + '</strong> endpoints documented' : ''));
+  if (dbs.length) $('#legend-db').hidden = false;
+  if (entryCount) $('#legend-entry').hidden = false;
+  if (ghosts.length) $('#legend-ghost').hidden = false;
+  var meta = data.meta || {};
+  $('#summary').innerHTML = (meta.workspace ? escapeHtml(meta.workspace) + '. ' : '') + parts.join(', ') + '.' +
+    (meta.generated ? '<br>Generated on ' + escapeHtml(meta.generated) + ' from allspark.md' : '') +
+    (missing ? '<br>' + missing + ' connections point to points that are not in the export.' : '');
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  // ---------- 8. Build timeline ----------
+  function smooth(k) { return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; }
+  function bounce(k) { var c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); }
+  var tasks = [], phases = [], DURATION = 0;
+  function task(start, dur, fn) { tasks.push({ start: start, dur: dur, fn: fn }); DURATION = Math.max(DURATION, start + dur); }
+
+  var t = 0.2;
+  phases.push({ start: t, text: 'Drawing the axes' });
+  task(t, 1.4, function (k) { frame.material.opacity = 0.2 * smooth(k); grid.material.opacity = 0.16 * smooth(k); });
+  visualAxes.forEach(function (e, i) {
+    task(t + 0.15 + i * 0.22, 1.1, function (k) {
+      var kk = smooth(k); e.tube.geometry.setDrawRange(0, Math.ceil(kk * 40) * 8 * 6);
+      e.tip.scale.setScalar(kk > 0.92 ? bounce((kk - 0.92) / 0.08) : 0.0001);
+    });
+    task(t + 1.0 + i * 0.22, 0.6, function (k) { e.label.material.opacity = k; });
+  });
+
+  // Process order: client -> Acme -> externals
+  var ROLE_RANK = { frontend: 0, 'mvc-monolith': 2, backend: 3, worker: 5 };
+  var AXIS_RANK = { X: 1, Y: 4, Z: 6 };
+  function rank(n) {
+    if (n.type === 'repo') return ROLE_RANK.hasOwnProperty(n.p.role) ? ROLE_RANK[n.p.role] : 3;
+    return AXIS_RANK.hasOwnProperty(n.p.axis) ? AXIS_RANK[n.p.axis] : 6;
+  }
+  function trace(o) {
+    return function (k) {
+      var kk = smooth(k), n = Math.ceil(kk * o.seg) * o.rad * 6;
+      o.core.geometry.setDrawRange(0, n); o.halo.geometry.setDrawRange(0, n);
+      o.arrow.scale.setScalar(kk > 0.9 ? bounce((kk - 0.9) / 0.1) : 0.0001);
+      if (k >= 1) o.active = true;
+    };
+  }
+
+  // Camera keys: {t, target, fraction of FINAL_DIST}. The camera keeps the CAM_DIR angle,
+  // focuses on each point as it appears and pulls back as the universe grows.
+  var cameraKeys = [{ t: 0, target: CENTER.clone(), fraction: 1.15 }];
+  var NEAR_FRACTION = 0.3, FAR_FRACTION = 0.78;
+
+  t = 1.9;
+  // Process zones: client (frontends + client systems), internal (other repos + Acme without repo), external
+  function zone(n) {
+    if (n.type === 'repo') return n.p.role === 'frontend' ? 'client' : 'internal';
+    return n.p.axis === 'X' ? 'client' : n.p.axis === 'Z' ? 'external' : 'internal';
+  }
+  function compareIds(a, b) { return a.p.id < b.p.id ? -1 : 1; }
+  var base = nodes.filter(function (n) { return (n.type === 'repo' || n.type === 'virtual') && !n.ghost; });
+  var appearsAt = new Map();
+  function appear(n, ti) {
+    if (appearsAt.has(n)) return;
+    appearsAt.set(n, ti);
+    task(ti, 0.75, function (k) {
+      n.group.scale.setScalar(Math.max(0.0001, bounce(k)));
+      n.glow.material.opacity = n.glow.userData.baseOpacity * (1 + 1.2 * Math.sin(Math.PI * k));
+      n.label.material.opacity = Math.max(0, (k - 0.4) / 0.6);
+    });
+  }
+  function centerOf(list) {
+    if (!list.length) return CENTER.clone();
+    var c = new THREE.Vector3(); list.forEach(function (n) { c.add(n.home); }); return c.multiplyScalar(1 / list.length);
+  }
+  var V_DUR = 1.0;
+  var STEP = Math.max(0.3, Math.min(1.0, 12 / Math.max(1, base.length)));
+  var V_STEP = Math.max(0.12, Math.min(0.45, 8 / Math.max(1, vectors.length)));
+  var zClient = base.filter(function (n) { return zone(n) === 'client'; }).sort(function (a, b) {
+    return (a.type === 'repo' ? 0 : 1) - (b.type === 'repo' ? 0 : 1) || compareIds(a, b); });
+  var zInternal = base.filter(function (n) { return zone(n) === 'internal'; });
+  var zExternal = base.filter(function (n) { return zone(n) === 'external'; });
+  var cClient = centerOf(zClient), cInternal = centerOf(zInternal), cExternal = centerOf(zExternal);
+
+  // Stage of each vector, from its source and target
+  function stage(o) {
+    var za = zone(o.a), zb = zone(o.b);
+    if (za === 'client' && zb === 'internal') return 1;
+    if (za === 'internal' && zb === 'internal') return 2;
+    if (za === 'internal' && zb === 'external') return 3;
+    if (za === 'internal' && zb === 'client') return 4;   // response / notification to the client
+    if (za === 'client' && zb === 'external') return 5;   // direct client -> external (red)
+    return 4;                                             // other rare cases: together with the response
+  }
+  var stages = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+  vectors.forEach(function (o) { stages[stage(o)].push(o); });
+  Object.keys(stages).forEach(function (k) { stages[k].sort(function (x, y) { return compareIds(x.a, y.a) || compareIds(x.b, y.b); }); });
+
+  // traces a list of vectors, staggered; the source appears if missing, the target when the line arrives
+  function traceList(list, from) {
+    var end = from;
+    list.forEach(function (o, i) {
+      var ti = from + i * V_STEP;
+      if (appearsAt.has(o.a)) ti = Math.max(ti, appearsAt.get(o.a) + 0.35); else appear(o.a, ti - 0.4);
+      task(ti, V_DUR, trace(o));
+      appear(o.b, ti + V_DUR * 0.85);
+      end = Math.max(end, ti + V_DUR);
+    });
+    return end;
+  }
+
+  // 1. the client front: frontends and client systems, camera focusing on each
+  phases.push({ start: t, text: 'Adding the client front' });
+  zClient.forEach(function (n, i) {
+    var ti = t + i * STEP;
+    cameraKeys.push({ t: ti - 0.2, target: n.home.clone(), fraction: 0.32 });
+    appear(n, ti);
+  });
+  t += zClient.length * STEP + 0.3;
+
+  // 2. from the client to the internals: each internal appears when its line arrives
+  if (stages[1].length) {
+    phases.push({ start: t, text: 'Connecting to the internals' });
+    cameraKeys.push({ t: t, target: cClient.clone().lerp(cInternal, 0.6), fraction: 0.48 });
+    t = traceList(stages[1], t) + 0.2;
+  }
+  // 3. the camera stays on the internals: the remaining ones and the connections between them
+  cameraKeys.push({ t: t - 0.2, target: cInternal.clone(), fraction: 0.5 });
+  phases.push({ start: t, text: 'Between the internals' });
+  var internalTargets = new Set(stages[2].map(function (o) { return o.b; }));
+  zInternal.filter(function (n) { return !appearsAt.has(n) && !internalTargets.has(n); })
+    .sort(compareIds).forEach(function (n, i) { appear(n, t + i * V_STEP); });
+  t = traceList(stages[2], t + 0.3) + 0.2;
+  zInternal.filter(function (n) { return !appearsAt.has(n); }).forEach(function (n, i) { appear(n, t + i * V_STEP); });
+
+  // 4. from the internals to the externals: the camera stays on the internals, a bit wider
+  if (stages[3].length) {
+    phases.push({ start: t, text: 'Reaching the externals' });
+    cameraKeys.push({ t: t, target: cInternal.clone().lerp(cExternal, 0.2), fraction: 0.64 });
+    t = traceList(stages[3], t) + 0.2;
+  }
+  // 5. processes that end at the client (e.g. a webhook notification)
+  if (stages[4].length) {
+    phases.push({ start: t, text: 'Responding to the client' });
+    cameraKeys.push({ t: t, target: cInternal.clone().lerp(cClient, 0.45), fraction: 0.72 });
+    t = traceList(stages[4], t) + 0.2;
+  }
+  // 6. last, the direct client -> external connections (red)
+  if (stages[5].length) {
+    phases.push({ start: t, text: 'Direct client → external connections' });
+    cameraKeys.push({ t: t, target: cClient.clone().lerp(cExternal, 0.5), fraction: 0.82 });
+    t = traceList(stages[5], t) + 0.2;
+  }
+  // 7. databases: the nuclei appear next to the origin and their links are drawn to the repos that use them
+  if (dbs.length) {
+    phases.push({ start: t, text: 'Adding the databases' });
+    cameraKeys.push({ t: t, target: centerOf(dbs).lerp(cInternal, 0.35), fraction: 0.55 });
+    dbs.slice().sort(compareIds).forEach(function (n, i) {
+      var ti = t + i * 0.55; appear(n, ti);
+      n.links.forEach(function (e, j) { task(ti + 0.35 + j * 0.18, 0.8, function (k) { e.line.material.opacity = e.opacity * smooth(k); }); });
+    });
+    t += dbs.length * 0.55 + 1.3;
+  }
+  // 8. repos that are in the workspace but not documented yet: hollow and dotted, at the end
+  if (ghosts.length) {
+    phases.push({ start: t, text: 'Not documented yet' });
+    cameraKeys.push({ t: t, target: centerOf(ghosts), fraction: 0.8 });
+    ghosts.forEach(function (n, i) { appear(n, t + i * 0.3); });
+    t += ghosts.length * 0.3 + 0.8;
+  }
+  // points without any connection
+  base.filter(function (n) { return !appearsAt.has(n); }).forEach(function (n, i) { appear(n, t + i * 0.2); });
+  t += 0.4;
+
+  cameraKeys.push({ t: t - 0.2, target: CENTER.clone(), fraction: 0.9 });
+  t += 0.6;
+  cameraKeys.push({ t: t, target: CENTER.clone(), fraction: 1 });
+  t += 1.2;
+  phases.push({ start: t, text: '' });
+  DURATION = Math.max(DURATION, t);
+
+  // ---------- 9. State, layers and interaction ----------
+  var clock = new THREE.Clock(), tBuild = 0, building = true, sway = true, tSway = 0;
+  var guided = !reduced;                                 // the camera follows the keys until the user takes over
+  var camTarget = CENTER.clone(), camDist = FINAL_DIST * 1.15;
+  function currentKey(tt) { var c = cameraKeys[0]; for (var i = 0; i < cameraKeys.length; i++) if (cameraKeys[i].t <= tt) c = cameraKeys[i]; return c; }
+  function placeCamera() {
+    camera.position.copy(camTarget).add(CAM_DIR.clone().multiplyScalar(camDist));
+    controls.target.copy(camTarget);
+  }
+  var layers = { vectors: true, names: true };
+  var selection = null, activeModule = null, focus = { nodes: null, vecs: null };
+  var camTween = null, tour = null, TOUR_HOLD = 6.5;
+
+  function applyAll(tt) { tasks.forEach(function (ta) { var k = (tt - ta.start) / ta.dur; if (k >= 0) ta.fn(Math.min(1, k)); else ta.fn(0); }); }
+  function finishBuild() {
+    tBuild = DURATION + 1; applyAll(tBuild); building = false;
+    if (guided || sway) { camTarget.copy(CENTER); camDist = FINAL_DIST; placeCamera(); }
+    guided = false;
+    vectors.forEach(function (o) { o.active = true; });
+    $('#phase').style.opacity = 0; $('#btn-build').textContent = 'Rebuild';
+    applyLayers();
+  }
+  function restartBuild() {
+    tBuild = 0; building = true; selection = null; activeModule = null; activeEp = null; mode = 'global'; closeStrands(); stopTour(); camTween = null; applySelection();
+    nodes.forEach(function (n) { n.group.position.copy(n.home); n.group.scale.setScalar(0.0001); });
+    links.forEach(function (e) { e.line.material.opacity = 0; });
+    vectors.forEach(function (o) { o.active = false; o.pulse.material.opacity = 0; });
+    visualAxes.forEach(function (e) { e.label.material.opacity = 0; });
+    applyAll(0);
+    camTarget.copy(CENTER); camDist = FINAL_DIST * 1.15; placeCamera();
+    guided = !reduced; sway = true; tSway = 0;
+    $('#phase').style.opacity = 1; $('#btn-build').textContent = 'Skip animation';
+  }
+  $('#btn-build').addEventListener('click', function () { if (building) finishBuild(); else restartBuild(); });
+  $('#btn-view').addEventListener('click', function () {
+    camTarget.copy(CENTER); camDist = FINAL_DIST; placeCamera(); sway = !reduced; tSway = 0;
+  });
+  controls.addEventListener('start', function () { sway = false; guided = false; camTween = null; });
+
+  function nodeVisible() { return true; }
+  function applyLayers() {
+    nodes.forEach(function (n) { n.group.visible = nodeVisible(n); n.label.visible = layers.names && n.label.userData.hasName; });
+    vectors.forEach(function (o) { var v = layers.vectors; o.core.visible = o.halo.visible = o.arrow.visible = o.pulse.visible = v; });
+    links.forEach(function (e) { e.line.visible = layers.vectors && nodeVisible(e.a) && nodeVisible(e.b); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-layer]'), function (b) {
+    b.addEventListener('click', function () {
+      var c = b.getAttribute('data-layer'); layers[c] = !layers[c]; b.setAttribute('aria-pressed', String(layers[c])); applyLayers();
+    });
+  });
+
+  // Selection: highlights a point with its connections and dims the rest
+  function related(n) {
+    var set = new Set([n]);
+    n.vectors.forEach(function (o) { set.add(o.a); set.add(o.b); });
+    n.links.forEach(function (e) { set.add(e.a); set.add(e.b); });
+    return set;
+  }
+  // The three levels of detail over the same points: Global (everything), Modules (one numbered trail) and Detail (one strand per endpoint).
+  var mode = 'global', activeEp = null, ui = { ready: false, epFor: null };
+  function applySelection() {
+    var f = { nodes: null, vecs: null };
+    if (activeModule) { f.nodes = new Set(activeModule.allPoints); f.vecs = mode === 'detail' ? new Set() : new Set(activeModule.vectors); }
+    else if (selection) { f.nodes = related(selection); f.vecs = new Set(selection.vectors); }
+    focus = f;
+    nodes.forEach(function (n) {
+      var on = !f.nodes || f.nodes.has(n);
+      n.mesh.material.opacity = on ? (n.ghost ? 0.55 : n.type === 'virtual' ? 0.9 : 1) : 0.12; n.mesh.material.transparent = true;
+      n.glow.material.opacity = on ? n.glow.userData.baseOpacity : 0.04;
+      n.label.material.opacity = on ? 1 : 0.15;
+      n.extras.forEach(function (x) { x.m.opacity = on ? x.base : x.base * 0.15; });
+    });
+    vectors.forEach(function (o) {
+      var on = !f.vecs || f.vecs.has(o);
+      o.core.material.opacity = on ? o.opC : 0.05; o.halo.material.opacity = on ? o.opH : 0.01; o.arrow.material.opacity = on ? o.opA : 0.06;
+    });
+    links.forEach(function (e) {
+      var on = activeModule ? activeModule.links.indexOf(e) >= 0 : (!selection || e.a === selection || e.b === selection);
+      if (!building) e.line.material.opacity = on ? e.opacity : 0.05;
+    });
+    modules.forEach(function (mo) { var was = mo.target; mo.target = (mo === activeModule && mode !== 'detail') ? 1 : 0; if (!mo.target || !was) mo.k = 0; });
+    syncUI();
+  }
+
+  var panel = $('#modules-panel'), selMod = $('#module-select'), selEp = $('#endpoint-select'), levelBtns = [];
+  function esc(x) { return escapeHtml(x == null ? '' : x); }
+  function buildPanel() {
+    if (!modules.length) return;
+    panel.hidden = false;
+    // module selector, grouped by the entry point that owns each module
+    selMod.innerHTML = '<option value="">All modules (Global)</option>';
+    var groups = {}, order = [];
+    modules.forEach(function (mo, i) { var g = mo.repo || ''; if (!(g in groups)) { groups[g] = []; order.push(g); } groups[g].push(i); });
+    order.forEach(function (g) {
+      var holder = selMod;
+      if (g && order.length > 1) { holder = document.createElement('optgroup'); holder.label = shortName(g); selMod.appendChild(holder); }
+      groups[g].forEach(function (i) { var o = document.createElement('option'); o.value = String(i); o.textContent = modules[i].name; holder.appendChild(o); });
+    });
+    selMod.addEventListener('change', function () {
+      if (selMod.value === '') showGlobal(); else if (mode === 'detail' && modules[+selMod.value].endpoints.length) openDetail(modules[+selMod.value]); else focusModule(modules[+selMod.value], false);
+    });
+    selEp.addEventListener('change', function () { activeEp = selEp.value === '' ? null : activeModule.endpoints[+selEp.value]; syncUI(); });
+    levelBtns = Array.prototype.slice.call(panel.querySelectorAll('.levels button'));
+    levelBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var m = b.getAttribute('data-mode');
+        if (m === 'global') showGlobal();
+        else if (m === 'modules') { if (!activeModule) focusModule(modules[0], false); else if (mode === 'detail') leaveDetail(); else focusModule(activeModule, false); }
+        else { var mo = (activeModule && activeModule.endpoints.length) ? activeModule : modules.filter(function (x) { return x.endpoints.length; })[0]; if (mo) openDetail(mo); }
+      });
+    });
+    $('#btn-open').addEventListener('click', function () { if (activeModule) openDetail(activeModule); });
+    // module list: one button per module, its steps unfold when it is the active one
+    var ml = $('#module-list');
+    modules.forEach(function (mo) {
+      var li = document.createElement('li'), btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'mbtn'; btn.setAttribute('aria-pressed', 'false'); btn.style.setProperty('--c', hex(mo.color));
+      btn.innerHTML = '<i></i><span>' + esc(mo.name) + '</span><em>' + mo.steps.length + (mo.steps.length === 1 ? ' step' : ' steps') + '</em>';
+      btn.addEventListener('click', function () { setModule(mo, false); });
+      var ol = document.createElement('ol'); ol.className = 'steps'; ol.hidden = true; ol.style.setProperty('--soft-c', hex(mo.color));
+      mo.steps.forEach(function (st, i) {
+        var it = document.createElement('li');
+        it.innerHTML = '<b>' + (i + 1) + '</b><span>' + esc(st.node.name) + '</span>' + (st.note ? '<small>' + esc(st.note) + '</small>' : '');
+        ol.appendChild(it);
+      });
+      li.appendChild(btn); li.appendChild(ol); ml.appendChild(li); mo.ui = { btn: btn, steps: ol };
+    });
+    panel.insertAdjacentHTML('beforeend', '<div class="mini" aria-label="Legend: modules">' +
+      '<div><svg viewBox="0 0 16 16"><path d="M2 13 14 3" stroke="#facc15" stroke-width="2.4" stroke-linecap="round"/></svg>Module: numbered trail through the points it touches</div>' +
+      '<div><svg viewBox="0 0 16 16"><path d="M2 12C5 4 11 4 14 12" fill="none" stroke="#fde047" stroke-width="1.6" stroke-linecap="round"/></svg>Endpoint strand (Detail); the light shows the direction</div></div>');
+    $('#btn-tour').hidden = false; $('#btn-panel').hidden = false;
+    ui.ready = true; syncUI();
+  }
+  function syncUI() {
+    if (!ui.ready) return;
+    var mo = activeModule, anyEp = modules.some(function (x) { return x.endpoints.length; });
+    selMod.value = mo ? String(modules.indexOf(mo)) : '';
+    levelBtns.forEach(function (b) { var m = b.getAttribute('data-mode'); b.setAttribute('aria-pressed', String(m === mode)); b.disabled = (m === 'detail' && !anyEp); });
+    var c = mode === 'global' ? '<b>Global</b>' : 'Global › ' + (mo ? 'Modules' : '<b>Modules</b>');
+    if (mo) c += ' › ' + (mode === 'modules' ? '<b>' + esc(mo.name) + '</b>' : esc(mo.name));
+    if (mode === 'detail') c += ' › ' + (activeEp ? '<b>' + esc(activeEp.method + ' ' + activeEp.route) + '</b>' : '<b>' + mo.endpoints.length + ' endpoints</b>');
+    $('#crumb').innerHTML = c;
+    // module list or endpoint list
+    var det = mode === 'detail' && !!mo;
+    $('#module-list').hidden = det; $('#endpoint-list').hidden = !det; $('#ep-sel-wrap').hidden = !det;
+    modules.forEach(function (x) { var on = mo === x; x.ui.btn.setAttribute('aria-pressed', String(on)); x.ui.steps.hidden = !(on && mode === 'modules'); });
+    if (det && ui.epFor !== mo) {
+      ui.epFor = mo;
+      selEp.innerHTML = '<option value="">All endpoints</option>' + mo.endpoints.map(function (e, i) { return '<option value="' + i + '">' + esc(e.method + ' ' + e.route) + '</option>'; }).join('');
+      var el = $('#endpoint-list'); el.innerHTML = '';
+      mo.endpoints.forEach(function (e) {
+        var li = document.createElement('li'), b = document.createElement('button');
+        b.type = 'button'; b.className = 'mbtn'; b.setAttribute('aria-pressed', 'false'); b.style.setProperty('--c', hex(mo.color));
+        b.innerHTML = '<i></i><span>' + esc(e.route) + '</span><em class="method">' + esc(e.method) + '</em>';
+        b.addEventListener('click', function () { isolate(e); });
+        li.appendChild(b); el.appendChild(li); e.btn = b;
+      });
+    }
+    if (!det) ui.epFor = null;
+    if (det) { selEp.value = activeEp ? String(mo.endpoints.indexOf(activeEp)) : ''; mo.endpoints.forEach(function (e) { if (e.btn) e.btn.setAttribute('aria-pressed', String(e === activeEp)); }); }
+    // module info (summary, document) and the way into the detail
+    var info = $('#module-info');
+    if (mo && mode !== 'global') {
+      info.hidden = false; $('#mi-summary').textContent = mo.summary; $('#mi-doc').textContent = mo.doc ? 'Read more: ' + mo.doc : '';
+      var ob = $('#btn-open'); ob.hidden = !(mode === 'modules' && mo.endpoints.length); ob.textContent = 'Open detail › (' + mo.endpoints.length + ' endpoints)';
+    } else info.hidden = true;
+    var ei = $('#ep-info');
+    if (det && activeEp) {
+      var e = activeEp, h = '';
+      if (e.summary) h += '<p>' + esc(e.summary) + '</p>';
+      h += '<ol class="steps" style="--soft-c:' + hex(mo.color) + '">' + (e.hops || []).map(function (hp, i) {
+        var a = byId[hp.source], b = byId[hp.target];
+        return '<li><b>' + (i + 1) + '</b><span>' + esc((a ? a.name : hp.source) + ' → ' + (b ? b.name : hp.target)) + '</span><small>' + esc((hp.kind === 'data' ? 'data' : 'call') + (hp.protocol ? ' · ' + hp.protocol : '')) + '</small></li>';
+      }).join('') + '</ol>';
+      if ((e.entities && e.entities.length) || (e.operations && e.operations.length))
+        h += '<p class="doc">Data: ' + esc((e.entities || []).join(', ')) + (e.operations && e.operations.length ? ' (' + e.operations.join(', ') + ')' : '') + '</p>';
+      if (e.doc) h += '<p class="doc">Read more: ' + esc(e.doc) + '</p>';
+      ei.innerHTML = h; ei.hidden = false;
+    } else ei.hidden = true;
+  }
+  function tweenToNodes(list) {   // keeps the current viewing direction; only moves the target and the distance
+    var c = new THREE.Vector3(), r = 0;
+    list.forEach(function (n) { c.add(n.home); }); c.multiplyScalar(1 / list.length);
+    list.forEach(function (n) { r = Math.max(r, c.distanceTo(n.home)); });
+    camTween = { target: c, dist: FINAL_DIST * Math.max(0.5, Math.min(1.0, 0.5 + r / 12)) }; sway = false; guided = false;
+  }
+  function showGlobal() {
+    stopTour(); closeStrands(); mode = 'global'; activeModule = null; activeEp = null; selection = null; applySelection();
+    camTween = { target: CENTER.clone(), dist: FINAL_DIST };
+  }
+  function focusModule(mo, fromTour) {
+    if (building) finishBuild();
+    if (!fromTour) stopTour();
+    closeStrands(); mode = 'modules'; selection = null; activeEp = null; activeModule = mo; applySelection();
+    tweenToNodes(mo.allPoints);
+  }
+  function setModule(mo, fromTour) {   // list buttons: a second click on the active module clears it
+    if (activeModule === mo && !fromTour && mode === 'modules') showGlobal(); else focusModule(mo, fromTour);
+  }
+  function openDetail(mo) {
+    if (!mo || !mo.endpoints.length) return;
+    if (building) finishBuild();
+    stopTour(); selection = null; activeEp = null; activeModule = mo; mode = 'detail'; openStrands(mo); applySelection();
+    tweenToNodes(mo.allPoints);
+  }
+  function leaveDetail() { closeStrands(); mode = 'modules'; activeEp = null; applySelection(); }
+  function isolate(ep) { activeEp = (activeEp === ep) ? null : ep; syncUI(); }
+  function clearFocus() { showGlobal(); }
+  function back() {   // Esc: one level up
+    if (mode === 'detail') { if (activeEp) { activeEp = null; syncUI(); } else leaveDetail(); return; }
+    if (mode === 'modules') { showGlobal(); return; }
+    selection = null; applySelection();
+  }
+  function startTour() {
+    if (!modules.length) return;
+    tour = { i: 0, t: 0 }; $('#btn-tour').textContent = 'Stop tour'; setModule(modules[0], true);
+  }
+  function stopTour() { tour = null; var b = $('#btn-tour'); if (b) b.textContent = 'Play modules'; }
+  $('#btn-tour').addEventListener('click', function () { if (tour) { clearFocus(); } else { if (building) finishBuild(); if (mode === 'detail') leaveDetail(); startTour(); } });
+  $('#btn-panel').addEventListener('click', function () {
+    panel.hidden = !panel.hidden; this.setAttribute('aria-pressed', String(!panel.hidden));
+  });
+  buildPanel();
+
+  var ray = new THREE.Raycaster(), pointer = new THREE.Vector2(), hover = null, tip = $('#tooltip');
+  function readPointer(ev) {
+    var r = canvas.getBoundingClientRect();
+    pointer.x = ((ev.clientX - r.left) / r.width) * 2 - 1; pointer.y = -((ev.clientY - r.top) / r.height) * 2 + 1;
+  }
+  function pickAll() {   // a point (repo, system, database) or, in the Detail view, a strand
+    ray.setFromCamera(pointer, camera);
+    var objs = pickables.filter(function (m) { var n = m.userData.node; return n.group.visible && n.group.scale.x > 0.5; }).concat(strandPick);
+    var hits = ray.intersectObjects(objs, false);
+    if (!hits.length) return null;
+    var o = hits[0].object;
+    return o.userData.strand ? { strand: o.userData.strand, hop: o.userData.hop } : { node: o.userData.node };
+  }
+  var TYPE_TXT = { database: function (p) { return 'Database' + (p.engine ? ', ' + p.engine : ''); },
+    repo: function (p) { return p.documented === false ? 'Repo not documented yet' : 'Repo ' + (p.role || '') + (p.entry_point ? ', entry point' : ''); },
+    virtual: function (p) { return 'System without repo, axis ' + (p.axis || ''); } };
+  function semanticValue(p, sem) {
+    for (var field in axes) if (axes[field] === sem) return p[field];
+    return '';
+  }
+  function tipBox(title, kind, rows, ev) {
+    tip.innerHTML = '<div class="name">' + escapeHtml(title) + '</div><div class="kind">' + escapeHtml(kind) + '</div><dl>' +
+      rows.map(function (f) { return '<dt>' + escapeHtml(f[0]) + '</dt><dd>' + escapeHtml(f[1]) + '</dd>'; }).join('') + '</dl>';
+    tip.hidden = false;
+    var x = ev.clientX + 16, y = ev.clientY + 16, r = tip.getBoundingClientRect();
+    if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 16;
+    if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - 16;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function showTip(n, ev) {
+    var p = n.p, rows = [];
+    if (n.type === 'database') {
+      rows.push(['Used by', n.links.map(function (e) { var o = e.a === n ? e.b : e.a; return o.name + (e.label ? ' (' + e.label + ')' : ''); }).join(', ') || (p.repos || []).join(', ') || '-']);
+      rows.push(['Electrons', p.electrons || n.electrons.length]);
+      if (p.notes) rows.push(['Stores', p.notes]);
+    } else if (!n.ghost) {
+      rows.push(['Client', semanticValue(p, 'client')], ['Internal', semanticValue(p, 'internal')], ['External', semanticValue(p, 'external')]);
+      if (n.type === 'repo' && p.count_internal != null) rows.push(['Endpoints C / I / E', (p.count_client || 0) + ' / ' + p.count_internal + ' / ' + (p.count_external || 0)]);
+      rows.push(['Connections', n.vectors.length]);
+    }
+    if (n.modules && n.modules.length) rows.push(['Modules', n.modules.map(function (m) { return m.name; }).join(', ')]);
+    tipBox(p.id, TYPE_TXT[n.type](p), rows, ev);
+  }
+  function showStrandTip(hit, ev) {
+    var e = hit.strand.ep, h = hit.hop, a = byId[h.source], b = byId[h.target], rows = [];
+    rows.push(['Hop', (a ? a.name : h.source) + ' → ' + (b ? b.name : h.target) + (h.protocol ? ' · ' + h.protocol : '')]);
+    if (e.summary) rows.push(['Summary', e.summary]);
+    if (h.kind === 'data') {
+      if (e.entities && e.entities.length) rows.push(['Entities', e.entities.join(', ')]);
+      if (e.operations && e.operations.length) rows.push(['Operations', e.operations.join(', ')]);
+    }
+    tipBox(e.method + ' ' + e.route, 'Endpoint · click to isolate', rows, ev);
+  }
+  canvas.addEventListener('pointermove', function (ev) {
+    readPointer(ev); hover = pickAll(); canvas.style.cursor = hover ? 'pointer' : 'grab';
+    if (!hover) tip.hidden = true; else if (hover.strand) showStrandTip(hover, ev); else showTip(hover.node, ev);
+  });
+  canvas.addEventListener('pointerleave', function () { tip.hidden = true; });
+  var down = null;
+  canvas.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, y: ev.clientY }; });
+  canvas.addEventListener('pointerup', function (ev) {
+    if (!down || Math.hypot(ev.clientX - down.x, ev.clientY - down.y) > 5) return;
+    readPointer(ev); var hit = pickAll(); stopTour();
+    if (mode === 'detail') {   // in the Detail view a click isolates a strand; clicking the void shows all of them again
+      if (hit && hit.strand) isolate(hit.strand.ep); else if (!hit) { activeEp = null; syncUI(); }
+      return;
+    }
+    closeStrands(); mode = 'global'; activeModule = null;
+    selection = (hit && hit.node && hit.node !== selection) ? hit.node : null; applySelection();
+  });
+  window.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape') { back(); tip.hidden = true; }
+  });
+
+  function resize() {
+    var width = window.innerWidth, height = window.innerHeight;
+    renderer.setSize(width, height, false); camera.aspect = width / height;
+    camera.fov = width < 720 ? 52 : 40; camera.updateProjectionMatrix();
+    computeDistances(camera.aspect, camera.fov);
+    if (composer) { composer.setSize(width, height); bloom.resolution.set(width, height); }
+  }
+  window.addEventListener('resize', resize); resize();
+
+  // ---------- 10. Loop ----------
+  var phaseTxt = $('#phase-text'), phaseBar = $('#phase-bar'), currentPhase = -1;
+  function loop() {
+    var dt = Math.min(0.05, clock.getDelta()), now = clock.elapsedTime;
+    if (building) {
+      tBuild += dt; applyAll(tBuild);
+      if (guided) {
+        var cl = currentKey(tBuild), f = 1 - Math.exp(-dt * 2.2);
+        camTarget.lerp(cl.target, f);
+        camDist += (FINAL_DIST * cl.fraction - camDist) * f;
+        placeCamera();
+      }
+      var f = -1; for (var i = 0; i < phases.length; i++) if (tBuild >= phases[i].start) f = i;
+      if (f !== currentPhase && f >= 0) { currentPhase = f; phaseTxt.textContent = phases[f].text; }
+      phaseBar.style.width = Math.min(100, 100 * tBuild / DURATION) + '%';
+      if (tBuild >= DURATION) { finishBuild(); if (modules.length && !reduced) startTour(); }
+    }
+    if (tour && !building) {
+      tour.t += dt;
+      if (tour.t > TOUR_HOLD) { tour.t = 0; tour.i++; if (tour.i >= modules.length) clearFocus(); else setModule(modules[tour.i], true); }
+    }
+    if (camTween && !building) {
+      var ft = 1 - Math.exp(-dt * 2.4), dir = camera.position.clone().sub(controls.target), d0 = dir.length();
+      dir.normalize(); controls.target.lerp(camTween.target, ft);
+      camera.position.copy(controls.target).add(dir.multiplyScalar(d0 + (camTween.dist - d0) * ft));
+      if (controls.target.distanceTo(camTween.target) < 0.02 && Math.abs(d0 - camTween.dist) < 0.1) camTween = null;
+    }
+    if (sway && !reduced && !building) { // gentle oscillation: never flips the client → external reading
+      tSway += dt;
+      var ang = Math.sin(tSway * 0.18) * 0.32, len = camera.position.distanceTo(controls.target);
+      var d = CAM_DIR.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), ang);
+      camera.position.copy(controls.target).add(d.multiplyScalar(len));
+    }
+    if (!reduced) vectors.forEach(function (o) {
+      if (!o.active || !o.core.visible) { o.pulse.material.opacity = 0; return; }
+      var vel = 0.9 / Math.max(2, o.length) * (o.weak ? 0.5 : 1);
+      var u = (now * vel * 3 + o.phase) % 1;
+      o.pulse.position.copy(o.curve.getPointAt(u * o.tArrow));
+      var on = !focus.vecs || focus.vecs.has(o);
+      o.pulse.material.opacity = (on ? 0.7 : 0.05) * Math.sin(Math.PI * u);
+    });
+    if (!reduced) nodes.forEach(function (n) {   // electrons orbiting the nuclei, slowly
+      if (n.electrons && n.group.scale.x > 0.05) n.electrons.forEach(function (e) { e.pivot.rotation.y += dt * e.speed; });
+    });
+    modules.forEach(function (mo) {   // module trails: drawn progressively, with a travelling light and numbered badges
+      var want = mo.target > 0;
+      if (mo.path) mo.core.visible = mo.halo.visible = mo.pulse.visible = want;
+      if (!want) { if (mo.path) mo.pulse.material.opacity = 0; mo.badges.forEach(function (bd) { bd.visible = false; }); return; }
+      if (mo.k < 1) mo.k = Math.min(1, mo.k + dt / (reduced ? 0.01 : 2.2));
+      var kk = smooth(mo.k);
+      if (mo.path) {
+        var n = Math.ceil(kk * mo.seg) * mo.rad * 6;
+        mo.core.geometry.setDrawRange(0, n); mo.halo.geometry.setDrawRange(0, n);
+        mo.core.material.opacity = 0.95; mo.halo.material.opacity = 0.2;
+        var u = (now * 3 / Math.max(4, mo.length) + mo.phase) % 1;
+        mo.pulse.position.copy(mo.path.getPointAt(Math.min(0.999, u * kk)));
+        mo.pulse.material.opacity = 0.95 * Math.sin(Math.PI * u);
+      }
+      mo.badges.forEach(function (bd) { bd.visible = true; bd.material.opacity = Math.max(0, Math.min(1, (kk - bd.userData.at) * 10 + (mo.path ? 0 : 1))); });
+    });
+    strands.forEach(function (st) {   // endpoint strands: drawn hop by hop, then a light walks them in order
+      if (st.k < 1) st.k = Math.min(1, st.k + dt / (reduced ? 0.01 : 1.6));
+      var N = st.hops.length, kk = smooth(st.k), dimmed = !!activeEp && activeEp !== st.ep;
+      st.hops.forEach(function (hh, i) {
+        var kh = Math.max(0, Math.min(1, kk * N - i)), cnt = Math.ceil(kh * hh.seg) * hh.rad * 6;
+        hh.core.geometry.setDrawRange(0, cnt); hh.halo.geometry.setDrawRange(0, cnt);
+        hh.core.material.opacity = dimmed ? 0.12 : 0.95; hh.halo.material.opacity = dimmed ? 0.02 : 0.18;
+      });
+      var pos = ((now * 0.3 + st.phase) % 1) * N, i = Math.min(N - 1, Math.floor(pos)), fr = pos - i;
+      st.spark.position.copy(st.hops[i].curve.getPointAt(Math.min(0.999, fr)));
+      st.spark.material.opacity = (dimmed || kk < 0.98) ? 0 : 0.95 * Math.sin(Math.PI * fr);
+    });
+    var st = scene.getObjectByName('stars'); if (st && !reduced) st.rotation.y += dt * 0.004;
+    controls.update();
+    if (composer) composer.render(); else renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+
+    applyAll(0);
+    if (reduced) finishBuild();
+    requestAnimationFrame(loop);
+  } // end of main()
+
+  // Wait for the label font (max. 1.2 s) before building the scene, so the 3D text does not use the fallback font
+  var ready = false; function once() { if (!ready) { ready = true; main(); } }
+  if (document.fonts && document.fonts.load) {
+    Promise.all([document.fonts.load('600 64px "Chakra Petch"'), document.fonts.load('500 64px "Chakra Petch"')]).then(once, once);
+    setTimeout(once, 1200);
+  } else once();
+})();
+</script>
+</body>
+</html>

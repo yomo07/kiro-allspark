@@ -94,7 +94,7 @@ After 2.A (role already defined), one command per repo:
 |---|---|
 | `--stack` | The repo's `tech.md` (e.g. `nestjs`, `spring`, `django,celery`). Only the names listed by `prescan.py --stacks` are valid: languages and frameworks (`django`, `spring`, `aspnet`...) and libraries tied to one language (`celery`, `sidekiq`, `masstransit`). Protocols or brokers such as `kafka`, `rabbitmq` or `grpc` are **not** stacks: the rules of each language already detect them, so do not pass them. Any other name goes to `stacks_without_pattern`. |
 | `--role` | Step 2.A. It does not narrow the search (the mapping is complete): it is used to warn about inconsistencies, e.g. a `frontend` with inbound routes. |
-| `--id` | Real Git name (the same deterministic ID as in the vault). |
+| `--id` | Real Git name (the same deterministic ID as in the export). |
 | `--cache` | Reuses the JSON if the repo's commit and state did not change (see "Cache"). |
 | `--max-kb` | Optional. Size limit per file, in KB (default `1024`). Larger files are skipped and listed in `warnings`. |
 
@@ -134,8 +134,9 @@ It never opens or reads:
   `*.jks`, `credentials*`, `secrets.*`.
 - YAML documents `kind: Secret` / `SealedSecret` / `ExternalSecret`.
 - Config keys with a secret name (`password`, `token`, `api_key`,
-  `secret`...) or database name (`datasource`, `db`, `postgres`,
-  `redis`...: outside the cube model).
+  `secret`...). Database keys (`datasource`, `db`, `postgres`, `redis`...)
+  are only read to **identify** the database (see "Database candidates"),
+  never to copy their values.
 - Tests and test doubles (`*.spec.*`, `*.test.*`, `test_*.py`,
   `*Test.java`, folders `test/`, `tests/`, `__mocks__/`, `fixtures/`...),
   dependencies and build output (`node_modules/`, `target/`, `dist/`,
@@ -150,9 +151,8 @@ Any credential embedded in a URL (`user:password@host`) comes out masked as
 
 ## Output — `.kiro/allspark/prescan/<repo-slug>.json`
 
-It is a working artifact, not a steering doc: it is not promoted to the
-vault or shared between teams (it stays under `.kiro/allspark/`, excluded
-by `.kiroignore`).
+It is a working artifact, not a steering doc: it stays under
+`.kiro/allspark/`, excluded by `.kiroignore`.
 
 ```json
 {
@@ -163,7 +163,7 @@ by `.kiroignore`).
   "stacks_without_pattern": [],
   "role": "backend",
   "cache_key": "3f9c…",
-  "summary": { "files_scanned": 42, "candidates": 17,
+  "summary": { "files_scanned": 42, "lines_scanned": 6310, "candidates": 17,
                "by_protocol": { "http:inbound": 3, "http:outbound": 4, "…": 0 },
                "by_confidence": { "high": 14, "uncertain": 3 }, "duration_ms": 72 },
   "contracts": ["proto/scoring.proto"],
@@ -188,7 +188,7 @@ Fields of each candidate:
 
 | Field | Always | Meaning |
 |---|---|---|
-| `protocol` | Yes | `http`, `soap`, `grpc`, `queue-kafka`, `queue-rabbitmq`, `queue` (broker not determinable from the code: NestJS `@EventPattern`, Celery, Sidekiq, MassTransit), `webhook`, `s3`. |
+| `protocol` | Yes | `http`, `soap`, `grpc`, `queue-kafka`, `queue-rabbitmq`, `queue` (broker not determinable from the code: NestJS `@EventPattern`, Celery, Sidekiq, MassTransit), `webhook`, `s3`, and `database` (identity only, see below). |
 | `direction` | Yes | `outbound`, `inbound`, or `declaration` (service from a `.proto`: Kiro decides whether the repo implements or consumes it by crossing it with the gRPC candidates). |
 | `raw_value` | Yes | What was found, unresolved: URL, path, `host:port`, topic, queue, `exchange/routing-key`, bucket, service. If it depends on variables, the code text is delivered as is. |
 | `confidence` | Yes | `high`: literal without variables. `uncertain`: depends on variables, config or concatenation, or the object was not recognized as a network client. |
@@ -227,9 +227,48 @@ Fields of each candidate:
    2.A is corrected there, not after classifying.
 
 **Mandatory reconciliation** (Phase 2 verification): for each repo,
-`candidates = grouped into connections + discarded with a reason`. A
+`candidates = grouped into connections + discarded with a reason +
+database candidates` (these go to the repo's `Databases used`, they are not grouped into connections). A
 candidate that does not appear on either side is a lost connection and the
 run is not considered finished.
+
+## Database candidates (identity for Level 1)
+
+A database is **not** a connection between systems: in the cube it is a
+nucleus near the origin that the repos reach. The prescan detects them so
+that each repo's `Databases used` (Level 1) identifies every database without
+anyone copying a connection string by hand. Two repos that point to the same
+database share one nucleus.
+
+- **Where**: the same non-secret config pass — URLs (`jdbc:postgresql://`,
+  `postgres://`, `mysql://`, `jdbc:sqlserver://`, `jdbc:oracle:`,
+  `mongodb://`, `redis://`) and .NET connection strings
+  (`Server=...;Database=...` for SQL Server, `Host=...;Database=...` for
+  PostgreSQL), in `application*.yml`, `appsettings*.json`, `.env.example`
+  and the other config files listed above.
+- **What is kept**: only the identity, as `raw_value` and in the `database`
+  field:
+
+  ```json
+  { "protocol": "database", "direction": "outbound",
+    "raw_value": "postgres://payments-db/payments",
+    "database": { "engine": "postgresql", "host": "payments-db", "name": "payments" },
+    "config_key": "spring.datasource.url", "confidence": "high",
+    "chain_step": 3, "rule": "config.database",
+    "evidence": { "file": "src/main/resources/application.yml", "line": 4,
+                  "snippet": "spring.datasource.url -> postgres://payments-db/payments" } }
+  ```
+
+- **What is never kept**: user, password, tokens, query parameters, or the
+  original line. The evidence snippet only shows the key and the resulting
+  id. Keys like `datasource.username` or `password` are skipped.
+- **Same database, same id**: two repos pointing to the same engine, host
+  and name produce the same `raw_value`, which becomes a single nucleus.
+- **Not covered by the script**: databases configured only in code (e.g.
+  Django `DATABASES` in `settings.py`) or split across separate keys
+  (`DB_HOST`, `DB_NAME`). Kiro identifies them while reading the data layer described in the repo's
+  `structure.md` (and, when a module is promoted, the code of its endpoints), applying the same rule: engine + host + name, never
+  credentials.
 
 ## Benefit also outside 2.B
 

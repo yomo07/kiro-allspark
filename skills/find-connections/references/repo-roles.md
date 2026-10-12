@@ -35,10 +35,10 @@ workspace (with steering docs).
    repo.
 4. **Tie or real doubt** → it is reported in the Phase 2 output with the
    evidence that caused the doubt, and the role with the most signals is
-   assigned. It can be pinned by hand in the vault's `allspark/roles.yaml`
+   assigned. It can be pinned by hand in the workspace's `allspark/roles.yaml`
    (override, highest priority), just like `domains.yaml` for domains.
 5. The role is written in the repo's `moc.md` (`role:` in the header) and
-   in the point's note in the vault (`role:` in the frontmatter). If a
+   in the repo's point in the export (`role:`). If a
    later run changes the role, traceable evidence is required, just as
    for reclassifying an axis.
 

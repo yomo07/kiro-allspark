@@ -22,6 +22,9 @@
     --internal: #22c55e;
     --external: #f97316;
     --monolith: #2ea3aa;
+    --feature: #a855f7;
+    --functionality: #e879f9;
+    --data: #facc15;
     --direct: #f43f5e;
     --title: "Chakra Petch", "Rajdhani", "Segoe UI", system-ui, sans-serif;
     --ui: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -119,6 +122,37 @@
     #phase { top: calc(env(safe-area-inset-top, 0px) + 140px); bottom: auto; font-size: 13px; }
   }
   @media (prefers-reduced-motion: reduce) { #phase { transition: none; } }
+  .controls input[type="search"] {
+    font: 400 13.5px var(--ui); color: var(--text); background: rgba(139, 156, 255, 0.06);
+    border: 1px solid rgba(139, 156, 255, 0.22); border-radius: 999px; padding: 6px 13px; min-width: 0; flex: 1 1 220px;
+  }
+  .controls input[type="search"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .controls input[type="search"]::placeholder { color: var(--text-soft); }
+  .modes { display: inline-flex; border: 1px solid rgba(139, 156, 255, 0.28); border-radius: 999px; overflow: hidden; }
+  .controls .modes button { border: 0; border-radius: 0; background: transparent; padding: 6px 14px; }
+  .controls .modes button[aria-pressed="false"] { border-style: solid; background: transparent; }
+  .controls .modes button[aria-pressed="true"] { background: rgba(139, 156, 255, 0.3); color: #fff; }
+  .controls .modes button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .controls #btn-open { border-color: var(--accent); color: #fff; background: rgba(139, 156, 255, 0.22); }
+  .header h2.sel { margin: 14px 0 0; font: 600 16px var(--ui); color: var(--text); }
+  .header .doc { margin: 6px 0 0; font: 500 12px var(--ui); color: var(--accent); word-break: break-all; }
+  .modlist { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 22px); right: 26px; width: min(340px, calc(100vw - 52px)); max-height: max(180px, calc(100vh - 300px)); overflow-y: auto; padding: 10px; z-index: 5; }
+  .modlist h3 { margin: 0 0 6px 4px; font: 500 13px var(--title); letter-spacing: 0.04em; color: var(--text-soft); }
+  .modlist button { display: grid; grid-template-columns: 10px 1fr; gap: 1px 9px; align-items: center; width: 100%; text-align: left; margin: 0 0 4px; padding: 7px 9px; font: 500 13.5px var(--ui); color: var(--text); background: transparent; border: 1px solid transparent; border-radius: 10px; cursor: pointer; }
+  .modlist button:hover { background: rgba(139, 156, 255, 0.12); }
+  .modlist button[aria-pressed="true"] { background: rgba(139, 156, 255, 0.24); border-color: rgba(139, 156, 255, 0.45); color: #fff; }
+  .modlist button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .modlist .dot { width: 10px; height: 10px; border-radius: 50%; grid-row: 1 / span 2; }
+  .modlist .sub { grid-column: 2; font-weight: 400; font-size: 12px; color: var(--text-soft); }
+  .modlist .empty { margin: 6px 4px 2px; font: 400 13px/1.45 var(--ui); color: var(--text-soft); }
+  .modlist .eplist { margin: 0 0 6px 14px; padding-left: 8px; border-left: 1px solid var(--border-panel); }
+  .modlist .eplist button.ep { grid-template-columns: auto 1fr; gap: 1px 8px; padding: 5px 8px; font-size: 12.5px; }
+  .modlist .eplist .m { font: 600 11.5px var(--ui); color: #fde047; }
+  .modlist .eplist .r { word-break: break-all; }
+  .modlist .eplist .sub { grid-column: 1 / span 2; }
+  .modlist #btn-open { display: block; width: auto; margin: 6px 0 0 auto; border: 1px solid var(--accent); border-radius: 999px; padding: 6px 13px; background: rgba(139, 156, 255, 0.22); color: #fff; }
+  @media (max-width: 720px) { .modlist { top: calc(env(safe-area-inset-top, 0px) + 150px); left: 12px; right: 12px; width: auto; max-height: 24vh; } }
+  #crumb { margin: 8px 4px 0; color: var(--text-soft); font-size: 12.5px; }
 </style>
 </head>
 <body>
@@ -127,6 +161,8 @@
 <header class="header">
   <h1>Allspark</h1>
   <p id="summary">Loading the cube…</p>
+  <h2 class="sel" id="hd-title" hidden></h2>
+  <p class="doc" id="hd-doc" hidden></p>
 </header>
 
 <div id="phase" aria-live="polite"><span id="phase-text"></span><span class="bar"><i id="phase-bar"></i></span></div>
@@ -137,19 +173,39 @@
     <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--client)"/></svg>Frontend</li>
     <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--monolith)"/></svg>MVC monolith</li>
     <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--internal)"/></svg>Backend / Worker</li>
-    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="var(--text-soft)" stroke-width="1.6" stroke-dasharray="2.4 1.6"/></svg>System without repo (color of its axis)</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="var(--text-soft)" stroke-width="1.6" stroke-dasharray="2.4 1.6"/><circle cx="8" cy="8" r="1.8" fill="var(--text-soft)"/></svg>System without repo (color of its axis)</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.2" fill="var(--client)"/><ellipse cx="8" cy="8" rx="7.4" ry="2.6" fill="none" stroke="var(--client)" stroke-width="1.3" opacity=".8"/></svg>Entry point (frontend or monolith)</li>
+    <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="var(--text-soft)" stroke-width="1.4" stroke-dasharray="1.6 1.6" opacity=".85"/></svg>Repo not documented yet (hollow)</li>
     <li class="sep" aria-hidden="true"></li>
+    <li><svg viewBox="0 0 16 16"><path d="M2 8h12" stroke="#cbd5ff" stroke-width="4.6" stroke-linecap="round" opacity=".8"/></svg>Bundle (thickness = endpoints)</li>
+    <li><svg viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="7" ry="3" fill="none" stroke="var(--data)" stroke-width="1" opacity=".7"/><circle cx="8" cy="8" r="3.2" fill="var(--data)"/></svg>Database</li>
+    <li><svg viewBox="0 0 16 16"><path d="M3 2 13 14" stroke="var(--data)" stroke-width="2" stroke-linecap="round"/></svg>Data access</li>
     <li><svg viewBox="0 0 16 16"><path d="M2 13 14 3" stroke="var(--direct)" stroke-width="2.4" stroke-linecap="round"/></svg>Direct client → external</li>
+    <li class="sep" aria-hidden="true"></li>
+    <li><svg viewBox="0 0 16 16"><path d="M2 12C5 3 11 3 14 12" fill="none" stroke="var(--feature)" stroke-width="2.6" stroke-linecap="round"/></svg>Module (level 2)</li>
+    <li><svg viewBox="0 0 16 16"><path d="M2 11C5 3 11 3 14 11M2 13.5C5 5.5 11 5.5 14 13.5" fill="none" stroke="#fde047" stroke-width="1.4" stroke-linecap="round"/></svg>Endpoint of the open module</li>
   </ul>
 </aside>
 
 <nav class="panel controls" aria-label="View controls">
+  <div class="modes" role="group" aria-label="View level">
+    <button type="button" data-mode="global" aria-pressed="true">Global</button>
+    <button type="button" data-mode="journeys" aria-pressed="false">Modules</button>
+    <button type="button" data-mode="detail" aria-pressed="false" disabled>Detail</button>
+  </div>
+  <button type="button" id="btn-route" hidden>Replay route</button>
   <button type="button" id="btn-build" class="primary">Skip animation</button>
   <button type="button" id="btn-view">Initial view</button>
   <button type="button" data-layer="vectors" aria-pressed="true">Connections</button>
   <button type="button" data-layer="names" aria-pressed="true">Names</button>
+  <button type="button" data-layer="allNames" aria-pressed="false" title="Show every name, even if they overlap">All names</button>
 </nav>
 
+<aside class="panel modlist" id="modlist" hidden aria-label="Modules">
+  <div id="modlist-body"></div>
+  <p id="crumb" aria-live="polite"></p>
+  <button type="button" id="btn-open" hidden>Open detail ›</button>
+</aside>
 <div id="tooltip" role="tooltip" hidden></div>
 <div id="notice" hidden><div class="panel"><h2 id="notice-title"></h2><p id="notice-text"></p></div></div>
 
@@ -193,11 +249,13 @@
     notice('Invalid data', 'The data block is not valid JSON (' + e.message + '). Run generate-visual again.');
     return;
   }
-  data.points = data.points || []; data.vectors = data.vectors || [];
+  data.points = data.points || []; data.vectors = data.vectors || []; data.links = data.links || [];
+  data.modules = data.modules || []; data.endpoints = data.endpoints || [];
   if (!data.points.length) { notice('Empty cube', 'allspark.md has no points yet. Run Phase 2 of find-connections first.'); return; }
 
-  var COLOR = { blue: 0x3b82f6, teal: 0x2ea3aa, green: 0x22c55e, orange: 0xf97316 };
-  var COLOR_DIRECT = 0xf43f5e;   // client -> external without going through an internal point
+  var COLOR = { blue: 0x3b82f6, teal: 0x2ea3aa, green: 0x22c55e, orange: 0xf97316, violet: 0xa855f7, lilac: 0xe879f9, gold: 0xfacc15 };
+  var COLOR_DIRECT = 0xf43f5e;
+  var COLOR_DB = 0xd9ad12;        // darker than the gold of the links: the atoms glow less   // client -> external without going through an internal point
   var COLOR_SEMANTIC = { client: COLOR.blue, internal: COLOR.green, external: COLOR.orange };
   var COLOR_VECTOR_AXIS = { X: COLOR.blue, Y: COLOR.green, Z: COLOR.orange };
   var AXIS_NAME = { client: 'Client', internal: 'Internal (Acme)', external: 'External' };
@@ -206,7 +264,10 @@
   var S = 5;                                   // cube 0..100 -> -5..5
   function w(v) { return (Number(v) - 50) / 50 * S; }
   function vec(p) { return new THREE.Vector3(w(p.pos_x), w(p.pos_y), w(p.pos_z)); }
-  function typeOf(p) { return p.type === 'virtual' || p.role === 'external' ? 'virtual' : 'repo'; }
+  function typeOf(p) {
+    if (p.type === 'database') return p.type;
+    return p.type === 'virtual' || p.role === 'external' ? 'virtual' : 'repo';
+  }
   function shortName(id) {
     var s = String(id); var h = s.lastIndexOf('#');
     if (h >= 0) { var r = s.slice(h + 1).split('/'); return r[r.length - 1]; }
@@ -270,12 +331,18 @@
       blending: THREE.AdditiveBlending, depthWrite: false });
     var s = new THREE.Sprite(m); s.scale.setScalar(scale); s.userData.baseOpacity = opacity; return s;
   }
-  function label(text, color, height, weight) {
+  function label(text, color, height, weight, bg) {
     var c = document.createElement('canvas'); var g = c.getContext('2d');
     var px = 64; var font = (weight || 600) + ' ' + px + 'px "Chakra Petch", "Segoe UI", sans-serif';
-    g.font = font; var width = Math.ceil(g.measureText(text).width) + 24;
+    g.font = font; var width = Math.ceil(g.measureText(text).width) + 24 + (bg ? 28 : 0);
     c.width = width; c.height = px + 24; g.font = font; g.textBaseline = 'middle';
-    g.shadowColor = color; g.shadowBlur = 16; g.fillStyle = color; g.fillText(text, 12, c.height / 2);
+    if (bg) {                                              // dark pill behind the text so it reads over any point
+      var r = 26, x0 = 4, y0 = 6, w0 = c.width - 8, h0 = c.height - 12;
+      g.beginPath(); g.moveTo(x0 + r, y0); g.arcTo(x0 + w0, y0, x0 + w0, y0 + h0, r); g.arcTo(x0 + w0, y0 + h0, x0, y0 + h0, r);
+      g.arcTo(x0, y0 + h0, x0, y0, r); g.arcTo(x0, y0, x0 + w0, y0, r); g.closePath();
+      g.fillStyle = 'rgba(6, 10, 28, 0.84)'; g.fill(); g.lineWidth = 3; g.strokeStyle = color; g.globalAlpha = 0.6; g.stroke(); g.globalAlpha = 1;
+    }
+    g.shadowColor = color; g.shadowBlur = bg ? 5 : 16; g.fillStyle = color; g.fillText(text, bg ? 26 : 12, c.height / 2);
     var tex = new THREE.CanvasTexture(c); tex.minFilter = THREE.LinearFilter;
     var m = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0 });
     var s = new THREE.Sprite(m); s.scale.set(height * c.width / c.height, height, 1); return s;
@@ -320,9 +387,21 @@
     return { tube: tube, tip: tip, label: lb };
   });
 
+  var layers = { vectors: true, names: true, allNames: false };
+  var MODULE_COLORS = [0xc084fc, 0xf472b6, 0x22d3ee, 0xa3e635, 0xfb7185, 0xfbbf24, 0x38bdf8, 0x34d399, 0xe879f9, 0xfda4af];
+  var STRAND_COLORS = [0xfde047, 0x67e8f9, 0xf9a8d4, 0xbef264, 0xc4b5fd, 0xfdba74, 0x5eead4, 0xfca5a5, 0x93c5fd, 0xd8b4fe];
+
+  // Process zones: client (frontends + client systems), internal (other repos + Acme without repo), external
+  function zone(n) {
+    if (n.type === 'repo') return n.p.role === 'frontend' ? 'client' : 'internal';
+    return n.p.axis === 'X' ? 'client' : n.p.axis === 'Z' ? 'external' : 'internal';
+  }
+  function zoneOf(n) { return n.zoneName || (n.type === 'database' ? 'data' : zone(n)); }
+  function compareIds(a, b) { return a.p.id < b.p.id ? -1 : 1; }
+  var ZONE_NAME = { client: 'Client', internal: 'Internal', external: 'External', data: 'Databases' };
+
   // ---------- 4. Points ----------
   var byId = {}, pickables = [], nodes = [];
-  var ROLE_ORDER = { frontend: 0, 'mvc-monolith': 1, backend: 2, worker: 3 };
   // More points -> all of them smaller, so the cube does not get crowded (14 points = base size)
   var nBase = data.points.filter(function (p) { var t = typeOf(p); return t === 'repo' || t === 'virtual'; }).length;
   var SCALE = Math.max(0.5, Math.min(1, Math.sqrt(14 / Math.max(1, nBase))));
@@ -330,13 +409,54 @@
     var type = typeOf(p);
     var color = COLOR[p.color] != null ? COLOR[p.color] : 0xffffff;
     var g = new THREE.Group(); g.position.copy(vec(p));
-    var mesh, radius, glow;
-    if (type === 'repo') {
+    var mesh, radius, glow, electrons = null, extras = [], ghost = false;
+    if (type === 'repo' && p.documented === false) {       // not documented yet: hollow and dotted, smaller, with no centre
+      ghost = true;
+      radius = 0.17 * SCALE;
+      mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 1),
+        new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.55 }));
+      glow = glowSprite(color, radius * 4, 0.07);
+    } else if (type === 'repo') {
       var total = (p.count_client || 0) + (p.count_internal || 0) + (p.count_external || 0);
       radius = Math.min(0.5, 0.24 * (1 + 0.45 * Math.log10(1 + total))) * SCALE;
       mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 3),
         new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.45, roughness: 0.3, metalness: 0.15 }));
       glow = glowSprite(color, radius * 6, 0.38);
+      if (p.entry_point) {                                  // entry point: a ring around the sphere, where the client interacts
+        var ringE = new THREE.Mesh(new THREE.TorusGeometry(radius * 1.85, Math.max(0.012, radius * 0.07), 8, 56),
+          new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.6, depthWrite: false }));
+        ringE.rotation.x = Math.PI / 2; mesh.add(ringE); extras.push({ m: ringE.material, base: 0.6 });
+      }
+    } else if (type === 'database') {
+      // nucleus in the data zone; size by how many repos use it; electrons = relative use (1..5)
+      var nRepos = Math.max(1, (p.repos || []).length);
+      radius = Math.min(0.42, 0.2 * (1 + 0.5 * Math.log2(nRepos))) * SCALE;
+      var orbitMax = (p.orbit != null ? p.orbit / 10 : radius * 4.6);    // world units; the export limits it so atoms never cross
+      orbitMax = Math.min(orbitMax, radius * 4.6);
+      radius = Math.min(radius, orbitMax * 0.34);
+      mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 2),
+        new THREE.MeshStandardMaterial({ color: COLOR_DB, emissive: COLOR_DB, emissiveIntensity: 0.3, roughness: 0.3, metalness: 0.2 }));
+      glow = glowSprite(COLOR_DB, radius * 6, 0.14);
+      var nElec = Math.max(1, Math.min(5, p.electrons || 1));
+      var r0 = Math.max(radius * 1.7, orbitMax * 0.42);
+      var elSize = Math.max(0.03, Math.min(0.06 * Math.max(0.75, SCALE), orbitMax * 0.09));
+      electrons = [];
+      for (var k = 0; k < nElec; k++) {
+        var orbit = new THREE.Group();
+        orbit.rotation.set(0.5 + k * 0.72, 0, k * 1.05);
+        var rOrb = nElec > 1 ? r0 + (orbitMax - r0) * k / (nElec - 1) : (r0 + orbitMax) / 2;
+        var ring = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(
+          new THREE.EllipseCurve(0, 0, rOrb, rOrb).getPoints(48).map(function (q) { return new THREE.Vector3(q.x, 0, q.y); })),
+          new THREE.LineBasicMaterial({ color: COLOR_DB, transparent: true, opacity: 0.2, depthWrite: false }));
+        orbit.add(ring); extras.push({ m: ring.material, base: 0.2 });
+        var pivot = new THREE.Group(); orbit.add(pivot);
+        var el = new THREE.Mesh(new THREE.SphereGeometry(elSize, 12, 12), new THREE.MeshBasicMaterial({ color: 0xf1d98a, transparent: true }));
+        el.position.set(rOrb, 0, 0); pivot.add(el); extras.push({ m: el.material, base: 0.9 });
+        var eg = glowSprite(COLOR_DB, elSize * 4.5, 0.2); eg.position.copy(el.position); pivot.add(eg); extras.push({ m: eg.material, base: 0.2 });
+        pivot.rotation.y = Math.random() * Math.PI * 2;
+        mesh.add(orbit);
+        electrons.push({ pivot: pivot, speed: 0.55 + 0.18 * k });
+      }
     } else { // system without repo
       radius = 0.22 * SCALE;
       mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 1),
@@ -345,75 +465,282 @@
       glow = glowSprite(color, radius * 5, 0.24);
     }
     g.add(glow); g.add(mesh);
-    var lb = label(shortName(p.id), '#' + color.toString(16).padStart(6, '0'), (type === 'repo' ? 0.42 : type === 'virtual' ? 0.36 : 0.26) * Math.max(0.75, SCALE), type === 'repo' ? 600 : 500);
-    lb.userData.hasName = type === 'repo' || type === 'virtual';
+    var lb = label(shortName(p.id), '#' + color.toString(16).padStart(6, '0'), (ghost ? 0.3 : type === 'repo' ? 0.42 : type === 'virtual' ? 0.36 : 0.3) * Math.max(0.75, SCALE), ghost ? 400 : type === 'repo' ? 600 : 500);
+    lb.userData.hasName = true;
     lb.position.set(0, radius + 0.3, 0); g.add(lb);
-    g.scale.setScalar(0.0001); g.visible = true;
-    var node = { p: p, type: type, group: g, mesh: mesh, glow: glow, label: lb, radius: radius, color: color,
-      home: g.position.clone(), vectors: [], links: [] };
+    g.scale.setScalar(0.0001);
+    var node = { p: p, type: type, ghost: ghost, entry: !!p.entry_point, group: g, mesh: mesh, glow: glow, label: lb, radius: radius, color: color,
+      home: g.position.clone(), vectors: [], data: [], electrons: electrons, extras: extras, f: 1, tf: 1 };
     mesh.userData.node = node; pickables.push(mesh);
     byId[p.id] = node; nodes.push(node); scene.add(g);
   });
+  function applyNode(n) {
+    var f = n.f;
+    n.mesh.material.transparent = true;
+    n.mesh.material.opacity = (n.ghost ? 0.55 : n.type === 'virtual' ? 0.9 : 1) * f;
+    n.glow.material.opacity = n.glow.userData.baseOpacity * f;
+    var lf = n.labF === undefined ? 1 : n.labF;
+    n.label.material.opacity = f * lf;
+    n.label.visible = layers.names && lf > 0.02;
+    n.extras.forEach(function (x) { x.m.opacity = x.base * f; });
+  }
 
-  var links = [];
-
-  // ---------- 6. Vectors (neon arcs) ----------
-  var vectors = [], missing = 0;
-  data.vectors.forEach(function (v) {
-    var a = byId[v.source], b = byId[v.target];
-    if (!a || !b) { missing++; return; }
-    var o = a.home, d = b.home, c;
-    if (v.curve) c = new THREE.Vector3(w(v.curve.cx), w(v.curve.cy), w(v.curve.cz));
-    else { // same calculation as position-formula.md (swap-invariant)
-      // convex toward the client; arc (rises and falls from above) toward an external point;
-      // straight if it goes from the client zone directly to an external point; concave toward an internal point
-      var towardClient = b.type === 'virtual' && b.p.axis === 'X';
-      var towardExternal = b.type === 'virtual' && b.p.axis === 'Z';
-      var fromClient = a.p.role === 'frontend' || (a.type === 'virtual' && a.p.axis === 'X');
-      var dist = o.distanceTo(d) / (2 * S) * 100;
-      var offset = 12 + 0.15 * dist;
-      var yC = towardClient ? Math.min(100, Math.max(a.p.pos_y, b.p.pos_y) + offset)
-             : towardExternal ? (fromClient ? (a.p.pos_y + b.p.pos_y) / 2 : Math.max(a.p.pos_y, b.p.pos_y) + offset)
-             : Math.max(0, Math.min(a.p.pos_y, b.p.pos_y) - offset);
-      if (towardExternal && fromClient) v.direct = true;
-      c = new THREE.Vector3((o.x + d.x) / 2, w(yC), (o.z + d.z) / 2);
-    }
-    var curve = new THREE.QuadraticBezierCurve3(o, c, d);
-    var color = v.direct ? COLOR_DIRECT : (COLOR_VECTOR_AXIS[v.axis] || COLOR[b.p.color] || 0xffffff);
-    var weak = v.reverse_validation === 'no-target-evidence';
+  // ---------- 5. Neon curves: shared by connections, bundles, modules and endpoint strands ----------
+  function neonCurve(a, b, curve, color, weak, rCore, rHalo, bright) {
+    rCore = rCore || 0.02; rHalo = rHalo || 0.075; bright = bright || 1;
     var SEG = 72, RAD = 8;
-    var core = new THREE.Mesh(new THREE.TubeGeometry(curve, SEG, 0.02, RAD, false),
-      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: weak ? 0.4 : 0.8, blending: THREE.AdditiveBlending, depthWrite: false }));
-    var halo = new THREE.Mesh(new THREE.TubeGeometry(curve, SEG, 0.075, RAD, false),
-      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: weak ? 0.05 : 0.1, blending: THREE.AdditiveBlending, depthWrite: false }));
+    var core = new THREE.Mesh(new THREE.TubeGeometry(curve, SEG, rCore, RAD, false),
+      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: (weak ? 0.4 : 0.8) * bright, blending: THREE.AdditiveBlending, depthWrite: false }));
+    var halo = new THREE.Mesh(new THREE.TubeGeometry(curve, SEG, rHalo, RAD, false),
+      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: (weak ? 0.05 : 0.1) * bright, blending: THREE.AdditiveBlending, depthWrite: false }));
     core.geometry.setDrawRange(0, 0); halo.geometry.setDrawRange(0, 0);
     scene.add(halo); scene.add(core);
     var length = curve.getLength();
-    var tArrow = Math.max(0.6, 1 - (b.radius + 0.22) / length);
-    var arrow = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.24, 12),
-      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: weak ? 0.5 : 1, blending: THREE.AdditiveBlending, depthWrite: false }));
+    var ar = Math.max(0.075, rCore * 2.4);
+    var tArrow = Math.max(0.6, 1 - (b.radius + ar * 2.6) / length);
+    var arrow = new THREE.Mesh(new THREE.ConeGeometry(ar, ar * 3.2, 12),
+      new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: (weak ? 0.5 : 1) * Math.min(1, bright + 0.25), blending: THREE.AdditiveBlending, depthWrite: false }));
     arrow.position.copy(curve.getPointAt(tArrow));
     arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), curve.getTangentAt(tArrow).normalize());
     arrow.scale.setScalar(0.0001); scene.add(arrow);
     var pulse = glowSprite(0xffffff, 0.42, 0); pulse.material.color.setHex(color).lerp(new THREE.Color(0xffffff), 0.45); scene.add(pulse);
-    var obj = { v: v, a: a, b: b, curve: curve, core: core, halo: halo, arrow: arrow, pulse: pulse, length: length,
-      tArrow: tArrow, weak: weak, seg: SEG, rad: RAD, phase: Math.random(), active: false,
+    return { a: a, b: b, curve: curve, core: core, halo: halo, arrow: arrow, pulse: pulse, length: length,
+      tArrow: tArrow, weak: weak, seg: SEG, rad: RAD, phase: Math.random(), active: false, f: 1, tf: 1,
       opC: core.material.opacity, opH: halo.material.opacity, opA: arrow.material.opacity };
+  }
+  function fullDraw(o) {
+    o.core.geometry.setDrawRange(0, Infinity); o.halo.geometry.setDrawRange(0, Infinity);
+    o.arrow.scale.setScalar(1); o.active = true;
+  }
+  function applyNeon(o) {
+    var f = o.f, vis = f > 0.02 && layers.vectors;
+    o.core.visible = o.halo.visible = o.arrow.visible = vis;
+    o.core.material.opacity = o.opC * f; o.halo.material.opacity = o.opH * f; o.arrow.material.opacity = o.opA * f;
+    if (o.lab) { o.lab.visible = vis && (!o.stepLab || (o.ep ? o.ep === hiEp : o.mo === hiMod)) && !o.routeHide; o.lab.material.opacity = 0.9 * f; }   // route numbers only on the highlighted module
+    if (!vis) o.pulse.material.opacity = 0;
+  }
+  function disposeNeon(o) {
+    [o.core, o.halo, o.arrow, o.pulse].forEach(function (m) {
+      scene.remove(m); if (m.geometry) m.geometry.dispose(); if (m.material) m.material.dispose();
+    });
+    if (o.lab) { scene.remove(o.lab); o.lab.material.dispose(); }
+  }
+  // Shape of a curve from its ends (same rules as position-formula.md): concave toward an internal point,
+  // arc toward an external one, straight from the client zone straight to an external one,
+  // convex toward the client, and a soft descent toward a database.
+  function controlFor(a, b, kind) {
+    var o = a.home, d = b.home, za = zoneOf(a), zb = zoneOf(b);
+    if (kind === 'data' || zb === 'data') return new THREE.Vector3((o.x + d.x) / 2, d.y + (o.y - d.y) * 0.25, (o.z + d.z) / 2);
+    var dist = o.distanceTo(d) / (2 * S) * 100;
+    var off = (12 + 0.15 * dist) * (2 * S) / 100;
+    var yC;
+    if (zb === 'client') yC = Math.min(S, Math.max(o.y, d.y) + off);
+    else if (zb === 'external') yC = (za === 'client') ? (o.y + d.y) / 2 : Math.max(o.y, d.y) + off;
+    else yC = Math.max(-S, Math.min(o.y, d.y) - off);
+    return new THREE.Vector3((o.x + d.x) / 2, yC, (o.z + d.z) / 2);
+  }
+  function sideways(a, b, amount) {
+    var dir = b.home.clone().sub(a.home), perp = new THREE.Vector3(-dir.z, 0, dir.x);
+    if (perp.lengthSq() < 1e-6) perp.set(1, 0, 0);
+    return perp.normalize().multiplyScalar(amount);
+  }
+
+  // Level 1 data usage: repo -> database
+  var dataLinks = [];
+  data.links.forEach(function (e) {
+    if (e.type !== 'data') return;
+    var a = byId[e.source], b = byId[e.target]; if (!a || !b) return;
+    var obj = neonCurve(a, b, new THREE.QuadraticBezierCurve3(a.home, controlFor(a, b, 'data'), b.home), COLOR.gold, false, null, null, data.links.length > 20 ? 0.32 : 0.55);
+    obj.e = e; a.data.push(obj); b.data.push(obj); dataLinks.push(obj);
+  });
+
+  // ---------- 6. Vectors: one per connection (Level 1 detail) ----------
+  var vectors = [], missing = 0;
+  data.vectors.forEach(function (v) {
+    var a = byId[v.source], b = byId[v.target];
+    if (!a || !b) { missing++; return; }
+    var c = v.curve ? new THREE.Vector3(w(v.curve.cx), w(v.curve.cy), w(v.curve.cz)) : controlFor(a, b, 'call');
+    var direct = !!v.direct || (zoneOf(a) === 'client' && zoneOf(b) === 'external');
+    var color = direct ? COLOR_DIRECT : (COLOR_VECTOR_AXIS[v.axis] || COLOR[b.p.color] || 0xffffff);
+    var weak = v.reverse_validation === 'no-target-evidence';
+    var obj = neonCurve(a, b, new THREE.QuadraticBezierCurve3(a.home, c, b.home), color, weak, null, null, data.vectors.length > 60 ? 0.62 : 1);
+    obj.v = v; obj.weight = v.endpoints || 1; obj.direct = direct;
     a.vectors.push(obj); b.vectors.push(obj); vectors.push(obj);
   });
+
+  // ---------- 6b. Bundles (global view): connections grouped by pair of zones, thickness = endpoints ----------
+  function centroid(list) {
+    var c = new THREE.Vector3();
+    if (list.length) { list.forEach(function (n) { c.add(n.home); }); c.multiplyScalar(1 / list.length); }
+    return c;
+  }
+  var baseNodes = nodes.filter(function (n) { return (n.type === 'repo' || n.type === 'virtual') && !n.ghost; });
+  var ghosts = nodes.filter(function (n) { return n.ghost; });         // repos of the workspace that are not documented yet
+  var databases = nodes.filter(function (n) { return n.type === 'database'; });
+  var HUB = {};
+  ['client', 'internal', 'external'].forEach(function (z) {
+    HUB[z] = { zoneName: z, type: 'hub', p: {}, home: centroid(baseNodes.filter(function (n) { return zone(n) === z; })), radius: 0.5 };
+  });
+  HUB.data = { zoneName: 'data', type: 'hub', p: {}, home: centroid(databases), radius: 0.5 };
+  var trunks = [], intra = {};
+  (function () {
+    var agg = {};
+    vectors.forEach(function (o) {
+      var za = zone(o.a), zb = zone(o.b);
+      if (za === zb) { intra[za] = (intra[za] || 0) + 1; return; }
+      var t = agg[za + '>' + zb] || (agg[za + '>' + zb] = { za: za, zb: zb, E: 0, n: 0 });
+      t.E += o.weight; t.n++;
+    });
+    if (dataLinks.length && databases.length) agg['internal>data'] = { za: 'internal', zb: 'data', E: dataLinks.length, n: dataLinks.length };
+    var Emax = 1; Object.keys(agg).forEach(function (k) { Emax = Math.max(Emax, agg[k].E); });
+    Object.keys(agg).forEach(function (key) {
+      var t = agg[key], a = HUB[t.za], b = HUB[t.zb];
+      var color = t.zb === 'data' ? COLOR.gold : (t.za === 'client' && t.zb === 'external') ? COLOR_DIRECT
+                : t.zb === 'client' ? COLOR.blue : t.zb === 'external' ? COLOR.orange : COLOR.green;
+      var rc = 0.03 + 0.10 * Math.sqrt(t.E / Emax);
+      var curve = new THREE.QuadraticBezierCurve3(a.home, controlFor(a, b, t.zb === 'data' ? 'data' : 'call'), b.home);
+      var obj = neonCurve(a, b, curve, color, false, rc, rc * 2.6, t.zb === 'data' ? 0.55 : 0.85);
+      fullDraw(obj); obj.trunk = t; obj.f = 0; obj.tf = 0;
+      obj.lab = label(t.E + (t.zb === 'data' ? ' repo↔db links' : ' endpoints'), '#' + color.toString(16).padStart(6, '0'), 0.55, 600, true);
+      obj.lab.position.copy(curve.getPoint(0.5)).add(new THREE.Vector3(0, 0.5, 0)); scene.add(obj.lab);
+      obj.labCurve = curve; obj.labT = 0.5;
+      obj.halo.userData.pick = obj; trunks.push(obj); applyNeon(obj);
+    });
+    // Master vector: one thick arc that stands for all the vectors, with the grand total of endpoints on top.
+    // It is one more trunk, so it appears with the others at the end of the build and only in the Global view.
+    var total = 0, nAll = 0;
+    vectors.forEach(function (o) { total += o.weight; nAll++; });
+    if (total > 0 && HUB.client && HUB.external) {
+      var ca = HUB.client.home, cb = HUB.external.home;
+      var mid = ca.clone().add(cb).multiplyScalar(0.5); mid.y += S * 0.95;
+      var mcurve = new THREE.QuadraticBezierCurve3(ca, mid, cb);
+      var mobj = neonCurve(HUB.client, HUB.external, mcurve, 0x8b9cff, false, 0.16, 0.42, 0.9);
+      fullDraw(mobj); mobj.trunk = { za: 'client', zb: 'external', E: total, n: nAll, master: true }; mobj.f = 0; mobj.tf = 0;
+      mobj.lab = label(total + ' endpoints in total', '#c7d0ff', 0.7, 600, true);
+      mobj.lab.position.copy(mcurve.getPoint(0.5)).add(new THREE.Vector3(0, 0.5, 0)); scene.add(mobj.lab);
+      mobj.labCurve = mcurve; mobj.labT = 0.5;
+      mobj.halo.userData.pick = mobj; trunks.push(mobj); applyNeon(mobj);
+    }
+  })();
+
+  // ---------- 6c. Modules (level 2): one tree per module, built from its endpoints ----------
+  var modules = [], moduleById = {}, beams = [];
+  (data.modules || []).forEach(function (m, i) {
+    var mo = { m: m, id: m.id, idx: i, name: m.name || shortName(m.id), repo: m.repo, color: MODULE_COLORS[i % MODULE_COLORS.length],
+      endpoints: [], beams: [], nodes: new Set() };
+    modules.push(mo); moduleById[m.id] = mo;
+  });
+  (data.endpoints || []).forEach(function (e) { if (moduleById[e.module]) moduleById[e.module].endpoints.push(e); });
+  modules.forEach(function (mo) {
+    var agg = {};
+    mo.endpoints.forEach(function (e) {
+      (e.hops || []).forEach(function (h) {
+        var a = byId[h.source], b = byId[h.target]; if (!a || !b) return;
+        var key = h.source + '>' + h.target + '>' + (h.kind || 'call');
+        var o = agg[key] || (agg[key] = { a: a, b: b, kind: h.kind || 'call', eps: [], protocols: {} });
+        o.eps.push(e); o.protocols[h.protocol || 'sql'] = 1; mo.nodes.add(a); mo.nodes.add(b);
+      });
+    });
+    var M = modules.length;
+    var stepKeys = Object.keys(agg);        // insertion order = the order in which the endpoints reach each hop = the numbered route
+    stepKeys.forEach(function (key, ki) {
+      var h = agg[key], count = h.eps.length;
+      var c = controlFor(h.a, h.b, h.kind).add(sideways(h.a, h.b, (mo.idx - (M - 1) / 2) * Math.min(0.16, 1.6 / M)));
+      var rc = 0.022 + 0.018 * Math.sqrt(count);
+      var obj = neonCurve(h.a, h.b, new THREE.QuadraticBezierCurve3(h.a.home, c, h.b.home), mo.color, false, rc, rc * 2.2, 0.36);
+      fullDraw(obj); obj.mo = mo; obj.hop = h; obj.count = count; obj.f = 0; obj.tf = 0;
+      // numbered route: the number sits on the hop, and the flash walks the hops in that order (see the render loop)
+      obj.step = ki + 1; obj.nSteps = stepKeys.length; obj.stepLab = true;
+      obj.lab = label(String(ki + 1), '#' + mo.color.toString(16).padStart(6, '0'), 0.5, 600, true);
+      obj.lab.position.copy(obj.curve.getPoint(0.5)).add(new THREE.Vector3(0, 0.3, 0)); scene.add(obj.lab);
+      obj.halo.userData.pick = obj; mo.beams.push(obj); beams.push(obj); applyNeon(obj);
+    });
+  });
+
+  // ---------- 6d. Endpoint strands: one strand per endpoint of the open module ----------
+  var strands = [], closing = [];
+  function openStrands(mo) {
+    var E = mo.endpoints.length;
+    mo.endpoints.forEach(function (e, ei) {
+      var color = STRAND_COLORS[ei % STRAND_COLORS.length];
+      var valid = (e.hops || []).filter(function (h) { return byId[h.source] && byId[h.target]; }), si = 0;
+      valid.forEach(function (h) {
+        var a = byId[h.source], b = byId[h.target];
+        var c = controlFor(a, b, h.kind || 'call').add(sideways(a, b, (ei - (E - 1) / 2) * Math.min(0.12, 1.4 / E)));
+        var obj = neonCurve(a, b, new THREE.QuadraticBezierCurve3(a.home, c, b.home), color, false, 0.016, 0.05, 0.9);
+        fullDraw(obj); obj.ep = e; obj.mo = mo; obj.hop = h; obj.f = 0; obj.tf = 1;
+        // numbered route of the endpoint: the same step numbers and flash as the hops of a module
+        obj.step = ++si; obj.nSteps = valid.length; obj.stepLab = true;
+        obj.lab = label(String(si), '#' + color.toString(16).padStart(6, '0'), 0.45, 600, true);
+        obj.lab.position.copy(obj.curve.getPoint(0.5)).add(new THREE.Vector3(0, 0.3, 0)); scene.add(obj.lab);
+        obj.halo.userData.pick = obj; strands.push(obj); applyNeon(obj);
+      });
+    });
+  }
+  function closeStrands(now) {
+    strands.forEach(function (o) { if (now) disposeNeon(o); else { o.tf = 0; closing.push(o); } });
+    strands = [];
+  }
 
   // ---------- 7. Summary ----------
   var count = { repo: 0, virtual: 0 };
   nodes.forEach(function (n) { count[n.type] = (count[n.type] || 0) + 1; });
   var parts = ['<strong>' + count.repo + '</strong> repos', '<strong>' + count.virtual + '</strong> systems without repo',
     '<strong>' + vectors.length + '</strong> connections'];
+  if (databases.length) parts.push('<strong>' + databases.length + '</strong> databases');
+  var entryCount = nodes.filter(function (n) { return n.entry; }).length;
+  if (entryCount) parts.push('<strong>' + entryCount + '</strong> entry point' + (entryCount === 1 ? '' : 's') + ' documented');
+  if (ghosts.length) parts.push('<strong>' + ghosts.length + '</strong> repo' + (ghosts.length === 1 ? '' : 's') + ' not documented yet');
+  if (modules.length) parts.push('<strong>' + modules.length + '</strong> modules, <strong>' + (data.endpoints || []).length + '</strong> endpoints');
   var meta = data.meta || {};
   $('#summary').innerHTML = (meta.workspace ? escapeHtml(meta.workspace) + '. ' : '') + parts.join(', ') + '.' +
     (meta.generated ? '<br>Generated on ' + escapeHtml(meta.generated) + ' from allspark.md' : '') +
     (missing ? '<br>' + missing + ' connections point to points that are not in the export.' : '');
+  function listOf(arr, max) {
+    max = max || 3;
+    if (arr.length > max) return arr.slice(0, max).join(', ') + ' and ' + (arr.length - max) + ' more';
+    return arr.length > 1 ? arr.slice(0, -1).join(', ') + ' and ' + arr[arr.length - 1] : arr.join('');
+  }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+  // What the whole universe is, in plain language, from the same data the cube draws
+  function describeUniverse() {
+    var entries = nodes.filter(function (n) { return n.entry; }), repos = nodes.filter(function (n) { return n.type === 'repo' && !n.ghost; });
+    var others = repos.length - entries.length, systems = nodes.filter(function (n) { return n.type === 'virtual'; }).length;
+    var total = 0; vectors.forEach(function (o) { total += o.weight; });
+    var t = entries.length ? listOf(entries.map(function (n) { return shortName(n.p.id); })) + (entries.length === 1 ? ' is' : ' are') + ' where the client enters'
+      : 'This is the map of the repos and systems of the workspace';
+    var links = [];
+    if (others > 0) links.push(plural(others, 'other repo', 'other repos'));
+    if (systems) links.push(plural(systems, 'system without a repo', 'systems without a repo'));
+    if (databases.length) links.push(plural(databases.length, 'database', 'databases'));
+    if (links.length) t += '; from there ' + listOf(links, 3) + ' are connected through ' + plural(vectors.length, 'connection', 'connections') + (total ? ' that carry ' + plural(total, 'endpoint', 'endpoints') : '');
+    t += '.';
+    if (modules.length) t += ' ' + plural(modules.length, 'module is', 'modules are') + ' documented in detail: choose Modules to follow their routes.';
+    return t + ' Hover or click a point to see what it does.';
+  }
+  // What one point does: its role, who it calls, who calls it, its databases and the modules that go through it
+  function describePoint(n) {
+    var p = n.p;
+    if (n.ghost) return 'Repo ' + (p.role || '') + ' not documented yet. Start from an entry point that reaches it to map its connections.';
+    var ms = modulesThrough(n), msTxt = ms.length ? ' Modules through it: ' + listOf(ms.map(function (m) { return m.name; })) + '.' : '';
+    if (n.type === 'database') {
+      var users = n.data.map(function (o) { return shortName(o.a.p.id); });
+      return 'Database' + (p.engine ? ' (' + p.engine + ')' : '') + '. Used by ' + (users.length ? listOf(users) : 'no documented repo') + '.' + msTxt;
+    }
+    var out = n.vectors.filter(function (o) { return o.a === n; }), inn = n.vectors.filter(function (o) { return o.b === n; });
+    var role = n.type === 'repo' ? (p.role || 'repo') + (n.entry ? ', entry point where the client interacts' : '') : 'system without a repo, axis ' + (p.axis || '');
+    var parts = [role.charAt(0).toUpperCase() + role.slice(1) + '.'];
+    if (out.length) parts.push('Calls ' + listOf(out.map(function (o) { return shortName(o.b.p.id) + ' (' + plural(o.weight, 'endpoint', 'endpoints') + ')'; })) + '.');
+    if (inn.length) parts.push('Called by ' + listOf(inn.map(function (o) { return shortName(o.a.p.id) + ' (' + o.weight + ')'; })) + '.');
+    if (n.type === 'repo' && n.data.length) parts.push('Uses the ' + listOf(n.data.map(function (o) { return (o.b.p.name || shortName(o.b.p.id)) + ' (' + (o.b.p.engine || 'database') + ')'; })) + ' database' + (n.data.length > 1 ? 's' : '') + '.');
+    return parts.join(' ') + msTxt;
+  }
+  var descNode = null;   // point under the pointer: the top-left text describes it while nothing is selected
+  $('#summary').innerHTML = escapeHtml(describeUniverse()) + '<br>' + $('#summary').innerHTML;
+  var globalSummary = $('#summary').innerHTML;   // the text of the Global view; the top-left block returns to it when nothing is selected
   function escapeHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
-  // ---------- 8. Build timeline ----------
+  // ---------- 8. Build timeline (global view, in process order) ----------
   function smooth(k) { return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; }
   function bounce(k) { var c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); }
   var tasks = [], phases = [], DURATION = 0;
@@ -429,14 +756,6 @@
     });
     task(t + 1.0 + i * 0.22, 0.6, function (k) { e.label.material.opacity = k; });
   });
-
-  // Process order: client -> Acme -> externals
-  var ROLE_RANK = { frontend: 0, 'mvc-monolith': 2, backend: 3, worker: 5 };
-  var AXIS_RANK = { X: 1, Y: 4, Z: 6 };
-  function rank(n) {
-    if (n.type === 'repo') return ROLE_RANK.hasOwnProperty(n.p.role) ? ROLE_RANK[n.p.role] : 3;
-    return AXIS_RANK.hasOwnProperty(n.p.axis) ? AXIS_RANK[n.p.axis] : 6;
-  }
   function trace(o) {
     return function (k) {
       var kk = smooth(k), n = Math.ceil(kk * o.seg) * o.rad * 6;
@@ -445,20 +764,17 @@
       if (k >= 1) o.active = true;
     };
   }
-
-  // Camera keys: {t, target, fraction of FINAL_DIST}. The camera keeps the CAM_DIR angle,
-  // focuses on each point as it appears and pulls back as the universe grows.
-  var cameraKeys = [{ t: 0, target: CENTER.clone(), fraction: 1.15 }];
-  var NEAR_FRACTION = 0.3, FAR_FRACTION = 0.78;
-
-  t = 1.9;
-  // Process zones: client (frontends + client systems), internal (other repos + Acme without repo), external
-  function zone(n) {
-    if (n.type === 'repo') return n.p.role === 'frontend' ? 'client' : 'internal';
-    return n.p.axis === 'X' ? 'client' : n.p.axis === 'Z' ? 'external' : 'internal';
+  var cameraKeys = [{ t: 0, target: CENTER.clone(), fraction: 1.15, az: 57.8, el: 15.5 }];
+  // Each process gets its own view: the point it looks at, the distance that frames its points, and an angle that shows it best
+  function stageView(list, pad, lo, hi) {
+    var c = list.length ? centroid(list) : CENTER.clone(), r = 0;
+    list.forEach(function (n) { r = Math.max(r, n.home.distanceTo(c)); });
+    return { target: c, fraction: Math.min(hi || 0.95, Math.max(lo || 0.32, (r + pad) / FRAME_R)) };
   }
-  function compareIds(a, b) { return a.p.id < b.p.id ? -1 : 1; }
-  var base = nodes.filter(function (n) { return n.type === 'repo' || n.type === 'virtual'; });
+  function endsOf(list) {
+    var set = new Set(); list.forEach(function (o) { set.add(o.a); set.add(o.b); }); return Array.from(set);
+  }
+  t = 1.9;
   var appearsAt = new Map();
   function appear(n, ti) {
     if (appearsAt.has(n)) return;
@@ -469,34 +785,27 @@
       n.label.material.opacity = Math.max(0, (k - 0.4) / 0.6);
     });
   }
-  function centerOf(list) {
-    if (!list.length) return CENTER.clone();
-    var c = new THREE.Vector3(); list.forEach(function (n) { c.add(n.home); }); return c.multiplyScalar(1 / list.length);
-  }
+  function centerOf(list) { return list.length ? centroid(list) : CENTER.clone(); }
   var V_DUR = 1.0;
-  var STEP = Math.max(0.3, Math.min(1.0, 12 / Math.max(1, base.length)));
-  var V_STEP = Math.max(0.12, Math.min(0.45, 8 / Math.max(1, vectors.length)));
-  var zClient = base.filter(function (n) { return zone(n) === 'client'; }).sort(function (a, b) {
+  var STEP = Math.max(0.15, Math.min(1.0, 10 / Math.max(1, baseNodes.length)));
+  var V_STEP = Math.max(0.05, Math.min(0.45, 6 / Math.max(1, vectors.length)));
+  var zClient = baseNodes.filter(function (n) { return zone(n) === 'client'; }).sort(function (a, b) {
     return (a.type === 'repo' ? 0 : 1) - (b.type === 'repo' ? 0 : 1) || compareIds(a, b); });
-  var zInternal = base.filter(function (n) { return zone(n) === 'internal'; });
-  var zExternal = base.filter(function (n) { return zone(n) === 'external'; });
+  var zInternal = baseNodes.filter(function (n) { return zone(n) === 'internal'; });
+  var zExternal = baseNodes.filter(function (n) { return zone(n) === 'external'; });
   var cClient = centerOf(zClient), cInternal = centerOf(zInternal), cExternal = centerOf(zExternal);
-
-  // Stage of each vector, from its source and target
   function stage(o) {
     var za = zone(o.a), zb = zone(o.b);
     if (za === 'client' && zb === 'internal') return 1;
     if (za === 'internal' && zb === 'internal') return 2;
     if (za === 'internal' && zb === 'external') return 3;
-    if (za === 'internal' && zb === 'client') return 4;   // response / notification to the client
-    if (za === 'client' && zb === 'external') return 5;   // direct client -> external (red)
-    return 4;                                             // other rare cases: together with the response
+    if (za === 'internal' && zb === 'client') return 4;
+    if (za === 'client' && zb === 'external') return 5;
+    return 4;
   }
   var stages = { 1: [], 2: [], 3: [], 4: [], 5: [] };
   vectors.forEach(function (o) { stages[stage(o)].push(o); });
   Object.keys(stages).forEach(function (k) { stages[k].sort(function (x, y) { return compareIds(x.a, y.a) || compareIds(x.b, y.b); }); });
-
-  // traces a list of vectors, staggered; the source appears if missing, the target when the line arrives
   function traceList(list, from) {
     var end = from;
     list.forEach(function (o, i) {
@@ -509,175 +818,456 @@
     return end;
   }
 
-  // 1. the client front: frontends and client systems, camera focusing on each
   phases.push({ start: t, text: 'Adding the client front' });
   zClient.forEach(function (n, i) {
     var ti = t + i * STEP;
-    cameraKeys.push({ t: ti - 0.2, target: n.home.clone(), fraction: 0.32 });
+    // seen from the client side, swinging slowly toward the front as the frontends appear
+    cameraKeys.push({ t: ti - 0.2, target: n.home.clone(), fraction: 0.34 + 0.1 * Math.min(1, i / 6),
+      az: 100 - 22 * (i / Math.max(1, zClient.length - 1)), el: 13 });
     appear(n, ti);
   });
   t += zClient.length * STEP + 0.3;
-
-  // 2. from the client to the internals: each internal appears when its line arrives
   if (stages[1].length) {
     phases.push({ start: t, text: 'Connecting to the internals' });
-    cameraKeys.push({ t: t, target: cClient.clone().lerp(cInternal, 0.6), fraction: 0.48 });
+    var v1 = stageView(endsOf(stages[1]), 1.6, 0.5);
+    cameraKeys.push({ t: t, target: v1.target, fraction: v1.fraction, az: 76, el: 16, orbit: -2 });
     t = traceList(stages[1], t) + 0.2;
   }
-  // 3. the camera stays on the internals: the remaining ones and the connections between them
-  cameraKeys.push({ t: t - 0.2, target: cInternal.clone(), fraction: 0.5 });
+  var vI = stageView(zInternal, 1.8, 0.45);
+  // orbit around the internal block: its depth only shows when the point of view moves
+  cameraKeys.push({ t: t - 0.2, target: vI.target, fraction: vI.fraction, az: 66, el: 27, orbit: -3 });
   phases.push({ start: t, text: 'Between the internals' });
   var internalTargets = new Set(stages[2].map(function (o) { return o.b; }));
   zInternal.filter(function (n) { return !appearsAt.has(n) && !internalTargets.has(n); })
     .sort(compareIds).forEach(function (n, i) { appear(n, t + i * V_STEP); });
   t = traceList(stages[2], t + 0.3) + 0.2;
   zInternal.filter(function (n) { return !appearsAt.has(n); }).forEach(function (n, i) { appear(n, t + i * V_STEP); });
-
-  // 4. from the internals to the externals: the camera stays on the internals, a bit wider
   if (stages[3].length) {
     phases.push({ start: t, text: 'Reaching the externals' });
-    cameraKeys.push({ t: t, target: cInternal.clone().lerp(cExternal, 0.2), fraction: 0.64 });
+    var v3 = stageView(endsOf(stages[3]), 1.6, 0.5);
+    cameraKeys.push({ t: t, target: v3.target, fraction: v3.fraction, az: 24, el: 15, orbit: 1.5 });
     t = traceList(stages[3], t) + 0.2;
   }
-  // 5. processes that end at the client (e.g. a webhook notification)
   if (stages[4].length) {
     phases.push({ start: t, text: 'Responding to the client' });
-    cameraKeys.push({ t: t, target: cInternal.clone().lerp(cClient, 0.45), fraction: 0.72 });
+    var v4 = stageView(endsOf(stages[4]), 1.6, 0.5);
+    cameraKeys.push({ t: t, target: v4.target, fraction: v4.fraction, az: 84, el: 27, orbit: -2 });
     t = traceList(stages[4], t) + 0.2;
   }
-  // 6. last, the direct client -> external connections (red)
   if (stages[5].length) {
     phases.push({ start: t, text: 'Direct client → external connections' });
-    cameraKeys.push({ t: t, target: cClient.clone().lerp(cExternal, 0.5), fraction: 0.82 });
+    var v5 = stageView(endsOf(stages[5]), 1.8, 0.55);
+    cameraKeys.push({ t: t, target: v5.target, fraction: v5.fraction, az: 46, el: 38, orbit: 2 });
     t = traceList(stages[5], t) + 0.2;
   }
-  // points without any connection
-  base.filter(function (n) { return !appearsAt.has(n); }).forEach(function (n, i) { appear(n, t + i * 0.2); });
-  t += 0.4;
-
-  cameraKeys.push({ t: t - 0.2, target: CENTER.clone(), fraction: 0.9 });
+  baseNodes.filter(function (n) { return !appearsAt.has(n); }).forEach(function (n, i) { appear(n, t + i * 0.1); });
+  t += 0.3;
+  if (dataLinks.length) {
+    phases.push({ start: t, text: 'Reaching the data' });
+    var vD = stageView(databases, 2.8, 0.42, 0.85);
+    // from outside the origin corner, where the atoms are: they stay in front and the whole cloud behind them, circling slowly
+    cameraKeys.push({ t: t, target: vD.target, fraction: vD.fraction, az: 215, el: 16, orbit: 6 });
+    t = traceList(dataLinks.slice().sort(function (x, y) { return compareIds(x.a, y.a) || compareIds(x.b, y.b); }), t) + 2.6;   // hold: the camera circles the atoms
+  }
+  databases.filter(function (n) { return !appearsAt.has(n); }).forEach(function (n, i) { appear(n, t + i * 0.2); });
+  if (ghosts.length) {                                     // what is still to document appears last, all at once
+    phases.push({ start: t, text: 'Not documented yet' });
+    cameraKeys.push({ t: t, target: CENTER.clone(), fraction: 0.95, az: 57.8, el: 15.5 });
+    ghosts.forEach(function (n, i) { appear(n, t + 0.3 + i * 0.05); });
+    t += ghosts.length * 0.05 + 1.2;
+  }
+  cameraKeys.push({ t: t - 0.2, target: CENTER.clone(), fraction: 0.95, az: 57.8, el: 15.5 });
   t += 0.6;
-  cameraKeys.push({ t: t, target: CENTER.clone(), fraction: 1 });
+  cameraKeys.push({ t: t, target: CENTER.clone(), fraction: 1, az: 57.8, el: 15.5 });
   t += 1.2;
   phases.push({ start: t, text: '' });
   DURATION = Math.max(DURATION, t);
 
-  // ---------- 9. State, layers and interaction ----------
+  // ---------- 9. State: level (mode), selection and transitions ----------
   var clock = new THREE.Clock(), tBuild = 0, building = true, sway = true, tSway = 0;
   var guided = !reduced;                                 // the camera follows the keys until the user takes over
-  var camTarget = CENTER.clone(), camDist = FINAL_DIST * 1.15;
+  var camTarget = CENTER.clone(), camDist = FINAL_DIST * 1.15, focusKey = null;
+  var DEG = Math.PI / 180, BASE_EL = Math.asin(CAM_DIR.y), BASE_AZ = Math.atan2(CAM_DIR.z, CAM_DIR.x), camAz = BASE_AZ, camEl = BASE_EL;
+  var mode = 'global', selection = null, hiMod = null, openMod = null, hiEp = null;
   function currentKey(tt) { var c = cameraKeys[0]; for (var i = 0; i < cameraKeys.length; i++) if (cameraKeys[i].t <= tt) c = cameraKeys[i]; return c; }
   function placeCamera() {
-    camera.position.copy(camTarget).add(CAM_DIR.clone().multiplyScalar(camDist));
+    camera.position.set(camTarget.x + camDist * Math.cos(camEl) * Math.cos(camAz), camTarget.y + camDist * Math.sin(camEl),
+      camTarget.z + camDist * Math.cos(camEl) * Math.sin(camAz));
     controls.target.copy(camTarget);
   }
-  var layers = { vectors: true, names: true };
-  var selection = null;
-
+  function syncCam() {                                    // take the camera as the user left it (target, distance and angles)
+    var off = camera.position.clone().sub(controls.target);
+    camTarget.copy(controls.target); camDist = Math.max(0.001, off.length());
+    camAz = Math.atan2(off.z, off.x); camEl = Math.asin(Math.max(-1, Math.min(1, off.y / camDist)));
+  }
+  // the guided camera eases toward the current key: target, distance, azimuth and elevation, plus a slow orbit while the stage lasts
+  function guidedStep(dt) {
+    var cl = currentKey(tBuild), f = 1 - Math.exp(-dt * 2.2);
+    var ta = (cl.az != null ? cl.az : BASE_AZ / DEG) + (cl.orbit || 0) * (tBuild - cl.t);
+    var te = cl.el != null ? cl.el : BASE_EL / DEG;
+    camTarget.lerp(cl.target, f);
+    camDist += (FINAL_DIST * cl.fraction - camDist) * f;
+    camAz += (ta * DEG - camAz) * f; camEl += (te * DEG - camEl) * f;
+    placeCamera();
+  }
+  function neonAll() { return vectors.concat(dataLinks, trunks, beams, strands, closing); }
   function applyAll(tt) { tasks.forEach(function (ta) { var k = (tt - ta.start) / ta.dur; if (k >= 0) ta.fn(Math.min(1, k)); else ta.fn(0); }); }
-  function finishBuild() {
-    tBuild = DURATION + 1; applyAll(tBuild); building = false;
-    if (guided || sway) { camTarget.copy(CENTER); camDist = FINAL_DIST; placeCamera(); }
-    guided = false;
-    vectors.forEach(function (o) { o.active = true; });
-    $('#phase').style.opacity = 0; $('#btn-build').textContent = 'Rebuild';
-    applyLayers();
-  }
-  function restartBuild() {
-    tBuild = 0; building = true; selection = null; applySelection();
-    nodes.forEach(function (n) { n.group.position.copy(n.home); n.group.scale.setScalar(0.0001); });
-    links.forEach(function (e) { e.line.material.opacity = 0; });
-    vectors.forEach(function (o) { o.active = false; o.pulse.material.opacity = 0; });
-    visualAxes.forEach(function (e) { e.label.material.opacity = 0; });
-    applyAll(0);
-    camTarget.copy(CENTER); camDist = FINAL_DIST * 1.15; placeCamera();
-    guided = !reduced; sway = true; tSway = 0;
-    $('#phase').style.opacity = 1; $('#btn-build').textContent = 'Skip animation';
-  }
-  $('#btn-build').addEventListener('click', function () { if (building) finishBuild(); else restartBuild(); });
-  $('#btn-view').addEventListener('click', function () {
-    camTarget.copy(CENTER); camDist = FINAL_DIST; placeCamera(); sway = !reduced; tSway = 0;
-  });
-  controls.addEventListener('start', function () { sway = false; guided = false; });
-
-  function nodeVisible() { return true; }
-  function applyLayers() {
-    nodes.forEach(function (n) { n.group.visible = nodeVisible(n); n.label.visible = layers.names && n.label.userData.hasName; });
-    vectors.forEach(function (o) { var v = layers.vectors; o.core.visible = o.halo.visible = o.arrow.visible = o.pulse.visible = v; });
-    links.forEach(function (e) { e.line.visible = nodeVisible(e.a) && nodeVisible(e.b); });
-  }
-  Array.prototype.forEach.call(document.querySelectorAll('[data-layer]'), function (b) {
-    b.addEventListener('click', function () {
-      var c = b.getAttribute('data-layer'); layers[c] = !layers[c]; b.setAttribute('aria-pressed', String(layers[c])); applyLayers();
-    });
-  });
-
-  // Selection: highlights a point with its connections and dims the rest
   function related(n) {
     var set = new Set([n]);
     n.vectors.forEach(function (o) { set.add(o.a); set.add(o.b); });
-    n.links.forEach(function (e) { set.add(e.a); set.add(e.b); });
+    n.data.forEach(function (o) { set.add(o.a); set.add(o.b); });
     return set;
   }
-  function applySelection() {
-    var rel = selection ? related(selection) : null;
-    nodes.forEach(function (n) {
-      var on = !rel || rel.has(n);
-      n.mesh.material.opacity = on ? (n.type === 'virtual' ? 0.9 : 1) : 0.12; n.mesh.material.transparent = true;
-      n.glow.material.opacity = on ? n.glow.userData.baseOpacity : 0.04;
-      n.label.material.opacity = on ? 1 : 0.15;
+  function focusOn(list, minFraction) {
+    if (!list.length) { focusKey = { target: CENTER.clone(), fraction: 1 }; return; }
+    var c = centroid(list), r = 0;
+    list.forEach(function (n) { r = Math.max(r, n.home.distanceTo(c)); });
+    focusKey = { target: c, fraction: Math.min(1, Math.max(minFraction || 0.4, (r + 1.6) / FRAME_R)) };
+    syncCam();
+  }
+  function nodesOfModule(mo) { return Array.from(mo.nodes); }
+  var epFilter = null, epList = [];
+  modules.forEach(function (mo) { if (epList.indexOf(mo.repo) < 0) epList.push(mo.repo); });
+  function pool() { return epFilter ? modules.filter(function (mo) { return mo.repo === epFilter; }) : modules; }
+  function modulesThrough(n) { return modules.filter(function (mo) { return mo.nodes.has(n); }); }
+
+  // Every view is a set of target opacities; the loop eases each object toward its target
+  function refresh() {
+    if (route && (route.isEp ? (mode !== 'detail' || hiEp !== route.owner) : (mode !== 'journeys' || hiMod !== route.owner))) stopRoute();
+    var indiv = vectors.length > 40 ? 0 : 0.35;
+    if (mode === 'global') {
+      var rel = selection ? related(selection) : null;
+      nodes.forEach(function (n) { n.tf = rel ? (rel.has(n) ? 1 : 0.12) : 1; });
+      vectors.forEach(function (o) { o.tf = selection ? ((o.a === selection || o.b === selection) ? 1 : 0) : indiv; });
+      dataLinks.forEach(function (o) { o.tf = selection ? ((o.a === selection || o.b === selection) ? 1 : 0) : (dataLinks.length > 20 ? 0 : 0.55); });
+      trunks.forEach(function (o) { o.tf = selection ? 0.22 : 1; });
+      beams.forEach(function (o) { o.tf = 0; }); strands.forEach(function (o) { o.tf = 0; });
+    } else if (mode === 'journeys') {
+      var show = hiMod ? [hiMod] : (selection ? modulesThrough(selection).filter(function (mo) { return pool().indexOf(mo) >= 0; }) : pool());
+      if (selection && !show.length) show = [];
+      var active = new Set(); show.forEach(function (mo) { mo.nodes.forEach(function (n) { active.add(n); }); });
+      if (selection) active.add(selection);
+      nodes.forEach(function (n) { n.tf = !modules.length ? 0.4 : (active.has(n) ? 1 : 0.07); });
+      vectors.forEach(function (o) { o.tf = 0; }); dataLinks.forEach(function (o) { o.tf = 0; }); trunks.forEach(function (o) { o.tf = 0; });
+      beams.forEach(function (o) { o.tf = show.indexOf(o.mo) >= 0 ? (hiMod ? 1 : 0.9) : 0.04; });
+      strands.forEach(function (o) { o.tf = 0; });
+    } else {
+      var inMod = openMod.nodes;
+      nodes.forEach(function (n) { n.tf = inMod.has(n) ? 1 : 0.05; });
+      vectors.forEach(function (o) { o.tf = 0; }); dataLinks.forEach(function (o) { o.tf = 0; }); trunks.forEach(function (o) { o.tf = 0; });
+      beams.forEach(function (o) { o.tf = o.mo === openMod ? 0.14 : 0; });
+      strands.forEach(function (o) { o.tf = hiEp ? (o.ep === hiEp ? 1 : 0.1) : 1; });
+    }
+    updateUI();
+  }
+  function setMode(m) {
+    if (building) finishBuild();
+    if (m === 'detail') { if (!openMod && hiMod) openMod = hiMod; if (!openMod) return; }
+    if (mode === 'detail' && m !== 'detail') closeStrands(false);
+    if (m === 'detail' && mode !== 'detail') openStrands(openMod);
+    var from = mode; mode = m; hiEp = null;
+    if (m === 'global') { hiMod = null; focusOn([], 1); }
+    if (m === 'journeys') { selection = null; if (from === 'detail') hiMod = openMod; focusOn(hiMod ? nodesOfModule(hiMod) : nodes.filter(function (n) { return modules.some(function (mo) { return mo.nodes.has(n); }); }), 0.5); }
+    if (m === 'detail') { selection = null; focusOn(nodesOfModule(openMod), 0.4); }
+    refresh();
+  }
+
+  // ---------- 9a. Modules view only: the list of modules and the route of the selected one ----------
+  // The hops of a module appear one by one, in the order its endpoints reach them, with the camera on each step and a caption.
+  var route = null, ROUTE_STEP = 2.4, ROUTE_TRACE = 1.3;
+  // a hop of a module (beam) or of an endpoint (strand), as { a, b, kind, eps }
+  function hopInfo(b) { return b.ep ? { a: b.a, b: b.b, kind: b.hop.kind || 'call', eps: [b.ep] } : b.hop; }
+  function hopText(b) {
+    var h = hopInfo(b), eps = h.eps.map(function (e) { return e.method + ' ' + e.route; });
+    var txt = shortName(h.a.p.id) + ' → ' + shortName(h.b.p.id);
+    if (h.kind === 'data') {
+      var ents = {}; h.eps.forEach(function (e) { (e.entities || []).forEach(function (x) { ents[x] = 1; }); });
+      var l = Object.keys(ents); if (l.length) txt += ' · data: ' + l.join(', ');
+    }
+    return b.ep ? txt : txt + ' · ' + eps.slice(0, 2).join(', ') + (eps.length > 2 ? ' +' + (eps.length - 2) : '');
+  }
+  // owner: a module (Modules view) or an endpoint (Detail view)
+  function startRoute(owner) {
+    stopRoute();
+    if (reduced || building || !owner) return;
+    var isEp = !!owner.method;
+    var list = isEp ? strands.filter(function (o) { return o.ep === owner; }) : (owner.beams || []).slice();
+    if (!list.length) return;
+    route = { owner: owner, isEp: isEp, t: 0, cur: 0, beams: list };
+    list.forEach(function (b) { b.routeHide = true; b.routeK = -1; b.active = false; applyNeon(b); });
+    list.forEach(function (b) { var h = hopInfo(b); h.a.tf = 0.3; h.b.tf = 0.3; });
+    $('#phase-text').textContent = ''; $('#phase-bar').style.width = '0%'; $('#phase').style.opacity = 1;
+  }
+  function routeStep(dt) {
+    var r = route, n = r.beams.length;
+    r.t += dt;
+    var cur = Math.min(n, Math.floor(r.t / ROUTE_STEP) + 1);
+    if (cur !== r.cur) {
+      r.cur = cur; var b = r.beams[cur - 1], h = hopInfo(b);
+      b.routeHide = false; applyNeon(b);
+      h.a.tf = 1; h.b.tf = 1;
+      focusOn([h.a, h.b], 0.3);
+      $('#phase-text').textContent = 'Step ' + cur + ' of ' + n + ' · ' + hopText(b);
+    }
+    r.beams.forEach(function (b) {
+      var k = Math.max(0, Math.min(1, (r.t - (b.step - 1) * ROUTE_STEP) / ROUTE_TRACE));
+      if (k !== b.routeK) { b.routeK = k; trace(b)(k); }
     });
-    vectors.forEach(function (o) {
-      var on = !selection || o.a === selection || o.b === selection;
-      o.core.material.opacity = on ? o.opC : 0.05; o.halo.material.opacity = on ? o.opH : 0.01; o.arrow.material.opacity = on ? o.opA : 0.06;
-    });
-    links.forEach(function (e) {
-      var on = !selection || e.a === selection || e.b === selection;
-      if (!building) e.line.material.opacity = on ? e.opacity : 0.05;
+    $('#phase-bar').style.width = Math.min(100, 100 * r.t / (n * ROUTE_STEP)) + '%';
+    if (r.t >= n * ROUTE_STEP + 0.6) {
+      var o = r.owner, isEp = r.isEp; stopRoute();
+      if (isEp && mode === 'detail' && hiEp === o) focusOn(nodesOfModule(openMod), 0.4);
+      else if (!isEp && mode === 'journeys' && hiMod === o) focusOn(nodesOfModule(o), 0.4);
+    }
+  }
+  function stopRoute() {
+    if (!route) return;
+    var r = route; route = null;
+    r.beams.forEach(function (b) { b.routeHide = false; fullDraw(b); applyNeon(b); });
+    $('#phase').style.opacity = 0;
+  }
+  function updateModList() {
+    var box = $('#modlist'), body = $('#modlist-body');
+    var list = mode === 'detail' ? (openMod ? [openMod] : []) : pool();
+    box.hidden = mode === 'global' || (modules.length > 0 && !list.length);
+    if (box.hidden) return;
+    body.innerHTML = '';
+    var h3 = document.createElement('h3'); h3.textContent = 'Modules'; body.appendChild(h3);
+    if (!modules.length) {
+      var em = document.createElement('p'); em.className = 'empty'; em.textContent = 'No modules documented yet.'; body.appendChild(em);
+      return;
+    }
+    list.forEach(function (mo) {
+      var open = mode === 'detail' || hiMod === mo;
+      var b = document.createElement('button'); b.type = 'button';
+      b.setAttribute('aria-pressed', String(mode === 'journeys' && hiMod === mo)); b.setAttribute('aria-expanded', String(open));
+      var dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = '#' + mo.color.toString(16).padStart(6, '0');
+      var nm = document.createElement('span'); nm.textContent = mo.name;
+      var sub = document.createElement('span'); sub.className = 'sub';
+      var shn = sharedCount(mo);
+      sub.textContent = shortName(mo.repo) + ' · ' + plural(mo.nodes.size, 'point', 'points') + ' · ' + plural(mo.endpoints.length, 'endpoint', 'endpoints') + (shn ? ' (' + shn + ' shared)' : '');
+      b.appendChild(dot); b.appendChild(nm); b.appendChild(sub);
+      b.addEventListener('click', function () {
+        if (mode === 'detail') { setMode('journeys'); return; }
+        if (hiMod === mo) { stopRoute(); hiMod = null; selection = null; refresh(); focusOn(Array.from(new Set([].concat.apply([], pool().map(nodesOfModule)))), 0.5); return; }
+        hiMod = mo; selection = null; refresh(); focusOn(nodesOfModule(mo), 0.4); startRoute(mo);
+      });
+      body.appendChild(b);
+      if (!open) return;
+      var ul = document.createElement('div'); ul.className = 'eplist';
+      mo.endpoints.forEach(function (e) {
+        var r = document.createElement('button'); r.type = 'button'; r.className = 'ep';
+        r.setAttribute('aria-pressed', String(mode === 'detail' && hiEp === e));
+        var m = document.createElement('span'); m.className = 'm'; m.textContent = e.method;
+        var rt = document.createElement('span'); rt.className = 'r'; rt.textContent = e.route;
+        var pc = document.createElement('span'); pc.className = 'sub';
+        var shw = sharedWith(e, mo);
+        pc.textContent = plural(pointsOfEp(e), 'point', 'points') + (shw.length ? ' · shared with ' + shw.map(function (x) { return x.name; }).join(', ') : '');
+        r.appendChild(m); r.appendChild(rt); r.appendChild(pc);
+        r.addEventListener('click', function () {
+          if (mode === 'journeys') { stopRoute(); openMod = mo; hiMod = mo; setMode('detail'); hiEp = e; refresh(); startRoute(e); return; }
+          hiEp = (hiEp === e) ? null : e; refresh(); if (hiEp) startRoute(hiEp);
+        });
+        ul.appendChild(r);
+      });
+      body.appendChild(ul);
     });
   }
 
-  var ray = new THREE.Raycaster(), pointer = new THREE.Vector2(), hover = null, tip = $('#tooltip');
+  function finishBuild() {
+    tBuild = DURATION + 1; applyAll(tBuild); building = false;
+    if (guided || sway) { camTarget.copy(CENTER); camDist = FINAL_DIST; camAz = BASE_AZ; camEl = BASE_EL; placeCamera(); }
+    guided = false;
+    vectors.forEach(function (o) { o.active = true; }); dataLinks.forEach(function (o) { o.active = true; });
+    $('#phase').style.opacity = 0; $('#btn-build').textContent = 'Rebuild';
+    refresh();
+  }
+  function restartBuild() {
+    stopRoute();
+    tBuild = 0; building = true; selection = null; hiMod = null; openMod = null; hiEp = null; mode = 'global'; focusKey = null;
+    closeStrands(true); closing.forEach(disposeNeon); closing = [];
+    nodes.forEach(function (n) { n.f = n.tf = 1; n.group.scale.setScalar(0.0001); });
+    vectors.concat(dataLinks).forEach(function (o) { o.f = o.tf = 1; o.active = false; o.pulse.material.opacity = 0; applyNeon(o); });
+    trunks.concat(beams).forEach(function (o) { o.f = o.tf = 0; applyNeon(o); });
+    visualAxes.forEach(function (e) { e.label.material.opacity = 0; });
+    applyAll(0);
+    camTarget.copy(CENTER); camDist = FINAL_DIST * 1.15; camAz = BASE_AZ; camEl = BASE_EL; placeCamera();
+    nodes.forEach(function (n) { n.labF = 1; n.labTarget = 1; });
+    guided = !reduced; sway = true; tSway = 0;
+    $('#phase').style.opacity = 1; $('#btn-build').textContent = 'Skip animation';
+    updateUI();
+  }
+  $('#btn-build').addEventListener('click', function () { if (building) finishBuild(); else restartBuild(); });
+  $('#btn-view').addEventListener('click', function () {
+    camTarget.copy(CENTER); camDist = FINAL_DIST; camAz = BASE_AZ; camEl = BASE_EL; placeCamera(); sway = !reduced; tSway = 0; focusKey = null;
+  });
+  controls.addEventListener('start', function () { sway = false; guided = false; focusKey = null; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-layer]'), function (b) {
+    b.addEventListener('click', function () {
+      var c = b.getAttribute('data-layer'); layers[c] = !layers[c]; b.setAttribute('aria-pressed', String(layers[c]));
+      neonAll().forEach(applyNeon); nodes.forEach(applyNode);
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-mode]'), function (b) {
+    b.addEventListener('click', function () { setMode(b.getAttribute('data-mode')); });
+  });
+  $('#btn-open').addEventListener('click', function () { if (hiMod) { openMod = hiMod; setMode('detail'); } });
+  $('#btn-route').addEventListener('click', function () { if (mode === 'detail' ? hiEp : hiMod) startRoute(mode === 'detail' ? hiEp : hiMod); });
+
+  // ---------- 9b. Search (depends on the level) and breadcrumb ----------
+  function kindTxt(n) { return n.type === 'repo' ? 'repo' : n.type === 'virtual' ? 'system' : 'database'; }
+  var epKey = function (e) { return e.method + ' ' + e.route; };
+  var epOwners = {};   // 'METHOD /route' -> modules that list it: more than one means a shared endpoint
+  modules.forEach(function (mo) { mo.endpoints.forEach(function (e) { var k = epKey(e); e._mo = mo; (epOwners[k] = epOwners[k] || []).push(mo); }); });
+  function sharedWith(e, mo) { return (epOwners[epKey(e)] || []).filter(function (x) { return x !== (mo || e._mo); }); }
+  function sharedCount(mo) { return mo.endpoints.filter(function (e) { return sharedWith(e, mo).length; }).length; }
+  function pointsOfEp(e) {
+    var u = {}; (e.hops || []).forEach(function (h) { if (byId[h.source]) u[h.source] = 1; if (byId[h.target]) u[h.target] = 1; });
+    return Object.keys(u).length;
+  }
+  // Top-left block: the Global text by default; the name, summary and document of whatever is selected in Modules or Detail
+  function updateHeader() {
+    var title = '', plain = null, doc = '';
+    if (mode === 'global' && (selection || descNode)) {
+      var pn = selection || descNode; title = shortName(pn.p.id); plain = describePoint(pn);
+    } else if (mode === 'journeys') {
+      if (hiMod) { title = hiMod.name + ' · ' + shortName(hiMod.repo); plain = hiMod.m.summary || ''; doc = hiMod.m.doc || ''; }
+      else if (selection || descNode) { var pm = selection || descNode; title = shortName(pm.p.id); plain = describePoint(pm); }
+      else if (!modules.length) {
+        title = 'Modules'; plain = 'No modules documented yet. Promote one with find-connections (Phase 3) and regenerate this view.';
+      } else {
+        title = 'Modules';
+        plain = plural(pool().length, 'module', 'modules') + (epFilter ? ' of ' + shortName(epFilter) : ' in ' + plural(epList.length, 'entry point', 'entry points')) + ' with promoted endpoints. Choose one to see its route step by step.';
+      }
+    } else if (mode === 'detail') {
+      if (hiEp) {
+        title = hiEp.method + ' ' + hiEp.route; plain = hiEp.summary || ''; doc = hiEp.doc || '';
+        var sh = sharedWith(hiEp, openMod); if (sh.length) plain += ' Shared with: ' + sh.map(function (m) { return m.name; }).join(', ') + '.';
+      }
+      else { title = openMod.name + ' · ' + shortName(openMod.repo); plain = openMod.m.summary || ''; doc = openMod.m.doc || ''; }
+    }
+    var h = $('#hd-title'); h.hidden = !title; h.textContent = title;
+    if (plain === null) $('#summary').innerHTML = globalSummary; else { $('#summary').textContent = plain; }
+    var d = $('#hd-doc'); d.hidden = !doc; d.textContent = doc ? 'Read more: ' + doc : '';
+  }
+  function updateUI() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-mode]'), function (b) {
+      var m = b.getAttribute('data-mode');
+      b.setAttribute('aria-pressed', String(m === mode));
+      if (m === 'detail') b.disabled = !(openMod || hiMod);
+    });
+    $('#btn-open').hidden = !(mode === 'journeys' && hiMod);
+    $('#btn-route').hidden = !((mode === 'journeys' && hiMod) || (mode === 'detail' && hiEp));
+    updateModList();
+    var cnt = '';
+    if (mode === 'journeys') {
+      if (!modules.length) cnt = '';
+      else if (hiMod) cnt = hiMod.name + ' · ' + plural(hiMod.nodes.size, 'point', 'points') + ' · ' + plural(hiMod.endpoints.length, 'endpoint', 'endpoints');
+      else if (selection) cnt = shortName(selection.p.id) + ' · ' + plural(modulesThrough(selection).length, 'module', 'modules');
+      else {
+        var ps = new Set(), es = 0;
+        pool().forEach(function (mo) { mo.nodes.forEach(function (n) { ps.add(n); }); es += mo.endpoints.length; });
+        cnt = plural(pool().length, 'module', 'modules') + ' · ' + plural(ps.size, 'point', 'points') + ' · ' + plural(es, 'endpoint', 'endpoints');
+      }
+    } else if (mode === 'detail') {
+      cnt = hiEp ? hiEp.method + ' ' + hiEp.route + ' · ' + plural(pointsOfEp(hiEp), 'point', 'points')
+        : openMod.name + ' · ' + plural(openMod.nodes.size, 'point', 'points') + ' · ' + plural(openMod.endpoints.length, 'endpoint', 'endpoints');
+    }
+    $('#crumb').textContent = cnt;
+    updateHeader();
+  }
+
+  // ---------- 9c. Picking and tooltips ----------
+  var ray = new THREE.Raycaster(), pointer = new THREE.Vector2(), tip = $('#tooltip');
   function readPointer(ev) {
     var r = canvas.getBoundingClientRect();
     pointer.x = ((ev.clientX - r.left) / r.width) * 2 - 1; pointer.y = -((ev.clientY - r.top) / r.height) * 2 + 1;
   }
   function pick() {
     ray.setFromCamera(pointer, camera);
-    var hits = ray.intersectObjects(pickables.filter(function (m) { var n = m.userData.node; return n.group.visible && n.group.scale.x > 0.5; }), false);
+    var hits = ray.intersectObjects(pickables.filter(function (m) { var n = m.userData.node; return n.group.scale.x > 0.5 && n.f > 0.05; }), false);
     return hits.length ? hits[0].object.userData.node : null;
   }
-  var TYPE_TXT = { repo: function (p) { return 'Repo ' + (p.role || ''); }, virtual: function (p) { return 'System without repo, axis ' + (p.axis || ''); } };
-  function semanticValue(p, sem) {
-    for (var field in axes) if (axes[field] === sem) return p[field];
-    return '';
+  function pickNeon() {
+    if (building) return null;
+    ray.setFromCamera(pointer, camera);
+    var pool = mode === 'global' ? trunks : mode === 'journeys' ? beams : strands;
+    var hits = ray.intersectObjects(pool.filter(function (o) { return o.f > 0.3 && layers.vectors; }).map(function (o) { return o.halo; }), false);
+    return hits.length ? hits[0].object.userData.pick : null;
   }
-  function showTip(n, ev) {
-    var p = n.p, rows = [];
-    rows.push(['Client', semanticValue(p, 'client')], ['Internal', semanticValue(p, 'internal')], ['External', semanticValue(p, 'external')]);
-    if (n.type === 'repo' && p.count_internal != null) rows.push(['Endpoints C / I / E', (p.count_client || 0) + ' / ' + p.count_internal + ' / ' + (p.count_external || 0)]);
-    rows.push(['Connections', n.vectors.length]);
-    tip.innerHTML = '<div class="name">' + escapeHtml(p.id) + '</div><div class="kind">' + escapeHtml(TYPE_TXT[n.type](p)) + '</div><dl>' +
-      rows.map(function (f) { return '<dt>' + escapeHtml(f[0]) + '</dt><dd>' + escapeHtml(f[1]) + '</dd>'; }).join('') + '</dl>';
+  function semanticValue(p, sem) { for (var field in axes) if (axes[field] === sem) return p[field]; return ''; }
+  function placeTip(ev) {
     tip.hidden = false;
     var x = ev.clientX + 16, y = ev.clientY + 16, r = tip.getBoundingClientRect();
     if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 16;
     if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - 16;
     tip.style.left = x + 'px'; tip.style.top = y + 'px';
   }
+  function tipBox(title, kind, rows, ev) {
+    tip.innerHTML = '<div class="name">' + escapeHtml(title) + '</div><div class="kind">' + escapeHtml(kind) + '</div><dl>' +
+      rows.map(function (f) { return '<dt>' + escapeHtml(f[0]) + '</dt><dd>' + escapeHtml(f[1]) + '</dd>'; }).join('') + '</dl>';
+    placeTip(ev);
+  }
+  function tipNode(n, ev) {
+    var p = n.p, rows = [];
+    if (n.ghost) {
+      tipBox(p.id, 'Repo ' + (p.role || '') + ' · not documented yet', [['Status', 'not documented yet'],
+        ['To document it', 'start from an entry point that reaches it']], ev); return;
+    }
+    if (n.entry) rows.push(['Entry point', 'where the client interacts']);
+    if (n.type === 'repo' || n.type === 'virtual')
+      rows.push(['Client', semanticValue(p, 'client')], ['Internal', semanticValue(p, 'internal')], ['External', semanticValue(p, 'external')]);
+    if (n.type === 'repo' && p.count_internal != null) rows.push(['Endpoints C / I / E', (p.count_client || 0) + ' / ' + p.count_internal + ' / ' + (p.count_external || 0)]);
+    if (n.type === 'database') rows.push(['Repos using it', (p.repos || []).length], ['Electrons', p.electrons || 1]);
+    if (n.type !== 'database') rows.push(['Connections', n.vectors.length]);
+    if (n.data.length && n.type === 'repo') rows.push(['Databases', n.data.map(function (o) { return shortName(o.b.p.id); }).join(', ')]);
+    var ms = modulesThrough(n); if (ms.length) rows.push(['Modules through it', ms.map(function (m) { return m.name; }).join(', ')]);
+    tipBox(p.id, n.type === 'repo' ? 'Repo ' + (p.role || '') : n.type === 'virtual' ? 'System without repo, axis ' + (p.axis || '') : 'Database · ' + (p.engine || ''), rows, ev);
+  }
+  function tipNeon(o, ev) {
+    if (o.trunk) {
+      var t = o.trunk;
+      if (t.master) { tipBox('All vectors', 'Every connection of the workspace', [['Endpoints in total', t.E], ['Connections', t.n]], ev); return; }
+      tipBox(ZONE_NAME[t.za] + ' → ' + ZONE_NAME[t.zb], 'Bundle of connections', [[t.zb === 'data' ? 'Repo ↔ database links' : 'Endpoints', t.E], ['Connections', t.n]].concat(
+        intra.internal && t.za === 'internal' && t.zb === 'external' ? [] : []), ev);
+    } else if (o.ep) {
+      var rows = [['Module', o.mo.name], ['Hop', shortName(o.hop.source) + ' → ' + shortName(o.hop.target)]];
+      if (o.hop.kind === 'data') rows.push(['Data', (o.ep.entities || []).join(', ') + ' (' + (o.ep.operations || []).join('/') + ')']);
+      tipBox(o.ep.method + ' ' + o.ep.route, 'Endpoint · click to isolate', rows, ev);
+    } else if (o.mo) {
+      var protos = Object.keys(o.hop.protocols).join(', ');
+      tipBox(o.mo.name, 'Module · click to highlight', (o.mo.m.summary ? [['Experience', o.mo.m.summary]] : []).concat([['Hop', shortName(o.hop.a.p.id) + ' → ' + shortName(o.hop.b.p.id)],
+        ['Step in the route', o.step + ' of ' + o.nSteps], ['Endpoints on this hop', o.count], ['Endpoints in the module', o.mo.endpoints.length], ['Protocol', protos]]), ev);
+    }
+  }
   canvas.addEventListener('pointermove', function (ev) {
-    readPointer(ev); hover = pick(); canvas.style.cursor = hover ? 'pointer' : 'grab';
-    if (hover) showTip(hover, ev); else tip.hidden = true;
+    readPointer(ev);
+    var n = pick(); hoverNode = n;
+    if (!building && n !== descNode) { descNode = n; updateHeader(); }
+    if (n) { canvas.style.cursor = 'pointer'; tipNode(n, ev); return; }
+    var ob = pickNeon();
+    if (ob) { canvas.style.cursor = 'pointer'; tipNeon(ob, ev); return; }
+    canvas.style.cursor = 'grab'; tip.hidden = true;
   });
-  canvas.addEventListener('pointerleave', function () { tip.hidden = true; });
+  canvas.addEventListener('pointerleave', function () { tip.hidden = true; if (descNode) { descNode = null; updateHeader(); } });
   var down = null;
   canvas.addEventListener('pointerdown', function (ev) { down = { x: ev.clientX, y: ev.clientY }; });
   canvas.addEventListener('pointerup', function (ev) {
     if (!down || Math.hypot(ev.clientX - down.x, ev.clientY - down.y) > 5) return;
-    readPointer(ev); var n = pick(); selection = (n && n !== selection) ? n : null; applySelection();
+    readPointer(ev);
+    if (building) return;
+    var n = pick(), ob = n ? null : pickNeon();
+    if (mode === 'detail') { hiEp = ob && ob.ep ? (hiEp === ob.ep ? null : ob.ep) : null; refresh(); if (hiEp) startRoute(hiEp); return; }
+    if (n) { selection = (n !== selection) ? n : null; hiMod = null; refresh(); if (selection) focusOn(Array.from(related(selection)), 0.4); return; }
+    if (mode === 'journeys' && ob && ob.mo) { hiMod = (hiMod === ob.mo) ? null : ob.mo; selection = null; refresh(); if (hiMod) { focusOn(nodesOfModule(hiMod), 0.4); startRoute(hiMod); } return; }
+    selection = null; hiMod = null; refresh();
   });
   window.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape') { selection = null; applySelection(); tip.hidden = true; }
+    if (ev.key !== 'Escape') return;
+    tip.hidden = true;
+    if (mode === 'detail') { if (hiEp) { hiEp = null; refresh(); } else setMode('journeys'); return; }
+    if (selection || hiMod) { selection = null; hiMod = null; refresh(); return; }
+    if (mode === 'journeys') setMode('global');
   });
 
   function resize() {
@@ -689,36 +1279,115 @@
   }
   window.addEventListener('resize', resize); resize();
 
+  // ---------- 9d. Label declutter: names and bundle labels never sit on top of each other ----------
+  // Priority: hovered/selected point, then bundle labels, then repos (by weight), databases and systems. A bundle label
+  // slides along its own curve to a free spot; a point name that would collide is hidden and comes back when it is
+  // hovered, selected, or when zooming in leaves it room.
+  var hoverNode = null, LAB_PAD = 3, tmpV = new THREE.Vector3();
+  function labelRect(sprite, pos, pad) {
+    var v = tmpV.copy(pos).project(camera);
+    if (v.z > 1) return null;
+    var W = window.innerWidth, H = window.innerHeight, dist = camera.position.distanceTo(pos);
+    var k = H / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / dist;
+    var w = sprite.scale.x * k, h = sprite.scale.y * k, x = (v.x * 0.5 + 0.5) * W, y = (-v.y * 0.5 + 0.5) * H;
+    return { x0: x - w / 2 - pad, y0: y - h / 2 - pad, x1: x + w / 2 + pad, y1: y + h / 2 + pad };
+  }
+  function overlapArea(a, b) {
+    var w = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0), h = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
+    return w > 0 && h > 0 ? w * h : 0;
+  }
+  var LAB_T = [0.5, 0.38, 0.62, 0.28, 0.72, 0.2, 0.8];
+  function declutter() {
+    var rel = selection ? related(selection) : null, items = [], spheres = [];
+    var W0 = window.innerWidth, H0 = window.innerHeight, k0 = H0 / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+    nodes.forEach(function (n) {                          // points are obstacles for the bundle labels (no label sits on a sphere)
+      if (n.f < 0.5 || n.group.scale.x < 0.5) return;
+      var v = tmpV.copy(n.home).project(camera); if (v.z > 1) return;
+      var rp = n.radius * k0 / camera.position.distanceTo(n.home) + 3, x = (v.x * 0.5 + 0.5) * W0, y = (-v.y * 0.5 + 0.5) * H0;
+      spheres.push({ x0: x - rp, y0: y - rp, x1: x + rp, y1: y + rp });
+    });
+    trunks.forEach(function (o) { if (o.f > 0.5 && layers.vectors) items.push({ trunk: o, prio: 5000 + o.trunk.E }); });
+    nodes.forEach(function (n) {
+      if (!layers.names || n.f < 0.5 || n.group.scale.x < 0.5) { n.labTarget = 0; return; }
+      var total = (n.p.count_client || 0) + (n.p.count_internal || 0) + (n.p.count_external || 0);
+      var p = n.ghost ? 40 : n.type === 'repo' ? 300 + 20 * Math.log(1 + total) : n.type === 'database' ? 250 : 100 + Math.min(50, (n.p.hosts || []).length * 5);
+      if (n === hoverNode || n === selection) p = 9000; else if (rel && rel.has(n)) p += 4000;
+      items.push({ node: n, prio: p + ((n.labF === undefined ? 1 : n.labF) > 0.5 ? 40 : 0) });    // a label already shown is not swapped for a neighbour
+    });
+    items.sort(function (a, b) { return b.prio - a.prio; });
+    var placed = [];
+    items.forEach(function (it) {
+      if (it.trunk) {
+        var o = it.trunk, best = null, bestA = 1e18, tries = [o.labT].concat(LAB_T.filter(function (t) { return t !== o.labT; }));
+        for (var i = 0; i < tries.length; i++) {
+          var pos = o.labCurve.getPoint(tries[i]).add(new THREE.Vector3(0, 0.5, 0)), r = labelRect(o.lab, pos, LAB_PAD);
+          if (!r) continue;
+          var area = 0; placed.forEach(function (q) { area += overlapArea(r, q); });
+          spheres.forEach(function (q) { area += 0.5 * overlapArea(r, q); });
+          if (area < bestA) { bestA = area; best = { pos: pos, t: tries[i], r: r }; if (area === 0) break; }
+        }
+        if (best) { o.lab.position.copy(best.pos); o.labT = best.t; placed.push(best.r); }
+      } else {
+        var n = it.node, r2 = labelRect(n.label, tmpV.copy(n.home).add(new THREE.Vector3(0, n.radius + 0.3, 0)), LAB_PAD);
+        if (!r2) { n.labTarget = 0; return; }
+        var hit = false; for (var j = 0; j < placed.length; j++) if (overlapArea(r2, placed[j]) > 0) { hit = true; break; }
+        if (it.prio >= 9000 || !hit || layers.allNames) { n.labTarget = 1; placed.push(r2); } else n.labTarget = 0;
+      }
+    });
+  }
+
   // ---------- 10. Loop ----------
   var phaseTxt = $('#phase-text'), phaseBar = $('#phase-bar'), currentPhase = -1;
   function loop() {
     var dt = Math.min(0.05, clock.getDelta()), now = clock.elapsedTime;
     if (building) {
       tBuild += dt; applyAll(tBuild);
-      if (guided) {
-        var cl = currentKey(tBuild), f = 1 - Math.exp(-dt * 2.2);
-        camTarget.lerp(cl.target, f);
-        camDist += (FINAL_DIST * cl.fraction - camDist) * f;
-        placeCamera();
-      }
-      var f = -1; for (var i = 0; i < phases.length; i++) if (tBuild >= phases[i].start) f = i;
-      if (f !== currentPhase && f >= 0) { currentPhase = f; phaseTxt.textContent = phases[f].text; }
+      if (guided) guidedStep(dt);
+      var ph = -1; for (var i = 0; i < phases.length; i++) if (tBuild >= phases[i].start) ph = i;
+      if (ph !== currentPhase && ph >= 0) { currentPhase = ph; phaseTxt.textContent = phases[ph].text; }
       phaseBar.style.width = Math.min(100, 100 * tBuild / DURATION) + '%';
       if (tBuild >= DURATION) finishBuild();
+    } else {
+      var kf = 1 - Math.exp(-dt * 6);
+      declutter();
+      nodes.forEach(function (n) {
+        if (Math.abs(n.tf - n.f) > 0.003) { n.f += (n.tf - n.f) * kf; applyNode(n); }
+        else if (n.f !== n.tf) { n.f = n.tf; applyNode(n); }
+        var lt = n.labTarget === undefined ? 1 : n.labTarget;
+        if (n.labF === undefined) n.labF = 1;
+        if (Math.abs(lt - n.labF) > 0.01) { n.labF += (lt - n.labF) * (1 - Math.exp(-dt * 9)); applyNode(n); }
+      });
+      neonAll().forEach(function (o) {
+        if (Math.abs(o.tf - o.f) > 0.003) { o.f += (o.tf - o.f) * kf; applyNeon(o); }
+        else if (o.f !== o.tf) { o.f = o.tf; applyNeon(o); }
+      });
+      if (closing.length) closing = closing.filter(function (o) { if (o.f < 0.02) { disposeNeon(o); return false; } return true; });
     }
+    if (route) routeStep(dt);
+    if (focusKey && !building) {
+      var fk = 1 - Math.exp(-dt * 2.4);
+      camTarget.lerp(focusKey.target, fk); camDist += (FINAL_DIST * focusKey.fraction - camDist) * fk; placeCamera();
+    }
+    if (!reduced) databases.forEach(function (n) {
+      if (n.electrons && n.f > 0.05) n.electrons.forEach(function (e) { e.pivot.rotation.y += dt * e.speed; });
+    });
     if (sway && !reduced && !building) { // gentle oscillation: never flips the client → external reading
       tSway += dt;
       var ang = Math.sin(tSway * 0.18) * 0.32, len = camera.position.distanceTo(controls.target);
       var d = CAM_DIR.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), ang);
       camera.position.copy(controls.target).add(d.multiplyScalar(len));
     }
-    if (!reduced) vectors.forEach(function (o) {
+    if (!reduced) neonAll().forEach(function (o) {
       if (!o.active || !o.core.visible) { o.pulse.material.opacity = 0; return; }
       var vel = 0.9 / Math.max(2, o.length) * (o.weak ? 0.5 : 1);
       var u = (now * vel * 3 + o.phase) % 1;
+      if (o.step) {                       // hops of a module: the flash travels hop 1, then 2, then 3..., in the direction of the vector
+        var lu = (now * 0.5) % (o.nSteps + 1.2) - (o.step - 1);
+        if (lu < 0 || lu > 1) { o.pulse.material.opacity = 0; return; }
+        u = lu;
+      }
       o.pulse.position.copy(o.curve.getPointAt(u * o.tArrow));
-      var on = !selection || o.a === selection || o.b === selection;
-      o.pulse.material.opacity = (on ? 0.7 : 0.05) * Math.sin(Math.PI * u);
+      o.pulse.material.opacity = 0.7 * o.f * Math.sin(Math.PI * u);
     });
     var st = scene.getObjectByName('stars'); if (st && !reduced) st.rotation.y += dt * 0.004;
     controls.update();
@@ -727,6 +1396,7 @@
   }
 
     applyAll(0);
+    updateUI();
     if (reduced) finishBuild();
     requestAnimationFrame(loop);
   } // end of main()

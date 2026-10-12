@@ -1,0 +1,721 @@
+{
+  "meta": {
+    "power_version": "3.3.0",
+    "generated": "2026-10-05",
+    "workspace": "acme-shop (demo)"
+  },
+  "axes": {
+    "pos_x": "external",
+    "pos_y": "internal",
+    "pos_z": "client"
+  },
+  "points": [
+    {
+      "id": "acme/web-app",
+      "type": "repo",
+      "role": "frontend",
+      "color": "blue",
+      "pos_x": 6,
+      "pos_y": 20,
+      "pos_z": 86,
+      "count_client": 24,
+      "count_internal": 5,
+      "count_external": 3,
+      "entry_point": true
+    },
+    {
+      "id": "acme/admin-portal",
+      "type": "repo",
+      "role": "frontend",
+      "color": "blue",
+      "pos_x": 8,
+      "pos_y": 32,
+      "pos_z": 66,
+      "count_client": 14,
+      "count_internal": 3,
+      "count_external": 0,
+      "entry_point": true
+    },
+    {
+      "id": "acme/api-core",
+      "type": "repo",
+      "role": "backend",
+      "color": "green",
+      "pos_x": 22,
+      "pos_y": 82,
+      "pos_z": 46,
+      "count_client": 12,
+      "count_internal": 9,
+      "count_external": 2
+    },
+    {
+      "id": "acme/auth-service",
+      "type": "repo",
+      "role": "backend",
+      "color": "green",
+      "pos_x": 12,
+      "pos_y": 70,
+      "pos_z": 64,
+      "count_client": 6,
+      "count_internal": 4,
+      "count_external": 0
+    },
+    {
+      "id": "acme/payments-service",
+      "type": "repo",
+      "role": "backend",
+      "color": "green",
+      "pos_x": 42,
+      "pos_y": 78,
+      "pos_z": 26,
+      "count_client": 3,
+      "count_internal": 6,
+      "count_external": 4
+    },
+    {
+      "id": "acme/notifications-worker",
+      "type": "repo",
+      "role": "worker",
+      "color": "green",
+      "pos_x": 34,
+      "pos_y": 62,
+      "pos_z": 10,
+      "count_client": 0,
+      "count_internal": 3,
+      "count_external": 5
+    },
+    {
+      "id": "partner-erp",
+      "type": "virtual",
+      "role": "external",
+      "axis": "X",
+      "color": "blue",
+      "pos_x": 4,
+      "pos_y": 8,
+      "pos_z": 96
+    },
+    {
+      "id": "Stripe",
+      "type": "virtual",
+      "role": "external",
+      "axis": "Z",
+      "color": "orange",
+      "pos_x": 94,
+      "pos_y": 66,
+      "pos_z": 24
+    },
+    {
+      "id": "SendGrid",
+      "type": "virtual",
+      "role": "external",
+      "axis": "Z",
+      "color": "orange",
+      "pos_x": 90,
+      "pos_y": 44,
+      "pos_z": 8
+    },
+    {
+      "id": "Twilio",
+      "type": "virtual",
+      "role": "external",
+      "axis": "Z",
+      "color": "orange",
+      "pos_x": 86,
+      "pos_y": 56,
+      "pos_z": 4
+    },
+    {
+      "id": "invoices-bucket",
+      "type": "virtual",
+      "role": "external",
+      "axis": "Z",
+      "color": "orange",
+      "pos_x": 88,
+      "pos_y": 24,
+      "pos_z": 18
+    },
+    {
+      "id": "postgresql://acme-db.internal/acme",
+      "type": "database",
+      "name": "acme-db",
+      "engine": "postgresql",
+      "pos_x": 8,
+      "pos_y": 14,
+      "pos_z": 8,
+      "color": "gold",
+      "repos": [
+        "acme/api-core",
+        "acme/auth-service",
+        "acme/payments-service",
+        "acme/notifications-worker",
+        "acme/admin-portal"
+      ],
+      "electrons": 5,
+      "notes": "Persistent storage: orders, sessions, invoices, payment logs"
+    },
+    {
+      "id": "acme/legacy-reports",
+      "type": "repo",
+      "role": "backend",
+      "color": "green",
+      "documented": false,
+      "pos_x": 18,
+      "pos_y": 48,
+      "pos_z": 30
+    }
+  ],
+  "vectors": [
+    {
+      "id": "v01",
+      "source": "acme/web-app",
+      "target": "acme/auth-service",
+      "protocol": "http",
+      "axis": "Y",
+      "endpoints": 3
+    },
+    {
+      "id": "v02",
+      "source": "acme/web-app",
+      "target": "acme/api-core",
+      "protocol": "http",
+      "axis": "Y",
+      "endpoints": 14
+    },
+    {
+      "id": "v03",
+      "source": "acme/admin-portal",
+      "target": "acme/api-core",
+      "protocol": "http",
+      "axis": "Y",
+      "endpoints": 9
+    },
+    {
+      "id": "v04",
+      "source": "acme/admin-portal",
+      "target": "acme/auth-service",
+      "protocol": "http",
+      "axis": "Y",
+      "endpoints": 2
+    },
+    {
+      "id": "v05",
+      "source": "acme/api-core",
+      "target": "acme/auth-service",
+      "protocol": "http",
+      "axis": "Y",
+      "endpoints": 4
+    },
+    {
+      "id": "v06",
+      "source": "acme/api-core",
+      "target": "acme/payments-service",
+      "protocol": "grpc",
+      "axis": "Y",
+      "endpoints": 6
+    },
+    {
+      "id": "v07",
+      "source": "acme/payments-service",
+      "target": "Stripe",
+      "protocol": "http",
+      "axis": "Z",
+      "endpoints": 3
+    },
+    {
+      "id": "v08",
+      "source": "Stripe",
+      "target": "acme/payments-service",
+      "protocol": "webhook",
+      "axis": "Y",
+      "endpoints": 1
+    },
+    {
+      "id": "v09",
+      "source": "acme/payments-service",
+      "target": "acme/notifications-worker",
+      "protocol": "queue-kafka",
+      "axis": "Y",
+      "endpoints": 4
+    },
+    {
+      "id": "v10",
+      "source": "acme/notifications-worker",
+      "target": "SendGrid",
+      "protocol": "http",
+      "axis": "Z",
+      "endpoints": 2
+    },
+    {
+      "id": "v11",
+      "source": "acme/notifications-worker",
+      "target": "Twilio",
+      "protocol": "http",
+      "axis": "Z",
+      "endpoints": 1
+    },
+    {
+      "id": "v12",
+      "source": "acme/api-core",
+      "target": "invoices-bucket",
+      "protocol": "s3",
+      "axis": "Z",
+      "endpoints": 3
+    },
+    {
+      "id": "v13",
+      "source": "acme/notifications-worker",
+      "target": "partner-erp",
+      "protocol": "webhook",
+      "axis": "X",
+      "endpoints": 2
+    },
+    {
+      "id": "v14",
+      "source": "partner-erp",
+      "target": "acme/api-core",
+      "protocol": "soap",
+      "axis": "Y",
+      "endpoints": 5
+    },
+    {
+      "id": "v15",
+      "source": "acme/web-app",
+      "target": "Stripe",
+      "protocol": "http",
+      "axis": "Z",
+      "direct": true,
+      "endpoints": 1
+    }
+  ],
+  "links": [
+    {
+      "id": "d01",
+      "source": "acme/api-core",
+      "target": "postgresql://acme-db.internal/acme",
+      "label": "Query & insert",
+      "type": "data"
+    },
+    {
+      "id": "d02",
+      "source": "acme/auth-service",
+      "target": "postgresql://acme-db.internal/acme",
+      "label": "Session storage",
+      "type": "data"
+    },
+    {
+      "id": "d03",
+      "source": "acme/payments-service",
+      "target": "postgresql://acme-db.internal/acme",
+      "label": "Payment records",
+      "type": "data"
+    },
+    {
+      "id": "d04",
+      "source": "acme/notifications-worker",
+      "target": "postgresql://acme-db.internal/acme",
+      "label": "Order status updates",
+      "type": "data"
+    },
+    {
+      "id": "d05",
+      "source": "acme/admin-portal",
+      "target": "postgresql://acme-db.internal/acme",
+      "label": "Reports",
+      "type": "data"
+    }
+  ],
+  "modules": [
+    {
+      "id": "acme/web-app#modules/sign-in",
+      "name": "Sign in",
+      "repo": "acme/web-app",
+      "doc": "docs/acme-web-app/modules/sign-in/acme-web-app--sign-in.md",
+      "summary": "Customers sign in with their email and password and land on their account.",
+      "steps": [
+        {
+          "point": "acme/web-app",
+          "note": "Login form"
+        },
+        {
+          "point": "acme/auth-service",
+          "note": "Issues the session token"
+        },
+        {
+          "point": "postgresql://acme-db.internal/acme",
+          "note": "Stores the session"
+        }
+      ]
+    },
+    {
+      "id": "acme/web-app#modules/pay-order",
+      "name": "Pay an order",
+      "repo": "acme/web-app",
+      "doc": "docs/acme-web-app/modules/pay-order/acme-web-app--pay-order.md",
+      "summary": "Customers pay an order at checkout and receive the receipt by email.",
+      "steps": [
+        {
+          "point": "acme/web-app",
+          "note": "Checkout screen"
+        },
+        {
+          "point": "acme/api-core",
+          "note": "Order and payment orchestration"
+        },
+        {
+          "point": "postgresql://acme-db.internal/acme",
+          "note": "Stores the order"
+        },
+        {
+          "point": "acme/payments-service",
+          "note": "Creates the charge"
+        },
+        {
+          "point": "Stripe",
+          "note": "Card processor"
+        },
+        {
+          "point": "acme/payments-service",
+          "note": "Receives the payment webhook"
+        },
+        {
+          "point": "postgresql://acme-db.internal/acme",
+          "note": "Marks payment done"
+        },
+        {
+          "point": "acme/notifications-worker",
+          "note": "Receipt job"
+        },
+        {
+          "point": "SendGrid",
+          "note": "Receipt email"
+        }
+      ]
+    },
+    {
+      "id": "acme/admin-portal#modules/issue-invoice",
+      "name": "Issue an invoice",
+      "repo": "acme/admin-portal",
+      "doc": "docs/acme-admin-portal/modules/issue-invoice/acme-admin-portal--issue-invoice.md",
+      "summary": "Staff issue an invoice for an order and the customer can download it as a PDF.",
+      "steps": [
+        {
+          "point": "acme/admin-portal",
+          "note": "Invoice screen"
+        },
+        {
+          "point": "acme/api-core",
+          "note": "Generates the invoice"
+        },
+        {
+          "point": "postgresql://acme-db.internal/acme",
+          "note": "Retrieves order data"
+        },
+        {
+          "point": "invoices-bucket",
+          "note": "Stores the PDF"
+        }
+      ]
+    },
+    {
+      "id": "acme/api-core#modules/partner-sync",
+      "name": "Partner order sync",
+      "summary": "A partner's system pushes its orders and gets the payment status back.",
+      "steps": [
+        {
+          "point": "partner-erp",
+          "note": "Pushes orders (SOAP)"
+        },
+        {
+          "point": "acme/api-core",
+          "note": "Order intake"
+        },
+        {
+          "point": "postgresql://acme-db.internal/acme",
+          "note": "Inserts partner order"
+        },
+        {
+          "point": "acme/payments-service",
+          "note": "Payment check"
+        },
+        {
+          "point": "acme/notifications-worker",
+          "note": "Status job"
+        },
+        {
+          "point": "postgresql://acme-db.internal/acme",
+          "note": "Updates order status"
+        },
+        {
+          "point": "partner-erp",
+          "note": "Receives the result by webhook"
+        }
+      ]
+    },
+    {
+      "id": "acme/api-core#modules/payment-alerts",
+      "name": "Failed payment alerts",
+      "summary": "Customers get a text message when a payment fails.",
+      "steps": [
+        {
+          "point": "acme/payments-service",
+          "note": "Failed payment event"
+        },
+        {
+          "point": "postgresql://acme-db.internal/acme",
+          "note": "Logs the failure"
+        },
+        {
+          "point": "acme/notifications-worker",
+          "note": "Alert job"
+        },
+        {
+          "point": "Twilio",
+          "note": "SMS to the customer"
+        }
+      ]
+    },
+    {
+      "id": "acme/admin-portal#modules/dashboard",
+      "name": "Admin dashboard",
+      "repo": "acme/admin-portal",
+      "doc": "docs/acme-admin-portal/modules/dashboard/acme-admin-portal--dashboard.md",
+      "summary": "Staff see metrics and transactions at a glance.",
+      "steps": [
+        {
+          "point": "acme/admin-portal",
+          "note": "Query repo"
+        },
+        {
+          "point": "postgresql://acme-db.internal/acme",
+          "note": "Retrieves metrics and transactions"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "acme/web-app#modules/sign-in::POST /auth/login",
+      "module": "acme/web-app#modules/sign-in",
+      "method": "POST",
+      "route": "/auth/login",
+      "summary": "The customer signs in and gets a session.",
+      "hops": [
+        {
+          "source": "acme/web-app",
+          "target": "acme/auth-service",
+          "kind": "call",
+          "protocol": "http"
+        },
+        {
+          "source": "acme/auth-service",
+          "target": "postgresql://acme-db.internal/acme",
+          "kind": "data",
+          "protocol": "sql"
+        }
+      ],
+      "entities": [
+        "sessions"
+      ],
+      "operations": [
+        "write"
+      ]
+    },
+    {
+      "id": "acme/web-app#modules/pay-order::POST /orders",
+      "module": "acme/web-app#modules/pay-order",
+      "method": "POST",
+      "route": "/orders",
+      "summary": "The customer places the order from the checkout.",
+      "hops": [
+        {
+          "source": "acme/web-app",
+          "target": "acme/api-core",
+          "kind": "call",
+          "protocol": "http"
+        },
+        {
+          "source": "acme/api-core",
+          "target": "postgresql://acme-db.internal/acme",
+          "kind": "data",
+          "protocol": "sql"
+        }
+      ],
+      "entities": [
+        "orders"
+      ],
+      "operations": [
+        "write"
+      ]
+    },
+    {
+      "id": "acme/web-app#modules/pay-order::POST /payments/confirm",
+      "module": "acme/web-app#modules/pay-order",
+      "method": "POST",
+      "route": "/payments/confirm",
+      "summary": "The customer confirms the payment and the card processor authorizes it.",
+      "hops": [
+        {
+          "source": "acme/web-app",
+          "target": "acme/api-core",
+          "kind": "call",
+          "protocol": "http"
+        },
+        {
+          "source": "acme/api-core",
+          "target": "acme/payments-service",
+          "kind": "call",
+          "protocol": "grpc"
+        },
+        {
+          "source": "acme/payments-service",
+          "target": "Stripe",
+          "kind": "call",
+          "protocol": "http"
+        },
+        {
+          "source": "acme/payments-service",
+          "target": "postgresql://acme-db.internal/acme",
+          "kind": "data",
+          "protocol": "sql"
+        },
+        {
+          "source": "acme/payments-service",
+          "target": "acme/notifications-worker",
+          "kind": "call",
+          "protocol": "queue-kafka"
+        },
+        {
+          "source": "acme/notifications-worker",
+          "target": "SendGrid",
+          "kind": "call",
+          "protocol": "http"
+        }
+      ],
+      "entities": [
+        "payments",
+        "transactions"
+      ],
+      "operations": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "id": "acme/web-app#modules/pay-order::GET /orders/{id}/receipt",
+      "module": "acme/web-app#modules/pay-order",
+      "method": "GET",
+      "route": "/orders/{id}/receipt",
+      "summary": "The customer opens the receipt of a paid order.",
+      "hops": [
+        {
+          "source": "acme/web-app",
+          "target": "acme/api-core",
+          "kind": "call",
+          "protocol": "http"
+        },
+        {
+          "source": "acme/api-core",
+          "target": "postgresql://acme-db.internal/acme",
+          "kind": "data",
+          "protocol": "sql"
+        }
+      ],
+      "entities": [
+        "orders",
+        "payments"
+      ],
+      "operations": [
+        "read"
+      ]
+    },
+    {
+      "id": "acme/admin-portal#modules/issue-invoice::POST /invoices",
+      "module": "acme/admin-portal#modules/issue-invoice",
+      "method": "POST",
+      "route": "/invoices",
+      "summary": "Staff issue the invoice of an order.",
+      "hops": [
+        {
+          "source": "acme/admin-portal",
+          "target": "acme/api-core",
+          "kind": "call",
+          "protocol": "http"
+        },
+        {
+          "source": "acme/api-core",
+          "target": "postgresql://acme-db.internal/acme",
+          "kind": "data",
+          "protocol": "sql"
+        },
+        {
+          "source": "acme/api-core",
+          "target": "invoices-bucket",
+          "kind": "call",
+          "protocol": "s3"
+        }
+      ],
+      "entities": [
+        "orders",
+        "invoices"
+      ],
+      "operations": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "id": "acme/admin-portal#modules/issue-invoice::GET /invoices/{id}/pdf",
+      "module": "acme/admin-portal#modules/issue-invoice",
+      "method": "GET",
+      "route": "/invoices/{id}/pdf",
+      "summary": "Staff download the PDF of an invoice.",
+      "hops": [
+        {
+          "source": "acme/admin-portal",
+          "target": "acme/api-core",
+          "kind": "call",
+          "protocol": "http"
+        },
+        {
+          "source": "acme/api-core",
+          "target": "invoices-bucket",
+          "kind": "call",
+          "protocol": "s3"
+        }
+      ]
+    },
+    {
+      "id": "acme/api-core#modules/partner-sync::POST /partner/orders",
+      "module": "acme/api-core#modules/partner-sync",
+      "method": "POST",
+      "route": "/partner/orders",
+      "summary": "The partner's system sends an order and gets an acknowledgement.",
+      "hops": [
+        {
+          "source": "partner-erp",
+          "target": "acme/api-core",
+          "kind": "call",
+          "protocol": "soap"
+        },
+        {
+          "source": "acme/api-core",
+          "target": "postgresql://acme-db.internal/acme",
+          "kind": "data",
+          "protocol": "sql"
+        },
+        {
+          "source": "acme/api-core",
+          "target": "acme/payments-service",
+          "kind": "call",
+          "protocol": "grpc"
+        }
+      ],
+      "entities": [
+        "orders"
+      ],
+      "operations": [
+        "write"
+      ]
+    }
+  ]
+}

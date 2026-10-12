@@ -37,7 +37,7 @@ Each internal connection gets a `reverse_validation` field in the MOC:
 
 `no-target-evidence` **is not a pending status and does not change the
 axis**: the connection is still **Y** (the target is a repo in the
-workspace) and still goes into the MOC and the vault. It is a quality mark
+workspace) and still goes into the MOC and the export. It is a quality mark
 reported separately at the end of Phase 2, with the route/service sought,
 because it almost always points to one of these real causes:
 

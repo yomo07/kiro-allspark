@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "kiro-allspark",
-  "version": "1.1.0",
-  "description": "Documents the connections between the repos of a multi-root Kiro workspace: defines each repo's role (frontend, backend, MVC monolith, worker), detects its connections (HTTP, SOAP, gRPC, Kafka/RabbitMQ queues, webhooks, S3) with a deterministic Python prescan (tree-sitter), validates them from both ends and renders them as an Obsidian graph and an interactive 3D cube: client, internal service and third parties.",
+  "version": "3.3.1",
+  "description": "Documents how the client experiences your service, in natural language, starting from the entry points (frontends and monoliths) and following what each one reaches: connections and the databases each repo uses (roles; HTTP, SOAP, gRPC, Kafka/RabbitMQ, webhooks, S3, detected with a deterministic Python prescan using tree-sitter and validated from both ends), modules (Level 2, consolidated: each one with its endpoints, hops, data access and shared functionalities in a single document). It computes what each entry point reaches and what documenting it costs before spending anything, and positions with deterministic scripts. Renders the universe as an interactive 3D cube with three views: global, modules and detail.",
   "author": {
     "name": "Yoel Moreno",
     "email": "yoel.moreno.ym@gmail.com",
@@ -15,8 +15,6 @@
     "steering",
     "allspark",
     "connections",
-    "vault",
-    "obsidian",
     "architecture",
     "cube",
     "management",
@@ -29,6 +27,13 @@
     "3d",
     "prescan",
     "tree-sitter",
-    "python"
+    "python",
+    "levels",
+    "database",
+    "moc",
+    "layout",
+    "modules",
+    "entry-points",
+    "experience"
   ]
 }

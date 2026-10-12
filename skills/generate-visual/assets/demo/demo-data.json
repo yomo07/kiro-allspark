@@ -1,0 +1,600 @@
+{
+ "meta": {
+  "power_version": "3.3.1",
+  "generated": "2026-10-05",
+  "workspace": "acme-demo"
+ },
+ "axes": {
+  "pos_x": "external",
+  "pos_y": "internal",
+  "pos_z": "client"
+ },
+ "points": [
+  {
+   "id": "acme/web-portal",
+   "type": "repo",
+   "role": "frontend",
+   "count_client": 0,
+   "count_internal": 38,
+   "count_external": 1,
+   "entry_point": true,
+   "pos_x": 10.8,
+   "pos_y": 52.5,
+   "pos_z": 91.6,
+   "color": "blue"
+  },
+  {
+   "id": "acme/mobile-app",
+   "type": "repo",
+   "role": "frontend",
+   "count_client": 0,
+   "count_internal": 20,
+   "count_external": 2,
+   "entry_point": true,
+   "pos_x": 4.0,
+   "pos_y": 66.8,
+   "pos_z": 84.6,
+   "color": "blue"
+  },
+  {
+   "id": "acme/api-gateway",
+   "type": "repo",
+   "role": "backend",
+   "count_client": 0,
+   "count_internal": 23,
+   "count_external": 0,
+   "pos_x": 48.0,
+   "pos_y": 90.1,
+   "pos_z": 62.4,
+   "color": "green"
+  },
+  {
+   "id": "acme/payments-api",
+   "type": "repo",
+   "role": "backend",
+   "count_client": 1,
+   "count_internal": 3,
+   "count_external": 4,
+   "pos_x": 84.0,
+   "pos_y": 83.9,
+   "pos_z": 84.0,
+   "color": "green"
+  },
+  {
+   "id": "acme/accounts-api",
+   "type": "repo",
+   "role": "backend",
+   "count_client": 0,
+   "count_internal": 6,
+   "count_external": 3,
+   "pos_x": 75.4,
+   "pos_y": 78.1,
+   "pos_z": 67.2,
+   "color": "green"
+  },
+  {
+   "id": "acme/notifications-worker",
+   "type": "repo",
+   "role": "worker",
+   "count_client": 0,
+   "count_internal": 0,
+   "count_external": 3,
+   "pos_x": 51.2,
+   "pos_y": 70.7,
+   "pos_z": 40.0,
+   "color": "green"
+  },
+  {
+   "id": "acme/backoffice-admin",
+   "type": "repo",
+   "role": "frontend",
+   "documented": false,
+   "pos_x": 18.0,
+   "pos_y": 40.0,
+   "pos_z": 70.0,
+   "color": "blue"
+  },
+  {
+   "id": "payflow.io",
+   "type": "virtual",
+   "role": "external",
+   "axis": "Z",
+   "pos_x": 76.4,
+   "pos_y": 26.3,
+   "pos_z": 11.8,
+   "color": "orange"
+  },
+  {
+   "id": "kyc-provider.io",
+   "type": "virtual",
+   "role": "external",
+   "axis": "Z",
+   "pos_x": 60.4,
+   "pos_y": 17.7,
+   "pos_z": 9.9,
+   "color": "orange"
+  },
+  {
+   "id": "sms-gateway.com",
+   "type": "virtual",
+   "role": "external",
+   "axis": "Z",
+   "pos_x": 52.3,
+   "pos_y": 12.2,
+   "pos_z": 17.8,
+   "color": "orange"
+  },
+  {
+   "id": "mail-service.com",
+   "type": "virtual",
+   "role": "external",
+   "axis": "Z",
+   "pos_x": 93.6,
+   "pos_y": 6.4,
+   "pos_z": 14.8,
+   "color": "orange"
+  },
+  {
+   "id": "push-service.io",
+   "type": "virtual",
+   "role": "external",
+   "axis": "Z",
+   "pos_x": 47.9,
+   "pos_y": 18.9,
+   "pos_z": 7.3,
+   "color": "orange"
+  },
+  {
+   "id": "legacy-core.acme.example",
+   "type": "virtual",
+   "role": "external",
+   "axis": "Y",
+   "pos_x": 65.2,
+   "pos_y": 61.3,
+   "pos_z": 69.8,
+   "color": "green"
+  },
+  {
+   "id": "partner-webhooks",
+   "type": "virtual",
+   "role": "external",
+   "axis": "X",
+   "pos_x": 4.0,
+   "pos_y": 8.8,
+   "pos_z": 40.0,
+   "color": "blue"
+  },
+  {
+   "id": "postgres://payments-db/payments",
+   "type": "database",
+   "engine": "postgresql",
+   "name": "payments",
+   "repos": [
+    "acme/payments-api",
+    "acme/accounts-api"
+   ],
+   "electrons": 5,
+   "orbit": 6.7,
+   "pos_x": 25.5,
+   "pos_y": 21.6,
+   "pos_z": 21.8,
+   "color": "gold"
+  },
+  {
+   "id": "mysql://accounts-db/accounts",
+   "type": "database",
+   "engine": "mysql",
+   "name": "accounts",
+   "repos": [
+    "acme/accounts-api",
+    "acme/notifications-worker"
+   ],
+   "electrons": 3,
+   "orbit": 9.9,
+   "pos_x": 18.1,
+   "pos_y": 42.0,
+   "pos_z": 12.5,
+   "color": "gold"
+  },
+  {
+   "id": "redis://session-cache/sessions",
+   "type": "database",
+   "engine": "redis",
+   "name": "sessions",
+   "repos": [
+    "acme/api-gateway"
+   ],
+   "electrons": 1,
+   "orbit": 6.7,
+   "pos_x": 12.5,
+   "pos_y": 13.4,
+   "pos_z": 17.6,
+   "color": "gold"
+  }
+ ],
+ "vectors": [
+  {
+   "id": "acme/web-portal->acme/api-gateway:http",
+   "source": "acme/web-portal",
+   "target": "acme/api-gateway",
+   "protocol": "http",
+   "axis": "Y",
+   "endpoints": 22,
+   "reverse_validation": "validated"
+  },
+  {
+   "id": "acme/mobile-app->acme/api-gateway:http",
+   "source": "acme/mobile-app",
+   "target": "acme/api-gateway",
+   "protocol": "http",
+   "axis": "Y",
+   "endpoints": 18,
+   "reverse_validation": "validated"
+  },
+  {
+   "id": "acme/mobile-app->push-service.io:http",
+   "source": "acme/mobile-app",
+   "target": "push-service.io",
+   "protocol": "http",
+   "axis": "Z",
+   "endpoints": 2,
+   "direct": true
+  },
+  {
+   "id": "acme/web-portal->legacy-core.acme.example:http",
+   "source": "acme/web-portal",
+   "target": "legacy-core.acme.example",
+   "protocol": "http",
+   "axis": "Y",
+   "endpoints": 6
+  },
+  {
+   "id": "acme/api-gateway->acme/payments-api:http",
+   "source": "acme/api-gateway",
+   "target": "acme/payments-api",
+   "protocol": "http",
+   "axis": "Y",
+   "endpoints": 9,
+   "reverse_validation": "validated"
+  },
+  {
+   "id": "acme/api-gateway->acme/accounts-api:http",
+   "source": "acme/api-gateway",
+   "target": "acme/accounts-api",
+   "protocol": "http",
+   "axis": "Y",
+   "endpoints": 14,
+   "reverse_validation": "validated"
+  },
+  {
+   "id": "acme/payments-api->acme/accounts-api:http",
+   "source": "acme/payments-api",
+   "target": "acme/accounts-api",
+   "protocol": "http",
+   "axis": "Y",
+   "endpoints": 3,
+   "reverse_validation": "no-target-evidence"
+  },
+  {
+   "id": "acme/payments-api->payflow.io:http",
+   "source": "acme/payments-api",
+   "target": "payflow.io",
+   "protocol": "http",
+   "axis": "Z",
+   "endpoints": 4
+  },
+  {
+   "id": "acme/accounts-api->kyc-provider.io:http",
+   "source": "acme/accounts-api",
+   "target": "kyc-provider.io",
+   "protocol": "http",
+   "axis": "Z",
+   "endpoints": 3
+  },
+  {
+   "id": "acme/accounts-api->acme/notifications-worker:queue-rabbitmq",
+   "source": "acme/accounts-api",
+   "target": "acme/notifications-worker",
+   "protocol": "queue-rabbitmq",
+   "axis": "Y",
+   "endpoints": 2,
+   "reverse_validation": "validated"
+  },
+  {
+   "id": "acme/notifications-worker->sms-gateway.com:http",
+   "source": "acme/notifications-worker",
+   "target": "sms-gateway.com",
+   "protocol": "http",
+   "axis": "Z",
+   "endpoints": 2
+  },
+  {
+   "id": "acme/notifications-worker->mail-service.com:http",
+   "source": "acme/notifications-worker",
+   "target": "mail-service.com",
+   "protocol": "http",
+   "axis": "Z",
+   "endpoints": 1
+  },
+  {
+   "id": "partner-webhooks->acme/payments-api:webhook",
+   "source": "partner-webhooks",
+   "target": "acme/payments-api",
+   "protocol": "webhook",
+   "axis": "X",
+   "endpoints": 1
+  }
+ ],
+ "links": [
+  {
+   "source": "acme/payments-api",
+   "target": "postgres://payments-db/payments",
+   "type": "data"
+  },
+  {
+   "source": "acme/accounts-api",
+   "target": "postgres://payments-db/payments",
+   "type": "data"
+  },
+  {
+   "source": "acme/accounts-api",
+   "target": "mysql://accounts-db/accounts",
+   "type": "data"
+  },
+  {
+   "source": "acme/notifications-worker",
+   "target": "mysql://accounts-db/accounts",
+   "type": "data"
+  },
+  {
+   "source": "acme/api-gateway",
+   "target": "redis://session-cache/sessions",
+   "type": "data"
+  }
+ ],
+ "modules": [
+  {
+   "id": "acme/web-portal#pages/payments/pay-bill",
+   "repo": "acme/web-portal",
+   "name": "pay-bill",
+   "summary": "Customers pay a bill in three steps: review it, confirm it and get a receipt.",
+   "doc": "docs/acme-web-portal/features/pages/payments/pay-bill/acme-web-portal--pay-bill.md"
+  },
+  {
+   "id": "acme/mobile-app#screens/transfers/send-money",
+   "repo": "acme/mobile-app",
+   "name": "send-money",
+   "summary": "Customers send money to a saved contact and both of them are notified by SMS.",
+   "doc": "docs/acme-mobile-app/features/screens/transfers/send-money/acme-mobile-app--send-money.md"
+  }
+ ],
+ "endpoints": [
+  {
+   "id": "acme/web-portal#pages/payments/pay-bill::POST /payments/quote",
+   "module": "acme/web-portal#pages/payments/pay-bill",
+   "method": "POST",
+   "route": "/payments/quote",
+   "summary": "The customer sees the total of the bill, with fees, before paying.",
+   "doc": "docs/acme-web-portal/features/pages/payments/pay-bill/acme-web-portal--pay-bill.md",
+   "hops": [
+    {
+     "source": "acme/web-portal",
+     "target": "acme/api-gateway",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/api-gateway",
+     "target": "acme/payments-api",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/payments-api",
+     "target": "postgres://payments-db/payments",
+     "kind": "data",
+     "protocol": "sql"
+    }
+   ],
+   "entities": [
+    "bills",
+    "fees"
+   ],
+   "operations": [
+    "read"
+   ]
+  },
+  {
+   "id": "acme/web-portal#pages/payments/pay-bill::POST /payments/confirm",
+   "module": "acme/web-portal#pages/payments/pay-bill",
+   "method": "POST",
+   "route": "/payments/confirm",
+   "summary": "The customer confirms and the card provider authorizes the payment.",
+   "doc": "docs/acme-web-portal/features/pages/payments/pay-bill/acme-web-portal--pay-bill.md",
+   "hops": [
+    {
+     "source": "acme/web-portal",
+     "target": "acme/api-gateway",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/api-gateway",
+     "target": "acme/payments-api",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/payments-api",
+     "target": "payflow.io",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/payments-api",
+     "target": "postgres://payments-db/payments",
+     "kind": "data",
+     "protocol": "sql"
+    }
+   ],
+   "entities": [
+    "payments",
+    "transactions"
+   ],
+   "operations": [
+    "read",
+    "write"
+   ]
+  },
+  {
+   "id": "acme/web-portal#pages/payments/pay-bill::GET /payments/{id}",
+   "module": "acme/web-portal#pages/payments/pay-bill",
+   "method": "GET",
+   "route": "/payments/{id}",
+   "summary": "The customer gets the receipt of a payment.",
+   "doc": "docs/acme-web-portal/features/pages/payments/pay-bill/acme-web-portal--pay-bill.md",
+   "hops": [
+    {
+     "source": "acme/web-portal",
+     "target": "acme/api-gateway",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/api-gateway",
+     "target": "acme/payments-api",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/payments-api",
+     "target": "postgres://payments-db/payments",
+     "kind": "data",
+     "protocol": "sql"
+    }
+   ],
+   "entities": [
+    "payments"
+   ],
+   "operations": [
+    "read"
+   ]
+  },
+  {
+   "id": "acme/mobile-app#screens/transfers/send-money::POST /transfers",
+   "module": "acme/mobile-app#screens/transfers/send-money",
+   "method": "POST",
+   "route": "/transfers",
+   "summary": "The customer sends money to a contact and the contact gets an SMS.",
+   "doc": "docs/acme-mobile-app/features/screens/transfers/send-money/acme-mobile-app--send-money.md",
+   "hops": [
+    {
+     "source": "acme/mobile-app",
+     "target": "acme/api-gateway",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/api-gateway",
+     "target": "acme/accounts-api",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/accounts-api",
+     "target": "mysql://accounts-db/accounts",
+     "kind": "data",
+     "protocol": "sql"
+    },
+    {
+     "source": "acme/accounts-api",
+     "target": "acme/notifications-worker",
+     "kind": "call",
+     "protocol": "queue-rabbitmq"
+    },
+    {
+     "source": "acme/notifications-worker",
+     "target": "sms-gateway.com",
+     "kind": "call",
+     "protocol": "http"
+    }
+   ],
+   "entities": [
+    "accounts",
+    "movements"
+   ],
+   "operations": [
+    "read",
+    "write"
+   ]
+  },
+  {
+   "id": "acme/mobile-app#screens/transfers/send-money::GET /accounts/{id}/balance",
+   "module": "acme/mobile-app#screens/transfers/send-money",
+   "method": "GET",
+   "route": "/accounts/{id}/balance",
+   "summary": "The customer sees the available balance of an account.",
+   "doc": "docs/acme-mobile-app/features/screens/transfers/send-money/acme-mobile-app--send-money.md",
+   "hops": [
+    {
+     "source": "acme/mobile-app",
+     "target": "acme/api-gateway",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/api-gateway",
+     "target": "acme/accounts-api",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/accounts-api",
+     "target": "mysql://accounts-db/accounts",
+     "kind": "data",
+     "protocol": "sql"
+    }
+   ],
+   "entities": [
+    "accounts"
+   ],
+   "operations": [
+    "read"
+   ]
+  },
+  {
+   "id": "acme/web-portal#pages/payments/pay-bill::GET /accounts/{id}/balance",
+   "module": "acme/web-portal#pages/payments/pay-bill",
+   "method": "GET",
+   "route": "/accounts/{id}/balance",
+   "summary": "The customer sees the available balance before paying a bill.",
+   "doc": "docs/acme-web-portal/features/pages/payments/pay-bill/acme-web-portal--pay-bill.md",
+   "hops": [
+    {
+     "source": "acme/web-portal",
+     "target": "acme/api-gateway",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/api-gateway",
+     "target": "acme/accounts-api",
+     "kind": "call",
+     "protocol": "http"
+    },
+    {
+     "source": "acme/accounts-api",
+     "target": "mysql://accounts-db/accounts",
+     "kind": "data",
+     "protocol": "sql"
+    }
+   ],
+   "entities": [
+    "accounts"
+   ],
+   "operations": [
+    "read"
+   ]
+  }
+ ]
+}

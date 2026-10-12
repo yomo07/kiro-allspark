@@ -29,7 +29,7 @@ import sys
 import time
 from datetime import datetime, timezone
 
-PRESCAN_VERSION = "1.0.0"
+PRESCAN_VERSION = "1.1.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # --------------------------------------------------------------------------
@@ -340,12 +340,14 @@ class Scanner:
         self.languages = languages
         self.warnings = warnings
         self.candidates = []
+        self.lines = 0
         self.django_warning = False
 
     # -------------------------------------------------------------------
     def scan_file(self, path, lang):
         with open(path, "rb") as f:
             source = f.read()
+        self.lines += source.count(b"\n") + 1
         tree = lang.parser.parse(source)
         A = SourceFile(source)
         rel_path = rel(path, self.repo)
@@ -688,6 +690,57 @@ DB_KEY = re.compile(r"(?i)(^|[._-])(database|datasource|db|postgres(ql)?|mysql|m
 SECRET_DOC = re.compile(r"(?im)^\s*kind:\s*(Secret|SealedSecret|ExternalSecret)\s*$")
 
 
+# --- Database identity (data access of the modules): engine + host + name, NEVER credentials ---
+DB_ENGINES = [
+    (re.compile(r"(?i)^(jdbc:)?postgres(ql)?(://|:)"), "postgresql", "postgres"),
+    (re.compile(r"(?i)^(jdbc:)?(mysql|mariadb)(://|:)"), "mysql", "mysql"),
+    (re.compile(r"(?i)^(jdbc:)?(sqlserver|mssql)(://|:)"), "sqlserver", "sqlserver"),
+    (re.compile(r"(?i)^(jdbc:)?oracle:"), "oracle", "oracle"),
+    (re.compile(r"(?i)^mongodb(\+srv)?://"), "mongodb", "mongodb"),
+    (re.compile(r"(?i)^rediss?://"), "redis", "redis"),
+]
+CONN_STRING = re.compile(r"(?i)\b(server|data source|host)\s*=\s*([^;\"']+).*?\b(database|initial catalog)\s*=\s*([^;\"']+)")
+
+
+def database_identity(value, key=""):
+    """(engine, host, name) of a database from a connection value, or None.
+    Only the identity is kept: user, password and parameters are dropped."""
+    v = value.strip().strip("'\",")
+    for rx, engine, prefix in DB_ENGINES:
+        if not rx.match(v):
+            continue
+        rest = re.sub(r"(?i)^jdbc:", "", v)
+        if engine == "oracle":                       # oracle:thin:@//host:1521/service  |  @host:1521:sid
+            m = re.search(r"@/*([\w.-]+)(?::\d+)?[/:]([\w.$-]+)", rest)
+            return (engine, prefix, m.group(1), m.group(2)) if m else (engine, prefix, None, None)
+        if engine == "sqlserver" and ";" in rest:    # sqlserver://host:1433;databaseName=x;user=...
+            h = re.search(r"//([^:;/]+)", rest)
+            n = re.search(r"(?i)(databaseName|database)=([^;]+)", rest)
+            return engine, prefix, h.group(1) if h else None, n.group(2) if n else None
+        m = re.match(r"(?i)^[a-z+]+:(?://)?(?:[^@/]*@)?([^/?;,:]+)(?::\d+)?(?:,[^/]*)?(?:/([^?;/]+))?", rest)
+        if m:
+            return engine, prefix, m.group(1), m.group(2)
+        return engine, prefix, None, None
+    m = CONN_STRING.search(v)                          # .NET: Server=host;Database=name;User Id=...;Password=...
+    if m:
+        host = re.sub(r"(?i)^tcp:", "", m.group(2).strip()).split(",")[0].split("\\")[0]
+        is_pg = m.group(1).lower() == "host" or re.search(r"(?i)npgsql|postgres", key + v)
+        engine, prefix = ("postgresql", "postgres") if is_pg else ("sqlserver", "sqlserver")
+        return engine, prefix, host, m.group(4).strip()
+    return None
+
+
+def database_candidate(ident, key, rel_path, line):
+    engine, prefix, host, name = ident
+    db_id = f"{prefix}://{host or '?'}/{name or '?'}"
+    return {"protocol": "database", "direction": "outbound", "raw_value": db_id,
+            "database": {"engine": engine, "host": host, "name": name}, "config_key": key or None,
+            "confidence": "high" if host and name else "uncertain", "chain_step": 3, "rule": "config.database",
+            "note": "database identity for the data access of the modules (engine + host + name); never a Level 1 connection",
+            # the snippet never repeats the original value: only the key and the identity
+            "evidence": {"file": rel_path, "line": line, "snippet": f"{key or '(value)'} -> {db_id}"}}
+
+
 def config_pass(path, repo):
     rel_path = rel(path, repo)
     out = []
@@ -721,7 +774,19 @@ def config_pass(path, repo):
                     stack.append((indent, key))
                     continue
                 key = key_path
-        if SECRET_KEY.search(key) or DB_KEY.search(key):
+        if SECRET_KEY.search(key):
+            continue
+        # databases: identity only (engine + host + name), then move on
+        ident = database_identity(value_txt, key) if value_txt else None
+        if ident is None:
+            for u in re.findall(r"(?i)\b(?:jdbc:)?[a-z][a-z0-9+]*:[^\s\"'<>,}]+", raw):
+                ident = database_identity(u, key)
+                if ident:
+                    break
+        if ident:
+            out.append(database_candidate(ident, key, rel_path, i))
+            continue
+        if DB_KEY.search(key):
             continue
         values = re.findall(r"(?i)\b[a-z][a-z0-9+.-]*://[^\s\"'<>,}]+", raw)
         if not values and value_txt:
@@ -959,7 +1024,7 @@ def main():
         warnings.append("Django: include() prefixes are not composed; routes stay relative to their urls.py")
 
     candidates = sorted(scanner.candidates + extra, key=lambda c: (c["evidence"]["file"], c["evidence"]["line"]))
-    summary = {"files_scanned": scanned, "candidates": len(candidates), "by_protocol": {}, "by_confidence": {}}
+    summary = {"files_scanned": scanned, "lines_scanned": scanner.lines, "candidates": len(candidates), "by_protocol": {}, "by_confidence": {}}
     for c in candidates:
         k = f"{c['protocol']}:{c['direction']}"
         summary["by_protocol"][k] = summary["by_protocol"].get(k, 0) + 1
